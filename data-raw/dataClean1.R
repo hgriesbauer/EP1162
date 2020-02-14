@@ -77,13 +77,42 @@ data.Sub1<-rbind(yearExtract(year=1992,colList=cols.1992),
   # most columns need to be factors
   mutate_at(c("Plot","TreeID","Species","Sector","Year","Status"),factor) %>% 
   
+  # drop rows that contain NA
+  drop_na(Plot,Species) %>% 
+  
   # Reorganize columns
   dplyr::select(Plot,TreeID,Species,Sector,Year,Status,everything())
+
+dat<-data.Sub1
+save(dat,file="data/ep1162_Data.RData")
+
+###########################
+# Screening
+
+# Look at entries where tree number is duplicated within plot
+dat %>% 
+  add_count(Plot,TreeID,Year) %>% # get a number by this grouping
+  filter(n>1) %>% 
+  View()
+
+# Look for DBH outliers
+boxplot(dat$DBH) # all good there, nothing seems out of the ordinary
+boxplot(dat$Height) # all good there, nothing seems out of the ordinary
+
+
+# Look at entries where recorded DBH is less from one measurement to the other
+DBH_decrease<-
+  dat %>% 
+  filter(TreeID!="New") %>% 
+  filter(TreeID!=631) %>% 
+  mutate(ID=paste(Plot,TreeID,sep=".")) %>% 
+  # distinct(.,ID,.keep_all = T) %>% # drop duplicated ID
+  pivot_wider(id_cols=ID,names_from="Year",values_from="DBH") %>% 
+  mutate(diff.2019=`2019`-`2009`) %>% 
+  mutate(diff.2009=`2009`-`1997`) %>% 
+  mutate(diff.1997=`1997`-`1994`) %>% 
+  mutate(diff.1994=`1994`-`1992`) %>% 
+  filter(diff.2019<0 | diff.2009<0 | diff.1997<0 | diff.1994<0)
   
-# # script to look at erroneous values entered
-# x<-
-#   data.Sub1[,"Height"] %>% 
-#   drop_na() %>% # drop na 
-#   mutate(Height2=as.numeric(Height))
-# x[is.na(x$Height2),] %>% View()
-# data.Sub1[!is.na(data.Sub1$Dead.DBH),] %>% View()
+  
+
