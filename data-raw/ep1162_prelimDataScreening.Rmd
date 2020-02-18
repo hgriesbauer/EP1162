@@ -1,0 +1,122 @@
+---
+title: "EP1162_Prelim_Data_Screening"
+author: "Hardy Griesbauer"
+date: "18/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(tidyverse)
+
+# Load data
+load("../data/ep1162_Data.RData")
+
+```
+
+## Preliminary screening
+I did some preliminary screening, to confirm data entry and detect any potential outliers.  Some findings below.
+
+
+## Outliers
+Quick boxplot to confirm DBH and height measurements 
+
+#### DBH
+
+```{r echo=FALSE}
+
+dat %>% 
+  ggplot()+
+  aes(group=Species,y=DBH,fill=Species) +
+  geom_boxplot()
+
+
+```
+
+DBH measurements look reasonable, and no major outliers.  Note that there is a tree with species recorded as "l".
+
+
+#### Height
+
+```{r echo=FALSE}
+
+dat %>% 
+  ggplot()+
+  aes(group=Species,y=Height,fill=Species) +
+  geom_boxplot()
+
+
+```
+Again, measurements look reasonable here.
+
+### Data entry
+
+One tree has species recorded as "l".  I assume that it's SAF, but might be worthwhile to verify with the field cards?
+
+
+```{r echo=FALSE}
+
+dat %>% 
+  filter(Species=="l") %>% 
+  knitr::kable()
+
+```
+
+There are also two trees recorded with id=631:
+
+```{r echo=FALSE}
+# Look at entries where tree number is duplicated within plot
+dat %>% 
+  add_count(Plot,TreeID,Year) %>% # get a number by this grouping
+  filter(n>1) %>% 
+  drop_na(TreeID) %>% 
+  filter(TreeID!="New") %>% 
+    knitr::kable()
+  
+```
+
+Looks like it is the same tree (exact same DBH and Height measured in 2019), so assume it's safe to delete the duplicated entry?
+
+There are also quite a few trees with their ID recorded as "New".  Not an issue from an analysis point of view, however, I seem to recall that we were assigning new tags/IDs for all trees.  But I also remember a discussion about tagging trees once they get to a larger size!  
+
+### Decreasing DBH 
+I also screened trees that had a smaller DBH measurements than a previous measurement at some point.  Below are some examples:
+
+```{r echo=FALSE}
+# Look at entries where recorded DBH is less from one measurement to the other
+
+dbhDecrease<-
+  dat %>% 
+  filter(TreeID!="New") %>% 
+  filter(TreeID!=631) %>% # this is a duplicated tree
+  pivot_wider(id_cols=c(Plot,TreeID),names_from="Year",values_from="DBH") %>% 
+  mutate(diff.2019=`2019`-`2009`) %>% 
+  mutate(diff.2009=`2009`-`1997`) %>% 
+  mutate(diff.1997=`1997`-`1994`) %>% 
+  mutate(diff.1994=`1994`-`1992`) %>% 
+  filter(diff.2019<0 | diff.2009<0 | diff.1997<0 | diff.1994<0) %>% 
+  dplyr::select(Plot,TreeID) %>% # select these trees with decreasing DBH measurements
+  left_join(dat,by=c("Plot","TreeID")) %>% 
+  mutate_at(vars(contains("DBH")),round,1) %>% # round to one decimal place
+  dplyr::select(Plot:DBH)
+
+  
+  # Show example rows
+  dbhDecrease %>% 
+  slice(1:20) %>% 
+  knitr::kable()
+  
+  
+
+
+```
+
+In most cases, the differences are very small, and likely can be atrributed to slight measurement differences between years.  We can likely ignore this error and simply describe it if necessary in the results section?  
+
+In total, there are `r dbhDecrease %>% count(TreeID) %>% nrow()` trees with this situation.  I have the treeID saved and can provide them if we want to double check these trees.
+
+*****
+## Actions required
+- Confirm species for tree with Species recorded as "l" (likely SAF)
+- COnfirm that ok to delete duplicate record for Tree #631 (Plot 10)
+- Determine what to do about trees where DBH measurements aren't monotonically increasing.  

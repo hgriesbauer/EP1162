@@ -104,15 +104,19 @@ boxplot(dat$Height) # all good there, nothing seems out of the ordinary
 DBH_decrease<-
   dat %>% 
   filter(TreeID!="New") %>% 
-  filter(TreeID!=631) %>% 
-  mutate(ID=paste(Plot,TreeID,sep=".")) %>% 
-  # distinct(.,ID,.keep_all = T) %>% # drop duplicated ID
-  pivot_wider(id_cols=ID,names_from="Year",values_from="DBH") %>% 
+  filter(TreeID!=631) %>% # this is a duplicated tree
+  pivot_wider(id_cols=c(Plot,TreeID),names_from="Year",values_from="DBH") %>% 
   mutate(diff.2019=`2019`-`2009`) %>% 
   mutate(diff.2009=`2009`-`1997`) %>% 
   mutate(diff.1997=`1997`-`1994`) %>% 
   mutate(diff.1994=`1994`-`1992`) %>% 
-  filter(diff.2019<0 | diff.2009<0 | diff.1997<0 | diff.1994<0)
-  
+  filter(diff.2019<0 | diff.2009<0 | diff.1997<0 | diff.1994<0) %>% 
+  dplyr::select(Plot,TreeID) %>% # select these trees with decreasing DBH measurements
+  left_join(dat,by=c("Plot","TreeID")) %>%  # left join to filter for trees with decreasing DBH
+  mutate_at(vars(contains("DBH")),round,1)
+
+# Export this table
+write.csv(DBH_decrease,file="data-raw/EP1162_trees_DBHDecreasing.csv",row.names = FALSE)
+
   
 
