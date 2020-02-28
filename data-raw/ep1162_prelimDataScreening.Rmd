@@ -2,11 +2,13 @@
 title: "EP1162_Prelim_Data_Screening"
 author: "Hardy Griesbauer"
 date: "18/02/2020"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```{r setup, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning = FALSE)
 library(tidyverse)
 
 # Load data
@@ -188,16 +190,18 @@ dbhEdit1<-
   pivot_wider(names_from="Year",values_from="DBH") %>% 
   write.csv(file="dbh_for_edit.csv",row.names=FALSE)
 
-# Now edit .csv file manually
-
-
-
 ```
 
 One thing to note: the following trees had fallen as of 2019, which means we should not interpolate their 2019 values:
 ```{r}
 dbhDecrease %>% 
   filter(Year==2019 & is.na(DBH))
+
+dbhEdit2<-
+  readr::read_csv(here::here("data-raw","dbh_for_edit.csv"))
+
+# save this file so we can go back to it
+save(dbhEdit2,file=paste("editedDBH",Sys.Date(),"RData",sep="."))
 
 ```
 
@@ -207,16 +211,14 @@ For values that shouldn't be interpolated, I entered 'DoNotReplace' in the corre
 
 Values to be replaced by interpolation had 'Interpolate' entered into their cell.
 
-```{r}
-dbhEdit2<-
-  readr::read_csv(here::here("data-raw","dbh_for_edit.csv"))
 
-# save this file so we can go back to it
-save(dbhEdit2,file=paste("editedDBH",Sys.Date(),"RData",sep="."))
+
+```{r}
+# Load tree data with values to replace
+load(here::here("data-raw","editedDBH.2020-02-27.RData"))
 
 # Show data with replacements
 dbhEdit2 
-
 
 ```
 
@@ -232,6 +234,8 @@ library(Hmisc)
 DoNotReplace<-  
   dbhEdit2 %>% 
   pivot_longer(cols=`1992`:`2019`,names_to="Year",values_to="DBH") %>% 
+  mutate(TreeID=factor(TreeID)) %>% 
+  mutate(Year=as.numeric(Year)) %>% 
   filter(DBH=="DoNotReplace")
 
 # Interpolation
@@ -241,6 +245,7 @@ dbhEdit3<-
   mutate(DBH=as.numeric(DBH)) %>% 
   mutate(Year=paste("01-01",Year,sep="-")) %>% 
   mutate(Year=dmy(Year)) %>% 
+  mutate(TreeID=factor(TreeID)) %>% 
   group_by(TreeID) %>% 
   pad() %>% 
   ungroup() %>% 
@@ -262,10 +267,113 @@ dbhInterp<-function() {
 }
 
 # Run function by TreeID
-dbhPred<-by(dbhEdit3, dbhEdit3[,"TreeID"],
+dbhPred1<-by(dbhEdit3, dbhEdit3[,"TreeID"],
    function(x) predict(lm(DBH ~ Year, data = x),new=data.frame(Year=c(1992,1994,1997,2009,2019))),simplify=F)
 
-do
+# Bring datasets together 
+dbhPred<-data.frame(TreeID=names(dbhPred1),do.call(rbind.data.frame,dbhPred1)) %>% # unpack output from by() function
+  setNames(c("TreeID",c(1992,1994,1997,2009,2019))) %>% # rename columns
+  pivot_longer(cols=`1992`:`2019`,names_to="Year",values_to = "DBH.Pred") %>% # pivot longer 
+  mutate(Year=as.numeric(Year)) %>% 
+  
+  # Join with dbhEdit3
+  left_join(dbhEdit3,by=c("TreeID","Year")) %>% 
+  
+  # Join with doNot Replace
+  left_join(DoNotReplace,by=c("TreeID","Year")) %>% 
+  
+  # Formatting
+  dplyr::select(Plot=Plot.x,TreeID,Year,DBH=DBH.x,DBH.Pred,DoNotRep=DBH.y) %>% 
+  mutate_at(vars(DBH.Pred),round,1) %>% # round DBH.Pred
+  
+  # Find and replace
+  mutate(DBH.New=DBH) %>% 
+  mutate(DBH.New=coalesce(DBH.New,DBH.Pred)) %>% 
+  mutate(DBH.New=replace(DBH.New,!is.na(DoNotRep),"NA")) %>% 
+  
+  # Set new DBH column
+  dplyr::select(Plot:Year,DBH=DBH.New) %>% 
+  mutate(DBH.Pred=as.numeric(DBH)) %>% 
+  dplyr::select(-DBH) %>% 
+  mutate(Plot=factor(Plot)) %>% 
+  mutate(Year=factor(Year)) %>% 
+  mutate(TreeID=factor(TreeID))
+
 
 ```
+
+Now let's test to make sure that all DBH are now monotonic.
+
+```{r}
+library(MonoInc)
+
+x<-
+  dbhPred %>% 
+  drop_na(DBH) 
+  
+ mono.x<- by(x$DBH,x$TreeID,monotonic)
+
+ # One tree still has decreasing DBH
+ dbhPred %>% 
+   filter(TreeID==as.numeric(names(which(mono.x==FALSE))))
+ 
+```
+
+One tree still has decreasing DBH. 1994 value for this tree is less than 1992.  This is because the linear function predicts values below the 1992 value.  Let's manually replace the 1994 value with interpolation between 1992 and 1997 values.
+
+```{r}
+
+  dbhPred[dbhPred$TreeID==31 & dbhPred$Year==1994,"DBH"]=22.5
+
+```
+
+
+*** 
+## Now merge DBH values back into the dataset
+```{r}
+dat<-
+  dat %>% 
+  left_join(dbhPred,by=c("Plot","TreeID","Year")) %>% 
+  arrange(Plot,TreeID,Year) %>% 
+  mutate(DBH=coalesce(DBH.Pred,DBH)) %>% 
+  mutate_at(vars(DBH),round,1) %>% 
+  dplyr::select(-DBH.Pred)
+
+
+```
+
+# Heights
+Now let's look at trees where height measurements aren't monotonically increasing.
+
+*The chunk below isn't set to run, because we only want to do this once*
+
+```{r eval=FALSE}
+x<-
+  dat %>% 
+  drop_na(Height) %>% # drop rows with missing Height values 
+  arrange(Plot,TreeID,Year) %>% 
+  mutate(id=paste(Plot,TreeID,sep="."))
+  
+ mono.x<- by(x$Height,x$id,monotonic)
+
+ 
+  # Trees with decreasing height measurements
+ # write to .csv file
+  x %>% 
+   group_by(id) %>% 
+   summarise(n=n()) %>% 
+   filter(n>1) %>%  # filter tree records with more than one height measurement
+   filter(id%in%names(which(mono.x==FALSE))) %>% 
+   left_join(x,by="id") %>% 
+   arrange(id) %>% 
+   dplyr::select(Plot,TreeID,Species,Year,Height) %>% 
+   pivot_wider(names_from="Year",values_from = "Height") 
+ 
+
+```
+
+42 trees have decreasing DBH.  A visual inspection of the plot cards revealed several trees with broken tops (e.g., Plot 12 Tree 22, and Plot 18 Tree 346).
+
+In almost all other cases, there is too much fluctuation to confidently delete height measurements for interpolation.  I recommend we leave the height measurements as is.
+
 
