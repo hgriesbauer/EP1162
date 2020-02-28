@@ -3,8 +3,8 @@ title: "EP1162_Prelim_Data_Screening"
 author: "Hardy Griesbauer"
 date: "18/02/2020"
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, warning=FALSE, message=FALSE}
@@ -135,7 +135,7 @@ dbhDecrease<-
 
 In most cases, the differences are very small, and likely can be atrributed to slight measurement differences between years.  
 
-In total, there are `r dbhDecrease %>% count(TreeID) %>% nrow()` trees with this situation.  I have the treeID saved and can provide them if we want to double check these trees.
+In total, there are `r dbhDecrease %>% count(TreeID) %>% nrow()` trees with this situation.  
 
 *****
 ## Trees without monotonically increasing DBH measurements
@@ -193,10 +193,15 @@ dbhEdit1<-
 ```
 
 One thing to note: the following trees had fallen as of 2019, which means we should not interpolate their 2019 values:
+
+
 ```{r}
 dbhDecrease %>% 
   filter(Year==2019 & is.na(DBH))
+```
 
+*The following chunk won't run, because we only want to do this once*
+```{r eval=FALSE}
 dbhEdit2<-
   readr::read_csv(here::here("data-raw","dbh_for_edit.csv"))
 
@@ -247,7 +252,7 @@ dbhEdit3<-
   mutate(Year=dmy(Year)) %>% 
   mutate(TreeID=factor(TreeID)) %>% 
   group_by(TreeID) %>% 
-  pad() %>% 
+  pad() %>% # pad out time series so we can interpolate
   ungroup() %>% 
   mutate(Year=year(Year)) %>% 
   as.data.frame()
@@ -309,9 +314,9 @@ library(MonoInc)
 
 x<-
   dbhPred %>% 
-  drop_na(DBH) 
+  drop_na(DBH.Pred) 
   
- mono.x<- by(x$DBH,x$TreeID,monotonic)
+ mono.x<- by(x$DBH.Pred,x$TreeID,monotonic)
 
  # One tree still has decreasing DBH
  dbhPred %>% 
@@ -323,7 +328,7 @@ One tree still has decreasing DBH. 1994 value for this tree is less than 1992.  
 
 ```{r}
 
-  dbhPred[dbhPred$TreeID==31 & dbhPred$Year==1994,"DBH"]=22.5
+  dbhPred[dbhPred$TreeID==31 & dbhPred$Year==1994,"DBH.Pred"]=22.5
 
 ```
 
@@ -345,9 +350,8 @@ dat<-
 # Heights
 Now let's look at trees where height measurements aren't monotonically increasing.
 
-*The chunk below isn't set to run, because we only want to do this once*
 
-```{r eval=FALSE}
+```{r}
 x<-
   dat %>% 
   drop_na(Height) %>% # drop rows with missing Height values 

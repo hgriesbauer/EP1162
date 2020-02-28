@@ -369,6 +369,11 @@ summary {
 </div>
 
 
+<pre class="r"><code>knitr::opts_chunk$set(message=FALSE, warning = FALSE)
+library(tidyverse)
+
+# Load data
+load(&quot;../data/ep1162_Data.RData&quot;)</code></pre>
 <div id="preliminary-screening" class="section level2">
 <h2>Preliminary screening</h2>
 <p>I did some preliminary screening, to confirm data entry and detect any potential outliers. Some findings below.</p>
@@ -520,6 +525,10 @@ summary {
 </tr>
 </tbody>
 </table>
+<p><em>ALRF staff confirmed that the species is “Bl”</em>, so we’ll change the species code accordingly in the next line of code:</p>
+<pre class="r"><code>dat&lt;-
+  dat %&gt;% 
+  mutate(Species=replace(Species,Species==&quot;l&quot;,&quot;Bl&quot;))</code></pre>
 <p>There are also two trees recorded with id=631:</p>
 <table>
 <thead>
@@ -770,7 +779,11 @@ summary {
 </tbody>
 </table>
 <p>Looks like it is the same tree (exact same DBH and Height measured in 2019), so assume it’s safe to delete the duplicated entry?</p>
-<p>There are also quite a few trees with their ID recorded as “New”. Not an issue from an analysis point of view, however, I seem to recall that we were assigning new tags/IDs for all trees. But I also remember a discussion about tagging trees once they get to a larger size!</p>
+<p><em>Confirmed that this tree was duplicated by mistake. We will remove one entry.</em></p>
+<pre class="r"><code>dat&lt;-
+  dat %&gt;% 
+  filter(!(Plot==10 &amp; TreeID==631 &amp; Sector==&quot;NA&quot;)) # remove entry</code></pre>
+<p>There are also quite a few trees with their ID recorded as “New”. Not an issue from an analysis point of view,</p>
 </div>
 <div id="decreasing-dbh" class="section level3">
 <h3>Decreasing DBH</h3>
@@ -970,9 +983,246 @@ summary {
 </tr>
 </tbody>
 </table>
-<p>In most cases, the differences are very small, and likely can be atrributed to slight measurement differences. We can likely ignore this error?</p>
-<p>In total, there are 31 trees with this situation.</p>
+<p>In most cases, the differences are very small, and likely can be atrributed to slight measurement differences between years.</p>
+<p>In total, there are 31 trees with this situation. I have the treeID saved and can provide them if we want to double check these trees.</p>
+<hr />
 </div>
+</div>
+<div id="trees-without-monotonically-increasing-dbh-measurements" class="section level2">
+<h2>Trees without monotonically increasing DBH measurements</h2>
+<p>After discussion, we will handle trees without monotonically increasing DBH measurements as follows:</p>
+<ul>
+<li>Where DBH decreases occur in dead trees or during periods where trees died, we will treat these decreases as likely due to wood shrinkage/rot associated with mortality.</li>
+<li>Where DBH decreases occur during periods where trees were live, we will treat these decreases as a measurement error. We will use linear interpolation to correct these errors.</li>
+</ul>
+<p>Code below.</p>
+<div id="trees-with-decreasing-dbh-over-dead-periods" class="section level3">
+<h3>Trees with decreasing DBH over dead periods</h3>
+<pre class="r"><code># Step one: identify periods where DBH decrease occured during a period when tree waslive
+
+dbhDecrease %&gt;% 
+  filter(Status==&quot;Dead&quot;) %&gt;% # filter trees with decreasing DBH that had dead status at any point
+  left_join(dat,by=c(&quot;Plot&quot;,&quot;TreeID&quot;)) %&gt;%  # join with dataset
+  dplyr::select(Plot,TreeID,Year=Year.y,Status=Status.y,DBH=DBH.y)</code></pre>
+<pre><code>## # A tibble: 45 x 5
+##    Plot  TreeID Year  Status   DBH
+##    &lt;fct&gt; &lt;fct&gt;  &lt;fct&gt; &lt;fct&gt;  &lt;dbl&gt;
+##  1 3     279    1992  Live    43.5
+##  2 3     279    1994  Live    43.3
+##  3 3     279    1997  Live    43.2
+##  4 3     279    2009  Live    43.5
+##  5 3     279    2019  Dead    43.5
+##  6 3     457    1992  Live    41.0
+##  7 3     457    1994  Live    41.2
+##  8 3     457    1997  Live    41.4
+##  9 3     457    2009  Live    42.2
+## 10 3     457    2019  Dead    41.7
+## # ... with 35 more rows</code></pre>
+<p>A visual inspection reveals that the following trees had DBH decreases during periods where the tree was dead:</p>
+<ul>
+<li>Plot 3, Tree 457</li>
+<li>Plot 10, Tree 409</li>
+</ul>
+<p>These trees should be filtered from further adjustment.</p>
+<pre class="r"><code># Filter out trees with DBH decrease with dead periods
+dbhDecrease&lt;-
+  dbhDecrease %&gt;% 
+  filter(!(Plot==3 &amp; TreeID==457)) %&gt;% 
+  filter(!(Plot==10 &amp; TreeID==409))</code></pre>
+</div>
+<div id="trees-with-decreasing-dbh-over-live-periods" class="section level3">
+<h3>Trees with decreasing DBH over live periods</h3>
+<p>We will make adjustments on a tree by tree basis.</p>
+<p>First, reshape the dbhDecrease dataframe to make it easier to see DBH by year, then save it to a .csv file for manual editing.</p>
+<p><em>I set the following chunk not to run, because we only want to do this once</em></p>
+<pre class="r"><code>dbhEdit1&lt;-
+  dbhDecrease%&gt;% 
+  dplyr::select(-Status) %&gt;% # Don&#39;t need this column anymore
+  pivot_wider(names_from=&quot;Year&quot;,values_from=&quot;DBH&quot;) %&gt;% 
+  write.csv(file=&quot;dbh_for_edit.csv&quot;,row.names=FALSE)</code></pre>
+<p>One thing to note: the following trees had fallen as of 2019, which means we should not interpolate their 2019 values:</p>
+<pre class="r"><code>dbhDecrease %&gt;% 
+  filter(Year==2019 &amp; is.na(DBH))</code></pre>
+<pre><code>## # A tibble: 2 x 7
+##   Plot  TreeID Species Sector Year  Status   DBH
+##   &lt;fct&gt; &lt;fct&gt;  &lt;fct&gt;   &lt;fct&gt;  &lt;fct&gt; &lt;fct&gt;  &lt;dbl&gt;
+## 1 6     111    Bl      3      2019  Live      NA
+## 2 10    626    Sx      4      2019  Live      NA</code></pre>
+<pre class="r"><code>dbhEdit2&lt;-
+  readr::read_csv(here::here(&quot;data-raw&quot;,&quot;dbh_for_edit.csv&quot;))
+
+# save this file so we can go back to it
+save(dbhEdit2,file=paste(&quot;editedDBH&quot;,Sys.Date(),&quot;RData&quot;,sep=&quot;.&quot;))</code></pre>
+<p>Also, there are trees that were &lt;7.5cm DBH during the 1992 or 1994 measurements. DBH values for those trees/periods should not be interpolated either.</p>
+<p>For values that shouldn’t be interpolated, I entered ‘DoNotReplace’ in the corresponding cell.</p>
+<p>Values to be replaced by interpolation had ‘Interpolate’ entered into their cell.</p>
+<pre class="r"><code># Load tree data with values to replace
+load(here::here(&quot;data-raw&quot;,&quot;editedDBH.2020-02-27.RData&quot;))
+
+# Show data with replacements
+dbhEdit2 </code></pre>
+<pre><code>## # A tibble: 29 x 9
+##     Plot TreeID Species Sector `1992`    `1994`    `1997`   `2009` `2019`  
+##    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;   
+##  1     3    279 Sx           1 Interpol~ 43.3      Interpo~ 43.5   43.5    
+##  2     3    294 Bl           2 20.5      Interpol~ 20.9     22     23.2    
+##  3     3    441 Bl           3 Interpol~ 9.1       9.7      11     14      
+##  4     3    459 Sx           3 34.9      Interpol~ 35       35.1   Interpo~
+##  5     5     11 Bl           4 Interpol~ 8.6       9.4      13     15.3    
+##  6     6    322 Bl           1 Interpol~ 35        36.5     41     44.7    
+##  7     6    219 Bl           2 7.9       8.1       Interpo~ 9.2    9.2     
+##  8     6    111 Bl           3 Interpol~ Interpol~ 14.8     14.8   DoNotRe~
+##  9     6    332 Bl           3 21.3      Interpol~ 22       24.9   26.3    
+## 10     6    120 Bl           4 26.1      Interpol~ 26.4     28.5   30.2    
+## # ... with 19 more rows</code></pre>
+<p>Now we can interpolate the missing values</p>
+<pre class="r"><code>library(imputeTS)
+library(padr)
+library(lubridate)
+library(Hmisc)
+
+# Create a vector of years that are not to be interpolated
+DoNotReplace&lt;-  
+  dbhEdit2 %&gt;% 
+  pivot_longer(cols=`1992`:`2019`,names_to=&quot;Year&quot;,values_to=&quot;DBH&quot;) %&gt;% 
+  mutate(TreeID=factor(TreeID)) %&gt;% 
+  mutate(Year=as.numeric(Year)) %&gt;% 
+  filter(DBH==&quot;DoNotReplace&quot;)
+
+# Interpolation
+dbhEdit3&lt;-
+  dbhEdit2 %&gt;% 
+  pivot_longer(cols=`1992`:`2019`,names_to=&quot;Year&quot;,values_to=&quot;DBH&quot;) %&gt;% 
+  mutate(DBH=as.numeric(DBH)) %&gt;% 
+  mutate(Year=paste(&quot;01-01&quot;,Year,sep=&quot;-&quot;)) %&gt;% 
+  mutate(Year=dmy(Year)) %&gt;% 
+  mutate(TreeID=factor(TreeID)) %&gt;% 
+  group_by(TreeID) %&gt;% 
+  pad() %&gt;% 
+  ungroup() %&gt;% 
+  mutate(Year=year(Year)) %&gt;% 
+  as.data.frame()
+
+# Define function to predict DBH values
+dbhInterp&lt;-function() {
+  
+  YearList=data.frame(Year=c(1992,1994,1997,2009,2019))  
+  
+ x&lt;-
+   dbhEdit3 %&gt;% 
+   lm(DBH~Year,data=.) %&gt;% 
+   predict(.,newdata=YearList)
+ 
+ return(data.frame(Year=YearList$Year,DBH.pred=x))
+  
+}
+
+# Run function by TreeID
+dbhPred1&lt;-by(dbhEdit3, dbhEdit3[,&quot;TreeID&quot;],
+   function(x) predict(lm(DBH ~ Year, data = x),new=data.frame(Year=c(1992,1994,1997,2009,2019))),simplify=F)
+
+# Bring datasets together 
+dbhPred&lt;-data.frame(TreeID=names(dbhPred1),do.call(rbind.data.frame,dbhPred1)) %&gt;% # unpack output from by() function
+  setNames(c(&quot;TreeID&quot;,c(1992,1994,1997,2009,2019))) %&gt;% # rename columns
+  pivot_longer(cols=`1992`:`2019`,names_to=&quot;Year&quot;,values_to = &quot;DBH.Pred&quot;) %&gt;% # pivot longer 
+  mutate(Year=as.numeric(Year)) %&gt;% 
+  
+  # Join with dbhEdit3
+  left_join(dbhEdit3,by=c(&quot;TreeID&quot;,&quot;Year&quot;)) %&gt;% 
+  
+  # Join with doNot Replace
+  left_join(DoNotReplace,by=c(&quot;TreeID&quot;,&quot;Year&quot;)) %&gt;% 
+  
+  # Formatting
+  dplyr::select(Plot=Plot.x,TreeID,Year,DBH=DBH.x,DBH.Pred,DoNotRep=DBH.y) %&gt;% 
+  mutate_at(vars(DBH.Pred),round,1) %&gt;% # round DBH.Pred
+  
+  # Find and replace
+  mutate(DBH.New=DBH) %&gt;% 
+  mutate(DBH.New=coalesce(DBH.New,DBH.Pred)) %&gt;% 
+  mutate(DBH.New=replace(DBH.New,!is.na(DoNotRep),&quot;NA&quot;)) %&gt;% 
+  
+  # Set new DBH column
+  dplyr::select(Plot:Year,DBH=DBH.New) %&gt;% 
+  mutate(DBH.Pred=as.numeric(DBH)) %&gt;% 
+  dplyr::select(-DBH) %&gt;% 
+  mutate(Plot=factor(Plot)) %&gt;% 
+  mutate(Year=factor(Year)) %&gt;% 
+  mutate(TreeID=factor(TreeID))</code></pre>
+<p>Now let’s test to make sure that all DBH are now monotonic.</p>
+<pre class="r"><code>library(MonoInc)
+
+x&lt;-
+  dbhPred %&gt;% 
+  drop_na(DBH.Pred) 
+  
+ mono.x&lt;- by(x$DBH.Pred,x$TreeID,monotonic)
+
+ # One tree still has decreasing DBH
+ dbhPred %&gt;% 
+   filter(TreeID==as.numeric(names(which(mono.x==FALSE))))</code></pre>
+<pre><code>## # A tibble: 5 x 4
+##   Plot  TreeID Year  DBH.Pred
+##   &lt;fct&gt; &lt;fct&gt;  &lt;fct&gt;    &lt;dbl&gt;
+## 1 12    31     1992      22.4
+## 2 12    31     1994      22.2
+## 3 12    31     1997      22.6
+## 4 12    31     2009      25.7
+## 5 12    31     2019      30.2</code></pre>
+<p>One tree still has decreasing DBH. 1994 value for this tree is less than 1992. This is because the linear function predicts values below the 1992 value. Let’s manually replace the 1994 value with interpolation between 1992 and 1997 values.</p>
+<pre class="r"><code>  dbhPred[dbhPred$TreeID==31 &amp; dbhPred$Year==1994,&quot;DBH.Pred&quot;]=22.5</code></pre>
+<hr />
+</div>
+</div>
+<div id="now-merge-dbh-values-back-into-the-dataset" class="section level2">
+<h2>Now merge DBH values back into the dataset</h2>
+<pre class="r"><code>dat&lt;-
+  dat %&gt;% 
+  left_join(dbhPred,by=c(&quot;Plot&quot;,&quot;TreeID&quot;,&quot;Year&quot;)) %&gt;% 
+  arrange(Plot,TreeID,Year) %&gt;% 
+  mutate(DBH=coalesce(DBH.Pred,DBH)) %&gt;% 
+  mutate_at(vars(DBH),round,1) %&gt;% 
+  dplyr::select(-DBH.Pred)</code></pre>
+</div>
+<div id="heights" class="section level1">
+<h1>Heights</h1>
+<p>Now let’s look at trees where height measurements aren’t monotonically increasing.</p>
+<pre class="r"><code>x&lt;-
+  dat %&gt;% 
+  drop_na(Height) %&gt;% # drop rows with missing Height values 
+  arrange(Plot,TreeID,Year) %&gt;% 
+  mutate(id=paste(Plot,TreeID,sep=&quot;.&quot;))
+  
+ mono.x&lt;- by(x$Height,x$id,monotonic)
+
+ 
+  # Trees with decreasing height measurements
+ # write to .csv file
+  x %&gt;% 
+   group_by(id) %&gt;% 
+   summarise(n=n()) %&gt;% 
+   filter(n&gt;1) %&gt;%  # filter tree records with more than one height measurement
+   filter(id%in%names(which(mono.x==FALSE))) %&gt;% 
+   left_join(x,by=&quot;id&quot;) %&gt;% 
+   arrange(id) %&gt;% 
+   dplyr::select(Plot,TreeID,Species,Year,Height) %&gt;% 
+   pivot_wider(names_from=&quot;Year&quot;,values_from = &quot;Height&quot;) </code></pre>
+<pre><code>## # A tibble: 42 x 7
+##    Plot  TreeID Species `1992` `1994` `1997` `2019`
+##    &lt;chr&gt; &lt;chr&gt;  &lt;fct&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+##  1 10    394    Sx        28.6   28.5   28.5   30.3
+##  2 10    406    Bl         8.5    9.2    9.7    8.4
+##  3 11    356    Sx        28.6   28.1   28.1   28.6
+##  4 11    669    Bl        24.8   23.8   NA     NA  
+##  5 12    22     Bl        10.3   10.8    7     15.4
+##  6 12    31     Sx        20.3   19.9   19.9   18.3
+##  7 12    43     Bl        24.4   24.9   18.7   22.1
+##  8 12    46     Sx        23     22.6   22.1   22.8
+##  9 12    49     Fd        35.1   36.4   NA     36.1
+## 10 12    52     Sx        18.7   17.1   NA     19.1
+## # ... with 32 more rows</code></pre>
+<p>42 trees have decreasing DBH. A visual inspection of the plot cards revealed several trees with broken tops (e.g., Plot 12 Tree 22, and Plot 18 Tree 346).</p>
+<p>In almost all other cases, there is too much fluctuation to confidently delete height measurements for interpolation. I recommend we leave the height measurements as is.</p>
 </div>
 
 
