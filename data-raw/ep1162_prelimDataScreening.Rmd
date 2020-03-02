@@ -380,16 +380,31 @@ x<-
 
 In almost all other cases, there is too much fluctuation to confidently delete height measurements for interpolation.  I recommend we leave the height measurements as is.
 
+### Remove trees with DBH<7.5cm DBH for that year
+We need to remove trees from the record that have less than 7.5cm DBH recorded.
+
+There are `dat %>% filter(DBH<7.5) %>% nrow()` records of trees with less than 7.5cm DBH that will be removed using the following chunk.
+
+```{r}
+
+dat<- # re-assign to dat
+  dat %>% 
+  filter(DBH>=7.5) # keep trees >= 7.5cm DBH
+
+```
+
 *** 
 # FINAL SAVING
 We'll save the final dataset and export it as well to .csv for final checks.
 
 ```{r}
 dat %>% 
-  write.csv(file=here::here("data-raw","ep1162_finalDataCheck.csv"))
+  write.csv(file=here::here("data-raw","ep1162_finalData.csv"),
+            row.names=F,
+            na="")
 
 dat %>% 
-  save(file=here::here("data","ep1162_Data.RData")
+  save(file=here::here("data","ep1162_Data.RData"))
 
 
 ```
