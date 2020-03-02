@@ -362,7 +362,7 @@ x<-
 
  
   # Trees with decreasing height measurements
- # write to .csv file
+
   x %>% 
    group_by(id) %>% 
    summarise(n=n()) %>% 
@@ -379,5 +379,19 @@ x<-
 42 trees have decreasing DBH.  A visual inspection of the plot cards revealed several trees with broken tops (e.g., Plot 12 Tree 22, and Plot 18 Tree 346).
 
 In almost all other cases, there is too much fluctuation to confidently delete height measurements for interpolation.  I recommend we leave the height measurements as is.
+
+*** 
+# FINAL SAVING
+We'll save the final dataset and export it as well to .csv for final checks.
+
+```{r}
+dat %>% 
+  write.csv(file=here::here("data-raw","ep1162_finalDataCheck.csv"))
+
+dat %>% 
+  save(file=here::here("data","ep1162_Data.RData")
+
+
+```
 
 
