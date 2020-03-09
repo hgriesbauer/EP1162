@@ -1,0 +1,208 @@
+---
+title: "EP1162 Preliminary Analysis"
+author: "Hardy Griesbauer"
+date: "04/03/2020"
+output: html_document
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.width=8)
+
+# Load libraries
+library(tidyverse)
+
+# Load dataset
+load(here::here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_plotData.RData"))
+
+```
+
+## Prelim analysis
+Below are some preliminary figures of the EP1162 data.  I tried different types of figures just to give us a few options to discuss when putting the final report together.  I was excited to start taking a look at the data!
+
+NB: this code is also posted in the github repo if you want to run it for your self.  Just clone the entire repo to your local drive and take it from there.
+
+https://github.com/hgriesbauer/EP1162
+
+*Also - there may still be some adjustments made to two height measurements in the dataset.  It will be easy to re-run this analysis with an updated dataset if need  be!*
+
+
+### Number of trees by diameter class
+```{r}
+
+# set up diameter classes
+diamClass=seq(from=7.5,to=95,by=5)
+
+dat %>% 
+  left_join(plotDat,by="Plot") %>% 
+  mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  
+  # Group and summarise
+  group_by(BA.Target,Plot,Year,DBH.class) %>% 
+  summarise(Num.Trees=n()) %>%
+  mutate(Num.Trees=Num.Trees*20) %>% # multiply to get trees per hectare
+  
+  # Generate means and SD
+  ungroup() %>% 
+  group_by(BA.Target,Year,DBH.class) %>% 
+  summarise(Tree.Count.mean=mean(Num.Trees),
+            Tree.Count.SD=sd(Num.Trees)) %>% 
+  
+  # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=Tree.Count.mean)+
+  geom_bar(stat="Identity")+
+  facet_wrap(~label~Year,ncol=5)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,size=6,vjust=0.25))+
+  ylab("Trees per hectare")+
+  xlab("Diameter classes (cm)")
+  
+
+```
+
+In this figure, Trt:10 refers to the treatment units with a target of 10m2/hectare post-harvest.
+
+I didn't place standard error bars on the graph.  They are quite wide (high variation within treatment units).
+
+Interesting to note that in all three treatment units, the number of trees in the smaller diameter classes actually decrease between 1992 and 1994 - will look at the plots to see where this ocurred, but could also be related to mortality in the understory?
+
+A few other observations from this figure:
+
+- By 2019, the 3 treatment units are similar in termms of trees per hectare in the diameter classes above 17.5cm DBH.  The control has more stems in the smaller diameter classes.
+
+*Could compare Q values between treatment units.* 
+
+### Trees per hectare by species in 2019
+Let's look at species composition by treatment unit in 2019:
+
+```{r}
+
+
+dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  filter(Year==2019) %>% # filter for 2019
+  filter(Species%in%c("Sx","Bl")) %>% #filter for Sx and Bl
+  group_by(BA.Target,Plot,Species,DBH.class) %>% 
+  summarise(Spp.Plot=n()) %>% # summarise number of trees per plot by species
+  mutate(Spp.Plot=Spp.Plot*20) %>%# plot multiplier to get sph
+  
+  # create means
+  ungroup() %>% 
+  group_by(BA.Target,Species,DBH.class) %>%
+  summarise(SPH=mean(Spp.Plot)) %>% 
+  
+   # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=SPH,fill=Species)+
+  geom_bar(stat="Identity")+
+  facet_wrap(~label~Species,ncol=2)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,size=6,vjust=0.25))+
+  ylab("Mean trees per hectare per plot")+
+  xlab("Diameter classes (cm)")
+  
+
+
+```
+
+A few observations:
+
+- There are actually more spruce trees per hectare in the high-removal treatment than the other two.  
+- Higher Q value for Control treatment SAF compared to harvested units.
+- 
+
+### Basal area by year and treatment
+
+```{r}
+dat %>% 
+   left_join(plotDat,by="Plot") %>% # join with plot data
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
+  group_by(BA.Target,Plot,Year) %>% 
+  summarise(BA=sum(BA)*20) %>% # multiply by 20 for BA/ha
+  ungroup() %>% 
+  
+  # create mean and SD
+  group_by(BA.Target,Year) %>% 
+  summarise(BA.Mean=mean(BA),
+            BA.se=sd(BA)/sqrt(length(BA))) %>% # calculate standard error of the mean
+  
+    # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # # padd out the year column
+  # right_join(data.frame(Year=as.factor(1992:2019)),by="Year") %>% 
+  
+  
+  # Plotting
+  ggplot()+
+  aes(x=Year,y=BA.Mean,color=label,group=label)+
+  geom_point(size=3)+
+  geom_line()+
+  geom_errorbar(aes(ymin=BA.Mean-BA.se,ymax=BA.Mean+BA.se),width=0.1)+
+  xlab("Measurement year")+
+  ylab("Mean basal area per plot (m2/ha)")
+  
+  
+
+```
+
+I included error bars in this code.
+
+Observations:
+
+- Basal area actually decreased between 1992 and 1994 for control and Trt20.  I will look into this a bit more.
+- Both 10 and 20 Treatment Units have converged in terms of basal area per hectare by 2019, and are >10m2/ha less than the control.
+
+### Basal area contribution by species
+
+```{r}
+
+
+dat %>% 
+    filter(Species!="Ep") %>% # remove birch 
+  filter(Status=="Live") %>% # filter for live only trees
+   left_join(plotDat,by="Plot") %>% # join with plot data
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
+  group_by(BA.Target,Plot,Year,Species) %>% 
+  summarise(BA=sum(BA)*20) %>% # multiply by 20 for BA/ha
+  ungroup() %>% 
+  
+  # create mean and SD
+  group_by(BA.Target,Year,Species) %>% 
+  summarise(BA.Mean=mean(BA),
+            BA.se=sd(BA)/sqrt(length(BA))) %>% # calculate standard error of the mean
+  
+    # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # # pad out the year column
+  # right_join(data.frame(Year=as.factor(1992:2019)),by="Year") %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=Year,y=BA.Mean,group=Species,fill=Species)+
+  geom_bar(stat="Identity")+
+  facet_wrap(~label)+
+  ylab("Mean basal area per plot (m2/ha)")+
+  xlab("Measurement year")
+  
+  
+
+```
+
+*Note: I removed birch from the dataset for this figure*
+
+A few observations:
+
+- Spruce basal area increased relatively faster in the high-removal treatment unit compared to the other two treatment units.  Interesting!
+- Douglas-fir basal area decreased between 1992 and 1994.  This likely explains the overall basal area decreases between 92 and 94 in previous figure.  Will look into this more  *Note - I removed dead trees for this analysis, just to see if this explained the decrease in Fdi BA - no effect*
+- Close to 30 years afterwards, both harvest treatments are similar in terms of total basal area, and SAF area.

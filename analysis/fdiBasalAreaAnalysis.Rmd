@@ -1,0 +1,105 @@
+---
+title: "Fdi basal area analysis"
+author: "Hardy Griesbauer"
+date: "06/03/2020"
+output: html_document
+---
+
+## The mystery of the disappearing Fdi basal area
+The figure below suggests that Douglas-fir basal area declined noticeably between 1992 and 1994 in the control and 20m2 residual treatment units.  Below is some script to analyze this phenomenon further.  
+
+```{r setup,include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.width=8)
+
+# Load libraries
+library(tidyverse)
+
+# Load dataset
+load(here::here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_plotData.RData"))
+
+# set up diameter classes
+diamClass=seq(from=7.5,to=95,by=5)
+
+
+dat %>% 
+    filter(Species!="Ep") %>% # remove birch 
+  filter(Status=="Live") %>% # filter for live only trees
+   left_join(plotDat,by="Plot") %>% # join with plot data
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
+  group_by(BA.Target,Plot,Year,Species) %>% 
+  summarise(BA=sum(BA)*20) %>% # multiply by 20 for BA/ha
+  ungroup() %>% 
+  
+  # create mean and SD
+  group_by(BA.Target,Year,Species) %>% 
+  summarise(BA.Mean=mean(BA),
+            BA.se=sd(BA)/sqrt(length(BA))) %>% # calculate standard error of the mean
+  
+    # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # # pad out the year column
+  # right_join(data.frame(Year=as.factor(1992:2019)),by="Year") %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=Year,y=BA.Mean,group=Species,fill=Species)+
+  geom_bar(stat="Identity")+
+  facet_wrap(~label)+
+  ylab("Mean basal area per plot (m2/ha)")+
+  xlab("Measurement year")
+  
+```
+
+First step, let's isolate plots with Fdi in the two treatment units:
+```{r}
+fdiDat<-
+  dat %>% 
+  filter(Species=="Fd") %>% # filter for Douglas-fir entries
+  left_join(plotDat,by="Plot") %>% 
+  mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) # assign DBH classes
+
+```
+
+Looks like there are two trees that are missing measurements from 1994 and 1997.
+
+```{r}
+fdiDat %>% 
+  filter(TreeID %in% c(400,188))
+
+
+```
+
+Are there any other trees (non-Fd) that are missing mid-point measurements?
+
+```{r}
+
+  
+  dat %>% 
+  filter(TreeID!="New") %>% # have to remove these from dataset
+  dplyr::select(Plot,TreeID,Year,DBH) %>% # select columns to run analysis on
+  pivot_wider(names_from=Year,values_from=DBH) %>% 
+  filter(!is.na(`1992`) & !is.na(`2019`)) %>% # filter for trees with measurements at 1992 and 2019
+  pivot_longer(cols=3:7,names_to="Year",values_to="DBH") %>% 
+  drop_na(DBH) %>% 
+  group_by(Plot,TreeID) %>% 
+  summarise(num=n()) %>% 
+  filter(num<5) 
+  
+  
+  
+
+```
+
+
+I suggest we interpolate these using linear regression:
+
+```{r}
+
+
+
+
+
