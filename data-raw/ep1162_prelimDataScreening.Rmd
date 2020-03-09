@@ -10,9 +10,11 @@ output:
 ```{r setup, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(message=FALSE, warning = FALSE)
 library(tidyverse)
+library(readxl)
+library(here)
 
-# Load data
-load("../data/ep1162_Data.RData")
+##
+load(here("data","ep1162_Data.RData"))
 
 ```
 
@@ -393,6 +395,27 @@ dat<- # re-assign to dat
 
 ```
 
+### Fix measurement for single tree
+One tree (Plot==11 TreeID==991) had a measurement missed in 1997.  I interpolated using surround values to fix it:
+
+```{r}
+# Take a look at tree records
+dat %>% filter(Plot==11 & TreeID==991)
+  
+# add DBH 17.2 (mean of 1994 and 2009 values)
+dat<-
+  dat %>% 
+  add_row(Plot=11,TreeID=991,DBH=17.2,Status="Live",Species="Bl",Sector=1,
+    Year=1997,Comments=c("DBH added manually for this year, missing"))
+
+# Confirm that entry worked
+dat %>% filter(Plot==11 & TreeID==991)
+
+
+```
+
+
+
 *** 
 # FINAL SAVING
 We'll save the final dataset and export it as well to .csv for final checks.
@@ -403,8 +426,7 @@ dat %>%
             row.names=F,
             na="")
 
-dat %>% 
-  save(file=here::here("data","ep1162_Data.RData"))
+  save(dat,file=here::here("data","ep1162_Data.RData"))
 
 
 ```

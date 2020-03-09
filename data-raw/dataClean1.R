@@ -1,9 +1,10 @@
 # Script to clean and format EP1162 raw data
 
 library(tidyverse)
+library(here)
 
 # Read Excel file
-X<-readxl::read_excel("data-raw/4.0 - FINAL DATASET FOR ANALYSIS - EP 1162 -  1992-2019 FIELD DATA (Feb 4th 2019) MJ.xlsx",
+X<-readxl::read_excel(here("data-raw","4.0 - FINAL DATASET FOR ANALYSIS - EP 1162 -  1992-2019 FIELD DATA (Feb 4th 2019) MJ.xlsx"),
                       skip=10)
 
 
