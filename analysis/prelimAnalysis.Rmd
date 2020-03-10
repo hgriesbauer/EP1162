@@ -19,14 +19,22 @@ load(here::here("data","ep1162_plotData.RData"))
 ```
 
 ## Prelim analysis
-Below are some preliminary figures of the EP1162 data.  I tried different types of figures just to give us a few options to discuss when putting the final report together.  I was excited to start taking a look at the data!
+Below are some preliminary figures of the EP1162 data.  
 
 NB: this code is also posted in the github repo if you want to run it for your self.  Just clone the entire repo to your local drive and take it from there.
 
 https://github.com/hgriesbauer/EP1162
 
-*Also - there may still be some adjustments made to two height measurements in the dataset.  It will be easy to re-run this analysis with an updated dataset if need  be!*
+NB2: Plots 16,17, 18 and 19 were omitted from the dataset for these analyses because they were not measured in 1994 or 1997.  
 
+```{r}
+dat<-
+  dat %>% 
+  filter(!Plot %in% c(16,17,18,19)) # remove plots 16-19 from data for further analysis
+
+```
+
+This means that the following analyses are based on `r length(unique(dat$Plot))` plots.
 
 ### Number of trees by diameter class
 ```{r}
@@ -36,6 +44,7 @@ diamClass=seq(from=7.5,to=95,by=5)
 
 dat %>% 
   left_join(plotDat,by="Plot") %>% 
+   filter(Status=="Live") %>% # filter for live trees only
   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
   
   # Group and summarise
@@ -74,9 +83,8 @@ A few other observations from this figure:
 
 - By 2019, the 3 treatment units are similar in termms of trees per hectare in the diameter classes above 17.5cm DBH.  The control has more stems in the smaller diameter classes.
 
-*Could compare Q values between treatment units.* 
 
-### Trees per hectare by species in 2019
+### Trees per hectare by species and diameter class in 2019
 Let's look at species composition by treatment unit in 2019:
 
 ```{r}
@@ -84,6 +92,7 @@ Let's look at species composition by treatment unit in 2019:
 
 dat %>% 
   left_join(plotDat,by="Plot") %>% # join with plot data
+   filter(Status=="Live") %>% # filter for live trees only
    mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
   filter(Year==2019) %>% # filter for 2019
   filter(Species%in%c("Sx","Bl")) %>% #filter for Sx and Bl
@@ -116,13 +125,58 @@ A few observations:
 
 - There are actually more spruce trees per hectare in the high-removal treatment than the other two.  
 - Higher Q value for Control treatment SAF compared to harvested units.
-- 
+
+
+
+
+### Basal area per hectare by species and diameter class in 2019
+Let's look at basal area by species, diameter class and treatment unit in 2019:
+
+```{r}
+dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+   filter(Status=="Live") %>% # filter for live trees only
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  filter(Year==2019) %>% # filter for 2019
+  filter(Species%in%c("Sx","Bl")) %>% #filter for Sx and Bl
+  mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  group_by(BA.Target,Plot,Species,DBH.class) %>% 
+  summarise(BA.Plot=sum(BA)*20) %>%   # sum basal area per diam class and multiply to get per ha
+  
+  # create means
+  ungroup() %>% 
+  group_by(BA.Target,Species,DBH.class) %>%
+  summarise(BA=mean(BA.Plot)) %>% 
+  
+   # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=BA,fill=Species)+
+  geom_bar(stat="Identity")+
+  facet_wrap(~label~Species,ncol=2)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,size=6,vjust=0.25))+
+  ylab("Mean basal area per hectare per plot (m2)")+
+  xlab("Diameter classes (cm)")
+  
+```
+
+A few observations:
+
+- Sx basal area is concentrated in the larger diameter classes.
+- Bl basal area is more evenly distributed across diameter classes.
+
+
+
+
 
 ### Basal area by year and treatment
 
 ```{r}
 dat %>% 
    left_join(plotDat,by="Plot") %>% # join with plot data
+  filter(Status=="Live") %>% 
    mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
   mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
   group_by(BA.Target,Plot,Year) %>% 
@@ -135,7 +189,7 @@ dat %>%
             BA.se=sd(BA)/sqrt(length(BA))) %>% # calculate standard error of the mean
   
     # Add labeller column
-  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
   
   # # padd out the year column
   # right_join(data.frame(Year=as.factor(1992:2019)),by="Year") %>% 
@@ -143,7 +197,7 @@ dat %>%
   
   # Plotting
   ggplot()+
-  aes(x=Year,y=BA.Mean,color=label,group=label)+
+  aes(x=Year,y=BA.Mean,color=Trt.Unit,group=Trt.Unit)+
   geom_point(size=3)+
   geom_line()+
   geom_errorbar(aes(ymin=BA.Mean-BA.se,ymax=BA.Mean+BA.se),width=0.1)+
@@ -158,8 +212,12 @@ I included error bars in this code.
 
 Observations:
 
-- Basal area actually decreased between 1992 and 1994 for control and Trt20.  I will look into this a bit more.
 - Both 10 and 20 Treatment Units have converged in terms of basal area per hectare by 2019, and are >10m2/ha less than the control.
+- Treatment Unit 10 has a steeper temporal trend than Treatment Unit 20.  Growing faster?
+
+
+
+
 
 ### Basal area contribution by species
 
@@ -168,7 +226,7 @@ Observations:
 
 dat %>% 
     filter(Species!="Ep") %>% # remove birch 
-  filter(Status=="Live") %>% # filter for live only trees
+    filter(Status=="Live") %>% # filter for live only trees
    left_join(plotDat,by="Plot") %>% # join with plot data
    mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
   mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
@@ -189,7 +247,7 @@ dat %>%
   
   # Plotting
   ggplot()+
-  aes(x=Year,y=BA.Mean,group=Species,fill=Species)+
+  aes(x=Year,y=BA.Mean,fill=Species)+
   geom_bar(stat="Identity")+
   facet_wrap(~label)+
   ylab("Mean basal area per plot (m2/ha)")+
@@ -204,5 +262,137 @@ dat %>%
 A few observations:
 
 - Spruce basal area increased relatively faster in the high-removal treatment unit compared to the other two treatment units.  Interesting!
-- Douglas-fir basal area decreased between 1992 and 1994.  This likely explains the overall basal area decreases between 92 and 94 in previous figure.  Will look into this more  *Note - I removed dead trees for this analysis, just to see if this explained the decrease in Fdi BA - no effect*
 - Close to 30 years afterwards, both harvest treatments are similar in terms of total basal area, and SAF area.
+- 2019 BA in both treatment units are similar to control in 2009.  Treatment units are about 10 years behind at this point?
+
+
+
+
+
+
+### PBAI
+Below is code to recreate Mike's PBAI graph by initial BA:
+
+```{r}
+
+dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+   filter(Status=="Live") %>% # filter for live trees only
+  mutate(BA=(DBH/2/100)^2*pi*20) %>% # convert DBH to basal area and multiply for per hectare
+  dplyr::select(BA.Target,Plot,TreeID,Species,Year,BA) %>% 
+  group_by(BA.Target,Plot,Year) %>% 
+  summarise(BA.Sum=sum(BA,na.rm=T)) %>% 
+  pivot_wider(names_from=Year,values_from=BA.Sum) %>% 
+  mutate(`1992-1994`=`1994`-`1992`) %>% 
+  mutate(`1994-1997`=`1997`-`1994`) %>% 
+  mutate(`1997-2009`=`2009`-`1997`) %>% 
+  mutate(`2009-2019`=`2019`-`2009`) %>% 
+  
+  # pivot back
+  dplyr::select(BA.Target,Plot,`1992-1994`:`2009-2019`) %>% 
+  pivot_longer(cols=`1992-1994`:`2009-2019`,names_to="Period",values_to="PBAI") %>% 
+  mutate(Period=factor(Period)) %>% 
+  
+  # summarise PBAI by BA.Target
+  group_by(BA.Target,Period) %>% 
+  summarise(PBAI.mean=mean(PBAI,na.rm=T),
+            PBAI.se=sd(PBAI,na.rm=T)/sqrt(length(PBAI))) %>% 
+  
+    # Add labeller column
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=Period,y=PBAI.mean,fill=Trt.Unit,color=Trt.Unit,group=Trt.Unit)+
+  geom_point(size=3)+
+  geom_line()+
+  geom_errorbar(aes(ymin=PBAI.mean-PBAI.se,ymax=PBAI.mean+PBAI.se),width=0.1)+
+  xlab("Period")+
+  ylab("Mean basal area per plot (m2/ha)")
+  
+
+```
+
+Graph looks similar to Mike's original figure.
+
+Some very interesting trends here:
+
+- Treatment 10 plots have higher increment than other treatment units.
+- Control treatment plots increment is starting to stabilize now?  Does this suggest that in the next 10-20 years, the treatment units may converge with control in terms of BAI?
+
+### Effect of initial BA on PBAI
+Below is R code to re-create Mike's figure of initial BA on PBAI by period
+
+```{r}
+
+pbai<- # assign output so we can plot several periods
+  dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+   filter(Status=="Live") %>% # filter for live trees only
+  mutate(BA=(DBH/2/100)^2*pi*20) %>% # convert DBH to basal area and multiply for per hectare
+  dplyr::select(BA.Target,Plot,TreeID,Species,Year,BA) %>% 
+  group_by(BA.Target,Plot,Year) %>% 
+  summarise(BA.Sum=sum(BA,na.rm=T)) %>% 
+  pivot_wider(names_from=Year,values_from=BA.Sum) %>% 
+  mutate(`1992-1994`=`1994`-`1992`) %>% 
+  mutate(`1994-1997`=`1997`-`1994`) %>% 
+  mutate(`1997-2009`=`2009`-`1997`) %>% 
+  mutate(`2009-2019`=`2019`-`2009`) 
+  
+
+
+  # Plotting function
+pbai.Plot<-function(initYear,baPeriod,data=pbai) {
+  
+  p1<-
+    data.frame(data[initYear],data[baPeriod]) %>% 
+    setNames(c("initialBA","PBAI")) %>% 
+     # filter(PBAI>=0) %>% 
+      ggplot()+
+    aes(x=initialBA,y=PBAI)+
+    geom_point(size=3)+
+    xlab(paste(initYear," plot basal area per hectare",sep=""))+
+    ylab(paste("BAI per hectare for ",baPeriod, "Period"))
+  
+  return(p1)
+  
+}
+
+pbai.Plot(initYear="2009",baPeriod="2009-2019")
+
+
+```
+
+We see a negative relationship between plot basal area and 2009-2019 PBAI.  Note the outlier - this plot is a control plot that had a large Sx tree die between 2009-2019, resulting in negative PBAI for that period.
+
+
+
+
+The relationship is consistent using initial BA for earlier periods (e.g., 1994):
+
+```{r}
+pbai.Plot(initYear="1994",baPeriod="2009-2019")
+```
+
+*For discussion*  Although the relationship seems nonlinear negative, I think that's mostly due to the plot (Treatment: Control Plot 3) with negative PBAI.  I don't think we would want to model plots with negative PBAI, as these are due to stand dynamics/forest health factors, and we are primarily interested in effects of treatment on growth. 
+
+With plot 3 removed, the relationship looks more linear:
+
+```{r}
+pbai.2<-
+  pbai %>% 
+  filter(Plot!=3)
+
+pbai.Plot(initYear="1994",baPeriod="2009-2019",data=pbai.2)
+
+```
+
+
+***
+This linear relationship doesn't hold for periods earlier than the 2009-2019 period:
+
+```{r}
+
+pbai.Plot(initYear="1994",baPeriod="1994-1997")
+```
+
