@@ -308,7 +308,7 @@ dat %>%
   geom_line()+
   geom_errorbar(aes(ymin=PBAI.mean-PBAI.se,ymax=PBAI.mean+PBAI.se),width=0.1)+
   xlab("Period")+
-  ylab("Mean basal area per plot (m2/ha)")
+  ylab("Mean BAI per plot (m2/ha/period)")
   
 
 ```
