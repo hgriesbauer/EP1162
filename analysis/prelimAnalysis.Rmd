@@ -342,8 +342,24 @@ pbai<- # assign output so we can plot several periods
 
 
   # Plotting function
-pbai.Plot<-function(initYear,baPeriod,data=pbai) {
+pbai.Plot<-function(initYear,baPeriod,data=pbai,x=15,y=5) {
   
+  # Linear model to extract coefficients and R2
+  mod1<-
+      data.frame(data[initYear],data[baPeriod]) %>% 
+      setNames(c("initialBA","PBAI")) %>% 
+      lm(PBAI~initialBA,data=.)
+  
+  text1=paste(round(broom::tidy(mod1)[1,"estimate"],3),
+              " + (",
+              round(broom::tidy(mod1)[2,"estimate"],3),
+              "X)\n",
+              "R² = ",
+              round(broom::glance(mod1)[1],3),
+              "\np = ",
+              round(broom::glance(mod1)["p.value"],3),
+              sep="")
+    
   p1<-
     data.frame(data[initYear],data[baPeriod]) %>% 
     setNames(c("initialBA","PBAI")) %>% 
@@ -351,6 +367,8 @@ pbai.Plot<-function(initYear,baPeriod,data=pbai) {
       ggplot()+
     aes(x=initialBA,y=PBAI)+
     geom_point(size=3)+
+    geom_text(label=text1,x=x,y=y,check_overlap=TRUE,hjust=0)+
+    geom_smooth(method="lm",se=FALSE)+ # add regression line
     xlab(paste(initYear," plot basal area per hectare",sep=""))+
     ylab(paste("BAI per hectare for ",baPeriod, "Period"))
   
@@ -358,21 +376,14 @@ pbai.Plot<-function(initYear,baPeriod,data=pbai) {
   
 }
 
-pbai.Plot(initYear="2009",baPeriod="2009-2019")
+# iteratively adjust x and y to line up text properly
+pbai.Plot(initYear="2009",baPeriod="2009-2019",x=10,y=2)
 
 
 ```
 
 We see a negative relationship between plot basal area and 2009-2019 PBAI.  Note the outlier - this plot is a control plot that had a large Sx tree die between 2009-2019, resulting in negative PBAI for that period.
 
-
-
-
-The relationship is consistent using initial BA for earlier periods (e.g., 1994):
-
-```{r}
-pbai.Plot(initYear="1994",baPeriod="2009-2019")
-```
 
 *For discussion*  Although the relationship seems nonlinear negative, I think that's mostly due to the plot (Treatment: Control Plot 3) with negative PBAI.  I don't think we would want to model plots with negative PBAI, as these are due to stand dynamics/forest health factors, and we are primarily interested in effects of treatment on growth. 
 
@@ -383,7 +394,7 @@ pbai.2<-
   pbai %>% 
   filter(Plot!=3)
 
-pbai.Plot(initYear="1994",baPeriod="2009-2019",data=pbai.2)
+pbai.Plot(initYear="1994",baPeriod="2009-2019",data=pbai.2,x=5,y=3)
 
 ```
 
@@ -391,8 +402,16 @@ pbai.Plot(initYear="1994",baPeriod="2009-2019",data=pbai.2)
 ***
 This linear relationship doesn't hold for periods earlier than the 2009-2019 period:
 
+1994 period:
+
 ```{r}
 
-pbai.Plot(initYear="1994",baPeriod="1994-1997")
+pbai.Plot(initYear="1994",baPeriod="1994-1997",y=3.5,x=25)
 ```
 
+1997 period:
+
+```{r}
+
+pbai.Plot(initYear="1997",baPeriod="1997-2009",x=5,y=1)
+```
