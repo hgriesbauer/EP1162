@@ -1,0 +1,173 @@
+---
+title: "Height estimates from DBH:Height relationship"
+author: "Hardy Griesbauer"
+date: "20/03/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Libraries
+library(tidyverse)
+library(here)
+
+
+# Load data
+load(here("data","ep1162_Data.RData"))
+
+
+```
+
+## Estimating tree heights based on dbh:height relationships
+In order to estimate stand-level volumes for each treatment, we need to first estimate heights for trees that do not have height measurements.  We will do the following:
+
+1. Model DBH:Height relationships separately for each measurement period, and for Bl:Sx separately (at first).
+2. Compare Bl and Sx relationships, compare estimates between years, and determine if we can pool species and/or years to estimate Height.
+
+### Step 1: Explore height:dbh relationships with scatterplots
+First, let's explore scatterplots for each species and measurement year:
+
+```{r dbh:height scatterplots,fig.height=12, fig.width=10}
+
+  dat %>% 
+    filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
+    filter(Status=="Live") %>% 
+    drop_na(Height) %>% # remove trees where height was not measured
+    
+    # Plotting
+  ggplot()+
+  aes(x=DBH,y=Height,fill=Species)+
+  geom_point()+
+  facet_wrap(Year~Species,ncol=2)+
+  theme(legend.position = "none")+
+  ylab("Height (m)")+
+  xlab("DBH (cm)")+
+  geom_smooth(formula = y~log(x),method="lm",se=FALSE)
+
+```
+
+It looks like there are differences between measurement years.  There may be subtle differences between species within a measurement year.  Let's explore that now by superposing Bl and Sx graphs within same year:
+
+```{r dbh:height scatterplots species superposed,fig.height=12, fig.width=10}
+
+  dat %>% 
+    filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
+    filter(Status=="Live") %>% 
+    drop_na(Height) %>% # remove trees where height was not measured
+    
+    # Plotting
+  ggplot()+
+  aes(x=DBH,y=Height,color=Species)+
+  geom_point()+
+  facet_wrap(~Year)+
+  theme(legend.position = "bottom")+
+  ylab("Height (m)")+
+  xlab("DBH (cm)")+
+  geom_smooth(formula = y~log(x),method="lm",se=FALSE)
+
+```
+
+We can see subtle differences between Bl and Sx DBH:Height relationships in first three measurement periods.  By 2019, it looks like DBH:height relationships converged between the species.
+
+***
+
+Let's look at differences between years by superposing different year graphs for species separately:
+
+```{r dbh:height scatterplots years superposed,fig.height=12, fig.width=10}
+
+  dat %>% 
+    filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
+    filter(Status=="Live") %>% 
+    drop_na(Height) %>% # remove trees where height was not measured
+    
+    # Plotting
+  ggplot()+
+  aes(x=DBH,y=Height,color=Year)+
+  geom_point()+
+  facet_wrap(~Species,ncol=2)+
+  theme(legend.position = "bottom")+
+  ylab("Height (m)")+
+  xlab("DBH (cm)")+
+  geom_smooth(formula = y~log(x),method="lm",se=FALSE)
+
+```
+
+Looks like Bl maintained the same DBH:Height relationship over all measurement periods.  Sx 2019 relationship differs from other time periods.
+
+
+****
+### Can we pool species and measurement years?  
+
+I believe we can test this statistically:
+
+*Note: I will get Peter Ott to confirm this is the correct way to test regression models between groups*
+
+```{r test for species and year effect}
+
+# Assign data
+x<-
+   dat %>% 
+    filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
+    filter(Status=="Live") %>% 
+    drop_na(Height) # remove trees where height was not measured
+
+# fit a model with all terms
+mod.full<-lm(Height~log(DBH)+log(DBH):Species+log(DBH):Year+log(DBH):Species:Year,data=x)
+
+# fit model with only DBH and species terms
+mod.species<-lm(Height~log(DBH)+log(DBH):Species,data=x)
+
+# fit model with only DBH and year terms
+mod.year<-lm(Height~log(DBH)+log(DBH):Year,data=x)
+
+# fit model with only DBH terms
+mod.dbh<-lm(Height~log(DBH),data=x)
+
+# Run through these iteratively
+anova(mod.full,mod.dbh)
+
+
+```
+
+Based on this ANOVA table, there is a significant reduction in residual sum of squares between the full model and the DBH-only model.  The species+DBH and year+DBH models don't seem to add much (not shown).
+
+
+***
+### Compare R^2^ between models
+How much variance is explained by each model?  Summary below:
+
+```{r extract r2 and other stats for each model}
+rbind(data.frame(Model="full",broom::glance(mod.full)),
+      data.frame(Model="dbh-only",broom::glance(mod.dbh)),
+      data.frame(Model="dbh+species",broom::glance(mod.species)),
+      data.frame(Model="dbh+year",broom::glance(mod.year))
+      
+      ) %>% 
+  dplyr::select(1:7)
+
+
+
+```
+
+Based on this, and the extremely modest increase in R^2^ from DBH-only to full model, I'm tempted to say that we can pool all species and years into the most parsimonious (ie., DBH:Height) model.  But definitely up for discussion!
+
+### DBH:Height equation for pooled data
+If we decide to use pooled data for the DBH:Height equation:
+
+```{r dbh:height equation}
+
+paste("Predicted.Height = ",coef(mod.dbh)[2],
+      " x ln(DBH) ",
+      coef(mod.dbh)[1])
+```
+
+Here are the coefficients from Mike's analysis:
+
+*Subalpine fir*
+HT = 11.188 x ln(DBH)  - 17.609
+
+*Hybrid white spruce*
+HT = 11.79 x ln(DBH)  - 19.637
+
+The coefficients using the pooled species/years are pretty similar to Mike's formula for spruce.
