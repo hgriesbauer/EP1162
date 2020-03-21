@@ -95,71 +95,97 @@ Let's look at differences between years by superposing different year graphs for
 
 Looks like Bl maintained the same DBH:Height relationship over all measurement periods.  Sx 2019 relationship differs from other time periods.
 
+As per previous discussion, we shouldn't pool measurements across measurement years because this would violate assumption of independence among samples.
 
 ****
-### Can we pool species and measurement years?  
+### Can we pool species?  
 
 I believe we can test this statistically:
 
 *Note: I will get Peter Ott to confirm this is the correct way to test regression models between groups*
 
-```{r test for species and year effect}
+```{r test for species effect}
+
+# function to compare three models
+# separate models will be fit for each year
+
+speciesMod1<-function(year) {
 
 # Assign data
 x<-
    dat %>% 
     filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
     filter(Status=="Live") %>% 
+  filter(Year==year) %>% 
     drop_na(Height) # remove trees where height was not measured
 
 # fit a model with all terms
-mod.full<-lm(Height~log(DBH)+log(DBH):Species+log(DBH):Year+log(DBH):Species:Year,data=x)
-
-# fit model with only DBH and species terms
-mod.species<-lm(Height~log(DBH)+log(DBH):Species,data=x)
-
-# fit model with only DBH and year terms
-mod.year<-lm(Height~log(DBH)+log(DBH):Year,data=x)
+mod.full<-lm(Height~log(DBH)+log(DBH):Species,data=x)
 
 # fit model with only DBH terms
 mod.dbh<-lm(Height~log(DBH),data=x)
 
-# Run through these iteratively
-anova(mod.full,mod.dbh)
+# extract coef and other values
+out<-data.frame(year=year,intercept=coef(mod.dbh)[1],
+                slope=coef(mod.dbh)[2],
+                p.value=broom::glance(mod.dbh)$p.value,
+                r2=broom::glance(mod.dbh)[1])
+rownames(out)=year
+
+# Return
+return(list(anov=anova(mod.full,mod.dbh),out=out))
+
+}
 
 
 ```
 
-Based on this ANOVA table, there is a significant reduction in residual sum of squares between the full model and the DBH-only model.  The species+DBH and year+DBH models don't seem to add much (not shown).
+Now let's run the model for the four measurement periods:
+
+1992:
+```{r}
+speciesMod1(1992)$anov
+```
+
+***
+1994:
+
+```{r}
+speciesMod1(1994)$anov
+```
+
+***
+1997:
+
+```{r}
+speciesMod1(1997)$anov
+```
+
+***
+2019:
+
+```{r}
+speciesMod1(2019)$anov
+```
+
+For each of the four measurement periods, there is no significant difference between models that include DBH:species interactions and just use DBH alone.  Therefore, we can develop a single height model for each measurement period.
 
 
 ***
-### Compare R^2^ between models
-How much variance is explained by each model?  Summary below:
 
-```{r extract r2 and other stats for each model}
-rbind(data.frame(Model="full",broom::glance(mod.full)),
-      data.frame(Model="dbh-only",broom::glance(mod.dbh)),
-      data.frame(Model="dbh+species",broom::glance(mod.species)),
-      data.frame(Model="dbh+year",broom::glance(mod.year))
-      
-      ) %>% 
-  dplyr::select(1:7)
+### DBH:Height equation for pooled species data
 
-
-
-```
-
-Based on this, and the extremely modest increase in R^2^ from DBH-only to full model, I'm tempted to say that we can pool all species and years into the most parsimonious (ie., DBH:Height) model.  But definitely up for discussion!
-
-### DBH:Height equation for pooled data
-If we decide to use pooled data for the DBH:Height equation:
 
 ```{r dbh:height equation}
 
-paste("Predicted.Height = ",coef(mod.dbh)[2],
-      " x ln(DBH) ",
-      coef(mod.dbh)[1])
+rbind(speciesMod1(1992)$out,
+      speciesMod1(1994)$out,
+      speciesMod1(1997)$out,
+      speciesMod1(2019)$out) %>% 
+  as_tibble()
+
+      
+
 ```
 
 Here are the coefficients from Mike's analysis:
@@ -170,4 +196,4 @@ HT = 11.188 x ln(DBH)  - 17.609
 *Hybrid white spruce*
 HT = 11.79 x ln(DBH)  - 19.637
 
-The coefficients using the pooled species/years are pretty similar to Mike's formula for spruce.
+
