@@ -138,7 +138,7 @@ dat %>%
 
 Could you please generate a graph of live BA over time for each of the PSP's, so their collective trajectories and similarities / differences can be compared by the reader? The behaviour of the BA of individual plots varies somewhat from the treatment means, esp in the first few years, when some plots experience mortality, and others not so much.
 
-```{r Figure 4b graph live BA over time}
+```{r Figure 4b graph live BA over time with each PSP separate window}
 
 dat %>% 
    left_join(plotDat,by="Plot") %>% # join with plot data
@@ -157,7 +157,7 @@ dat %>%
   aes(x=Year,y=BA,color=Trt.Unit,group=Trt.Unit)+
   geom_point(size=3)+
   geom_line()+
-  ylab("Mean basal area per plot (m²/ha)")+
+  ylab("Total basal area per hectare (m²/ha)")+
   scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
                      minor_breaks = c(1992,1994,1997,2009,2019),
                      name="Measurement year")+ # stretch out x-axis
@@ -169,6 +169,37 @@ dat %>%
   
 ```
 
+**Updated Figure 4b - All PSPs on one graph**
+
+```{r Figure 4b graph live BA over time with each PSP on same graph}
+
+dat %>% 
+   left_join(plotDat,by="Plot") %>% # join with plot data
+  filter(Status=="Live") %>% 
+  mutate(Plot=paste("Plot:",Plot,sep="")) %>% 
+  mutate(Year=as.numeric(as.character(Year))) %>% 
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
+ mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  group_by(Trt.Unit,Plot,Year) %>% 
+  summarise(BA=sum(BA)*20) %>% # multiply by 20 for BA/ha
+ 
+  
+  # Plotting
+  ggplot()+
+  aes(x=Year,y=BA,color=Trt.Unit,group=Plot)+
+  geom_point(size=3)+
+  geom_line()+
+  ylab("Total basal area per hectare (m²/ha)")+
+  scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+                     minor_breaks = c(1992,1994,1997,2009,2019),
+                     name="Measurement year")+ # stretch out x-axis
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+        legend.position = "bottom")
+  
+  
+  
+```
 
 **Table 4 (NEW)  - table(s) comparing Bl, Sx, and Fd basal area by treatment, for the years 1994 and 2019**
 
@@ -180,27 +211,54 @@ We discuss this qualitatively in reference to the graphs, but it would be good t
 
 ```{r Table 4}
 
-table4<-
-  dat %>% 
+# Create a matrix with number of plots (for calculating average BA)
+table4.Numplots<-
+    dat %>% 
    left_join(plotDat,by="Plot") %>% # join with plot data
   filter(Status=="Live") %>% 
   filter(Species!="Ep") %>% # remove birch from dataset
   mutate(Year=as.numeric(as.character(Year))) %>% 
   filter(Year %in% c(1994,2019)) %>% 
-    mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
- mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  group_by(Trt.Unit,Year,Plot) %>% 
+  summarise(BA=mean(DBH)) %>% 
+  group_by(Trt.Unit,Year) %>% 
+  summarise(num.plots=n())
+
+
+table4<-
+  dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+  filter(Status=="Live") %>% 
+  filter(Species!="Ep") %>% # remove birch from dataset
+  mutate(Year=as.numeric(as.character(Year))) %>% 
+  filter(Year %in% c(1994,2019)) %>% 
+  mutate(BA=(DBH/100/2)^2*pi) %>% # convert tree DBH to basal area
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
   group_by(Trt.Unit,Species,Year) %>% 
-  summarise(BA=mean(BA,na.rm=TRUE)*20) %>% 
-  mutate_at(vars("BA"),round,2) %>% 
-  pivot_wider(names_from="Year",values_from="BA") 
+  summarise(BA=sum(BA,na.rm=TRUE)) %>% # summarise BA for each treatment unit/year combination
+  mutate(BA=BA*20) %>% # multiply by 20 to get per hectare
+  
+  # join with number of plots
+  left_join(table4.Numplots,by=c("Trt.Unit","Year")) %>% 
+  mutate(BA.ha=BA/num.plots) %>% # divide by number of plots to get mean BA by plot
+
+  
+  # remove columns for reshaping
+  dplyr::select(-BA,-num.plots) %>% 
+  
+  # pivot wider 
+  pivot_wider(names_from="Year",values_from="BA.ha") 
 
 # Print to screen
-  knitr::kable(table4,format="markdown")
+  knitr::kable(table4,format="markdown",digits=2)
   
 # write to .csv
   write.csv(table4,file="table4.csv")
   
 ```
+
+Table shows mean BA per plot, multiplied by 20 to get BA/ha.
 
 Note: this code also writes Table 4 to a .csv, so you can adjust formatting to fit the paper.
 
@@ -248,7 +306,7 @@ dat %>%
   aes(x=Year,y=BA.Mean,fill=Species)+
   geom_bar(stat="Identity")+
   facet_wrap(~label)+
-  ylab("Mean basal area per plot (m2/ha)")+
+  ylab("Mean basal area per plot (m²/ha)")+
   xlab("Measurement year")
   
   
@@ -256,10 +314,11 @@ dat %>%
 ```
 
 **NB**
-However, this figure (and subsequent digging) has revealed another issue with the data - some plots were not measured in 1992, which that mean basal area contribution by species will vary between 1992 and 1994.  Note the decrease in Fd basal area per plot between 1992 and 1994.  This is due to different number of plots between 1992 and 1994, not because of Fd mortality (as this figure might imply).  I see a couple of options:
+Note the decrease in Fd basal area per plot between 1992 and 1994.  This is due to how I calculated these graphs (mean BA per plot), and the different number of plots between 1992 and 1994.  This is not because of Fd mortality (as this figure might imply).  I see a couple of options:
 
 1. Explain this in the report; or
-2. Limit analysis for these types of figures to 1994-2019 period.
+2. Limit analysis for these types of figures to 1994-2019 period; or
+3. Come up with a different method to calculate BA by period (open to suggestions!).
 
 Might be other options too.
 
@@ -275,7 +334,7 @@ dat %>% filter(Species=="Fd")
 
 ```
 
-There is only one Fd tree in the entire dataset.
+There is only one (albeit large) Fd tree in the entire dataset (note that there may be Fd in plots 16-19, which are not included in this analysis).
 
 
 **Figure 7 (QUESTION)  - total sph by dbh class - diameter distribution over time**
@@ -295,7 +354,7 @@ dat %>%
   summarise(Num.Trees=n()) %>% 
   ungroup() %>% 
   group_by(BA.Target,Year,Species,DBH.class) %>% 
-    summarise(Num.Trees=mean(Num.Trees)) %>% 
+    summarise(Num.Trees=mean(Num.Trees)*20) %>% # multiply by 20 to get per hectare
   pivot_wider(names_from="Year",values_from = "Num.Trees") %>% 
 arrange(BA.Target,Species,DBH.class)
   
@@ -308,7 +367,7 @@ write.csv(sphCount,file="tableForFigure7.csv")
 
 ```
 
-*This plot shows the mean number of stems per plot per Treatment Unit/Species/DBH Class/Year*
+*This plot shows the mean number of stems per hectare plot per Treatment Unit/Species/DBH Class/Year*
 
 Would this sort of table work?  I think a lot of the differences between 1992 and 1994 might be in the difference in plots measured between 1992 and 1994.  
 
