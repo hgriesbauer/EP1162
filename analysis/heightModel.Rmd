@@ -1,12 +1,12 @@
 ---
-title: "Height estimates from DBH:Height relationship"
+title: "DBH:Height models for EP1162"
 author: "Hardy Griesbauer"
 date: "20/03/2020"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
 
 # Libraries
 library(tidyverse)
@@ -14,7 +14,7 @@ library(here)
 
 
 # Load data
-load(here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_Data.RData"))
 
 
 ```
@@ -23,7 +23,23 @@ load(here("data","ep1162_Data.RData"))
 In order to estimate stand-level volumes for each treatment, we need to first estimate heights for trees that do not have height measurements.  We will do the following:
 
 1. Model DBH:Height relationships separately for each measurement period, and for Bl:Sx separately (at first).
-2. Compare Bl and Sx relationships, compare estimates between years, and determine if we can pool species and/or years to estimate Height.
+2. Compare Bl and Sx relationships, and determine if we can pool species to estimate Height.
+
+We will generate different dbh:height models for each measurement year, as pooling years would violate assumptions of independence.
+
+### Data preparation: remove trees with broken tops
+Trees with broken or dead tops that have height measurements should not be included in DBH:height models.  We can summarise and remove these:
+
+```{r}
+dat %>% 
+  filter(!is.na(DBT)) %>% # filter for trees with recorded broken top
+  filter(!is.na(Height)) %>% # filter for trees with height measurements
+  group_by(Species,Year) %>% # summarise trees with broken tops at the species and year level
+  summarise(Num.DBT=n()) %>% 
+  pivot_wider(names_from="Species",values_from="Num.DBT")
+
+
+```
 
 ### Step 1: Explore height:dbh relationships with scatterplots
 First, let's explore scatterplots for each species and measurement year:
@@ -32,7 +48,8 @@ First, let's explore scatterplots for each species and measurement year:
 
   dat %>% 
     filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
-    filter(Status=="Live") %>% 
+    filter(Status=="Live") %>% # filter for live trees
+    filter(is.na(DBT)) %>% # filter for trees with no broken tops
     drop_na(Height) %>% # remove trees where height was not measured
     
     # Plotting
@@ -54,6 +71,7 @@ It looks like there are differences between measurement years.  There may be sub
   dat %>% 
     filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
     filter(Status=="Live") %>% 
+   filter(is.na(DBT)) %>% # filter for trees with no broken tops
     drop_na(Height) %>% # remove trees where height was not measured
     
     # Plotting
@@ -79,6 +97,7 @@ Let's look at differences between years by superposing different year graphs for
   dat %>% 
     filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
     filter(Status=="Live") %>% 
+   filter(is.na(DBT)) %>% # filter for trees with no broken tops
     drop_na(Height) %>% # remove trees where height was not measured
     
     # Plotting
@@ -116,6 +135,7 @@ x<-
    dat %>% 
     filter(Species %in% c("Bl","Sx")) %>% # filter for Bl and Sx for now
     filter(Status=="Live") %>% 
+   filter(is.na(DBT)) %>% # filter for trees with no broken tops
   filter(Year==year) %>% 
     drop_na(Height) # remove trees where height was not measured
 
@@ -178,22 +198,73 @@ For each of the four measurement periods, there is no significant difference bet
 
 ```{r dbh:height equation}
 
-rbind(speciesMod1(1992)$out,
+heightModels<- # assign 
+  rbind(speciesMod1(1992)$out,
       speciesMod1(1994)$out,
       speciesMod1(1997)$out,
       speciesMod1(2019)$out) %>% 
   as_tibble()
 
-      
+print(heightModels)
+
 
 ```
 
-Here are the coefficients from Mike's analysis:
+#### Height model for 2009 measurement period
+Height was not recorded during the 2009 measurements, however, we should be able to estimate heights using the 2009 DBH data.  I propose the following model to estimate 2009 heights:
 
-*Subalpine fir*
-HT = 11.188 x ln(DBH)  - 17.609
+### Graph out intercept and slope for four measurement period
+I noticed that the intercept and slope vary monotonically with years, which suggests that we might be able to predict intercept/slope for a given year (in this case 2009).  Let's examine this with a scatterplot:
 
-*Hybrid white spruce*
-HT = 11.79 x ln(DBH)  - 19.637
+```{r}
+
+heightModels %>% 
+  dplyr::select(1:3) %>% #select first three columns
+  pivot_longer(-year,values_to="coefficient",names_to="component") %>% # pivot longer for facet plot
+  ggplot()+
+  aes(x=year,y=coefficient)+
+  geom_point()+
+  geom_line(color="red")+
+  geom_vline(xintercept=2009,linetype="dashed")+
+  facet_wrap(~component,nrow=2,scales="free")
+  
+
+
+```
+
+Based on these relationships, it seems we can reasonably estimate the slope and intercept for a dbh:height model at year 2009.  Thoughts?
+
+### Calculate 2009 intercept and slope coefficients for dbh:height model
+
+```{r}
+
+# Calculate slope to estimate intercept:
+int.slope<-
+  with(heightModels,heightModels[year==2019,"intercept"]-heightModels[year==1997,"intercept"])/(2019-1997)
+  int.slope$run=diff(c(1997,2009))
+  int.2009<-  as.numeric(with(int.slope,run*intercept)+with(heightModels,heightModels[year==1997,"intercept"]))
+    
+####
+slope<-
+  with(heightModels,heightModels[year==2019,"slope"]-heightModels[year==1997,"slope"])/(2019-1997)
+  slope$run=diff(c(1997,2009))
+  slope.2009<-  as.numeric(with(slope,run*slope)+with(heightModels,heightModels[year==1997,"slope"]))
+
+### Add these values into heightModels table
+  heightModels<-
+    heightModels %>% 
+    add_row(year=2009,intercept=int.2009,slope=slope.2009) %>% # add 2009 coefficients to table
+    arrange(year) # order by year
+  
+# print to screen
+  heightModels
+  
+```
+
+### Save file for volume estimates
+```{r}
+# save coefficients for volume estimates
+save(heightModels,file=here("data","heightModels.RData"))
+```
 
 

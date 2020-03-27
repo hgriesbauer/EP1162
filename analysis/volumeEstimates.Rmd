@@ -1,0 +1,274 @@
+---
+title: "EP1162 volume estimates"
+author: "Hardy Griesbauer"
+date: "26/03/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
+
+# Libraries
+library(tidyverse)
+
+# load data
+# Load data
+
+# Measurements
+load(here::here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_plotData.RData"))
+
+# Height model coefficients
+load(here::here("data","heightModels.RData"))  # load heightModels data frame
+
+
+# initial setup
+dat<-
+  dat %>% 
+  filter(!Plot %in% c(16,17,18,19)) # remove plots 16-19 from data for further analysis
+
+```
+
+## Volume estimates for EP1162
+
+We will estimate volume estimates using the following approach:
+
+1. Estimate heights for trees without height measurements, using DBH:height models developed earlier using EP1162 data
+2. Estimate volume using equations from Nigh (2016) for specific species and BGC units
+
+Source for Nigh (2016): https://www.for.gov.bc.ca/hfd/pubs/docs/TR/TR106.htm
+
+**NB Plots 16-19 omitted from this analysis**
+
+#### Estimate Heights
+From earlier analyses, we calculated intercept and slope coefficients to estimate spruce and subalpine fir heights using DBH.  The formula is: Height = b1*ln(DBH)+b0
+
+Coefficients were developed separately for each measurement period.  Analysis showed that the regression did not vary significantly between spruce and subalpine fir, therefore, we developed the coefficients by pooling data for both species within a measurement year.
+
+```{r show height models,}
+ hm<-
+  heightModels %>% 
+  dplyr::rename(b0=intercept,b1=slope) %>%   # rename columns
+  mutate(year=factor(year))
+
+# Print to screen 
+hm 
+
+```
+Table shows coefficients for height models for each measurement period.  P value and R^2^ values are from linear regression.
+
+Note missing p values and r square for 2009 year - these coefficients were estimated from 1997 and 2019 data.
+
+***
+#### Nigh equations
+Hardcode Nigh's 2016 total (Table 9) and merchantable (Table 11) volume equations for species and SBS BGC Zone into a table:
+
+```{r}
+volCoef<-
+  
+  ## TOTAL VOLUME
+  #  Subalpine fir 
+  data.frame(Species="Bl",VolType="total",b0=-9.79,b1=1.813,b2=1.033) %>% 
+  
+  # Douglas-fir
+  add_row(Species="Fd",VolType="total",b0=-10.19,b1=1.73,b2=1.206) %>% 
+  
+  # Add spruce
+  add_row(Species="Sx",VolType="total",b0=-10.024,b1= 1.801,b2= 1.107) %>% 
+  
+  ## MERCHANTABLE VOLUME
+  # Subalpine fir
+  add_row(Species="Bl",VolType="merch",b0=-9.980,b1= 1.792,b2= 1.102) %>% 
+  
+  # Douglas-fir
+  add_row(Species="Fd",VolType="merch",b0=-10.503,b1= 1.724,b2= 1.296) %>% 
+  
+  # Spruce
+  add_row(Species="Sx",VolType="merch",b0=-10.280,b1= 1.769,b2= 1.206 ) %>% 
+  
+  mutate(BGC.Zone="SBS") %>% 
+  
+  # convert species to factor
+  mutate(Species=factor(Species)) %>% 
+  dplyr::select(Species,BGC.Zone,everything())
+
+# print to screen
+volCoef
+  
+```
+
+This table shows the coefficients used in the volume equations.
+
+Equation: vol = e^b~0~^ x dbh^b~1~^ x height^b~2~^
+
+#### Estimate heights and volumes in dataset
+We can now apply the coefficients above to estimate heights for trees that do not have height measurements:
+
+```{r estimate heights and volumes, warning=FALSE}
+dat<- # we will update dat dataset
+  dat %>%
+  
+  # Height estimates
+  left_join(hm[,1:3],by=c("Year"="year")) %>% # add coefficients to table
+  mutate(heightVol=coalesce(Height,b0+b1*log(DBH))) %>%   # populate new height column height estimates
+  dplyr::select(-b0,-b1) %>%  # remove coefficients
+  
+  # Total volume estimates
+  left_join(filter(volCoef,VolType=="total"),by=c("Species")) %>% #add total volume coefficients to table
+  mutate(totalVol=exp(1)^b0*DBH^b1*heightVol^b2) %>% # estimate volume
+  dplyr::select(Plot:heightVol,totalVol) %>% # remove coefficients and other extraneous columns
+  
+  # Merchantable volume estimates
+    left_join(filter(volCoef,VolType=="merch"),by=c("Species")) %>% #add merch volume coefficients to table
+  mutate(merchVol=exp(1)^b0*DBH^b1*heightVol^b2) %>% # estimate volume
+  dplyr::select(Plot:totalVol,merchVol)
+
+# save output
+save(dat,file=here::here("data","ep1162_Data_Volumes.RData"))
+
+# write to .csv
+write.csv(dat,file=here::here("data","ep1162_Data_Volumes.csv"))
+
+```
+
+**As per Mike's suggestion, I double checked that the estimates are reasonable by comparing estimates to the volume formula for a cone (Height*BA/3) - estimates appear correct**
+
+## Preliminary volume analysis
+Produce some preliminar graphs based on total volume estimates:
+
+### Histogram of total volume estimates
+```{r histogram of volume values, message=F}
+dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+  filter(Status=="Live") %>% # filter for live trees only
+  filter(Species %in% c("Bl","Sx")) %>% # only for Sx and Bl
+  
+  ggplot()+
+  aes(x=totalVol,color=Species)+
+  geom_histogram(fill="white", alpha=0.5, position="identity")+
+  xlab("Volume per tree")
+
+
+```
+
+Data are right skewed, as expected in an uneven-aged stand.
+
+### Mean volume per plot per year and treatment
+
+```{r}
+dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+  filter(Status=="Live") %>% # filter for live trees only
+  
+  # plot multiplier
+  mutate(merchVol=merchVol*20) %>% 
+  mutate(totalVol=totalVol*20) %>% 
+  
+  # Summarise mean plot volume at the treatment unit and year levels
+  group_by(BA.Target,Plot,Year) %>% 
+  summarise(merchVol=sum(merchVol,na.rm=TRUE),
+            totalVol=sum(totalVol,na.rm=TRUE)) %>% 
+  ungroup() %>% 
+    group_by(BA.Target,Year) %>% 
+    summarise(merch.Vol=mean(merchVol,na.rm=TRUE),
+            total.Vol=mean(totalVol,na.rm=TRUE),
+            total.se=sd(totalVol)/sqrt(length(totalVol)),
+            merch.se=sd(merchVol)/sqrt(length(merchVol)))  %>% 
+  
+    # Add labeller column
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # Need to transform year format
+    mutate(Year=as.numeric(as.character(Year))) %>% 
+  
+ggplot()+
+  aes(x=Year,y=total.Vol,color=Trt.Unit,group=Trt.Unit)+  
+  geom_point(size=3)+
+  geom_line()+
+  geom_errorbar(aes(ymin=total.Vol-total.se,ymax=total.Vol+total.se),width=0.1)+
+  xlab("Measurement year")+
+  ylab("Mean total volume per plot (m³/ha)")+
+  theme(legend.position = "bottom")+
+    scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+                     minor_breaks = c(1992,1994,1997,2009,2019),
+                     name="Measurement year") 
+
+
+```
+
+
+### Volume for all plots 
+Plot out volume by year for all plots:
+
+```{r plot volume by year,message=FALSE,warning=FALSE}
+
+dat %>% 
+   left_join(plotDat,by="Plot") %>% # join with plot data
+  filter(Status=="Live") %>% 
+  mutate(Plot=paste("Plot:",Plot,sep="")) %>% 
+  mutate(Year=as.numeric(as.character(Year))) %>% 
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  group_by(Trt.Unit,Plot,Year) %>% 
+  summarise(vol=sum(totalVol)*20) %>% # multiply by 20 for volume/ha
+ 
+  
+  # Plotting
+  ggplot()+
+  aes(x=Year,y=vol,color=Trt.Unit,group=Plot)+
+  geom_point(size=3)+
+  geom_line()+
+  ylab("Plot volume per hectare (m³/ha)")+
+  scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+                     minor_breaks = c(1992,1994,1997,2009,2019),
+                     name="Measurement year")+ # stretch out x-axis
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+        legend.position = "bottom")
+```
+
+### Periodic volume increment
+```{r periodic volume increment,message=FALSE}
+dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+   filter(Status=="Live") %>% # filter for live trees only
+  dplyr::select(BA.Target,Plot,TreeID,Species,Year,totalVol) %>% 
+  group_by(BA.Target,Plot,Year) %>% 
+  summarise(vol.Sum=sum(totalVol,na.rm=T)*20) %>% # plot multiplier
+  pivot_wider(names_from=Year,values_from=vol.Sum) %>% 
+  mutate(`1992-1994`=`1994`-`1992`) %>% 
+  mutate(`1994-1997`=`1997`-`1994`) %>% 
+  mutate(`1997-2009`=`2009`-`1997`) %>% 
+  mutate(`2009-2019`=`2019`-`2009`) %>% 
+  
+  # pivot back
+  dplyr::select(BA.Target,Plot,`1992-1994`:`2009-2019`) %>% 
+  pivot_longer(cols=`1992-1994`:`2009-2019`,names_to="Period",values_to="PVI") %>% 
+  mutate(Period=factor(Period)) %>% 
+  
+  # summarise PBAI by BA.Target
+  group_by(BA.Target,Period) %>% 
+  summarise(PVI.mean=mean(PVI,na.rm=T),
+            PVI.se=sd(PVI,na.rm=T)/sqrt(length(PVI))) %>% 
+  
+    # Add labeller column
+  mutate(Trt.Unit=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # Add new column for plotting
+  mutate(Meas.Year=str_split_fixed(Period,"-",n=2)[,2]) %>% # extract measurement year
+  mutate(Meas.Year=as.numeric(Meas.Year)) %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=Meas.Year,y=PVI.mean,fill=Trt.Unit,color=Trt.Unit,group=Trt.Unit)+
+  geom_point(size=3)+
+  geom_line()+
+  geom_errorbar(aes(ymin=PVI.mean-PVI.se,ymax=PVI.mean+PVI.se),width=0.1)+
+  xlab("Period")+
+  ylab("Mean VI per plot (m³/ha/period)")+
+  scale_x_continuous(limits=c(1994,2019),breaks=c(1994,1997,2009,2019),
+                     labels = c("1992-1994","1994-1997","1997-2009","2009-2019"),
+                     name="Period",
+                     minor_breaks = c(1994,1997,2009,2019))+ # stretch out x-axis
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+  
+```
+
