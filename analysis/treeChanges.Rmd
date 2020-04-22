@@ -1,0 +1,152 @@
+---
+title: "Tree Level Changes"
+author: "Hardy Griesbauer"
+date: "21/04/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(tidyverse)
+library(here)
+library(lme4)
+library(lmerTest)
+library(broom)
+library(MuMIn)
+library(ggeffects)
+library(car)
+
+
+# Load data
+load(here::here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_plotData.RData"))
+
+```
+Below is code and output looking at tree-level changes over time
+
+Also, we can include plots 16-19 even though they weren't measured across all periods, because we are looking at tree-level responses.
+
+### PBAI at the tree level
+We can look at PBAi at the tree-level, by tree class.  This will tell us where PBAI is concentrated.  Hypothesis is that smaller trees respond with higher PBAI and responses are stronger with in plotss with higher basal area removal.
+
+```{r treeList and other starting variables}
+
+# Let's filter only for trees that have five measurements 
+treeList<- # assign variable
+  dat %>% 
+  filter(TreeID!="New") %>% #remove new trees
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(Species %in% c("Sx","Bl")) %>% # filter birch out of dataset
+  filter(Status=="Live") %>% # filter for live trees
+  group_by(TreeID) %>% 
+  summarise(N=n()) %>% 
+  filter(N==5) %>% #filter for trees with 5 measurements
+  pull(TreeID)
+  
+
+plotBA<-
+  dat %>% 
+  filter(Status=="Live") %>% # filter for live trees
+   mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area 
+  group_by(Plot,Year) %>% # grouping
+  summarise(plotBA=sum(BA))
+
+
+# derive PBAI
+pbaiDat<-
+  dat %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% treeList) %>% 
+  mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  dplyr::select(Plot,TreeID,Species,Year,BA) %>% 
+  pivot_wider(names_from=Year,values_from=BA) %>% 
+  mutate(PBAI=`2019`-`1992`) %>% 
+  dplyr::select(Plot,TreeID,Species,PBAI,baInit=`1992`)
+
+```
+
+
+LMER to predict basal area slope per tree after treatment
+```{r}
+x<- # assign output 
+  pbaiDat %>% 
+  left_join(plotDat,by="Plot")
+  
+ 
+```
+
+
+```{r lmer by PBAI}
+fit1<-
+  x %>% 
+  lmer(log(PBAI)~BA.Target+Species+log(baInit)+(1|Plot),data=.)
+
+Anova(fit1)
+
+plot(fit1)
+
+glance(fit1)
+
+
+```
+
+```{r plot marginal means}
+
+mydf<-  ggpredict(fit1,terms=c("baInit [exp]","Species","BA.Target"))
+
+ggplot(mydf, aes(x, predicted, colour = group)) + 
+  geom_line() +
+  facet_wrap(~facet)+
+  ylab("Predicted BAI (m2) per tree from 1992 to 2019")+
+  xlab("Tree basal area (m2) in 1992")
+
+ggsave("predictedPBAI.png")
+```
+
+```{r r squared values from model}
+
+r.squaredGLMM(fit1)
+
+```
+
+## Let's look at basal area composition by tree size per treatment per year
+```{r ba by tree size, year and treatment}
+
+# set up diameter classes
+diamClass=seq(from=7.5,to=95,by=5)
+
+dat %>% 
+   filter(!Plot %in% c(16,17,18,19)) %>%  # remove plots 16-19 from data for further analysis
+  left_join(plotDat,by="Plot") %>% # join with plot data
+   filter(Status=="Live") %>% # filter for live trees only
+   mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% # assign DBH classes
+  mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  group_by(BA.Target,Plot,Year,DBH.class) %>% 
+  summarise(BA.Plot=sum(BA)*20) %>%   # sum basal area per diam class and multiply to get per ha
+  
+  # create means
+  ungroup() %>% 
+  group_by(BA.Target,Year,DBH.class) %>%
+  summarise(BA=mean(BA.Plot)) %>% 
+  
+   # Add labeller column
+  mutate(label=factor(paste("Trt:",BA.Target,sep=""))) %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=BA,fill=label)+
+  geom_bar(stat="Identity")+
+  facet_grid(Year~label)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,size=6,vjust=0.25))+
+  ylab("Mean basal area per hectare per plot (m2)")+
+  xlab("Diameter classes (cm)")
+
+ggsave(filename="baDiamClass.png")
+
+```
+
+
+
+

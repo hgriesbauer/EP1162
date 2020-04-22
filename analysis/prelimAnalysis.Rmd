@@ -323,7 +323,7 @@ Some very interesting trends here:
 ### Effect of initial BA on PBAI
 Below is R code to re-create Mike's figure of initial BA on PBAI by period
 
-```{r}
+```{r pbai stand-level}
 
 pbai<- # assign output so we can plot several periods
   dat %>% 
@@ -426,3 +426,6 @@ pbai.Plot(initYear="1994",baPeriod="1994-2019",x=5,y=1)
 ```
 
 Plot 3 is an outlier because it has a negative BAI over the 1994-2019 period.  With this outlier removed, the slope would likely be p<0.05.
+
+
+
