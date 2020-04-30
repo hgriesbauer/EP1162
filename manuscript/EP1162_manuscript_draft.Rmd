@@ -1,0 +1,33 @@
+---
+title: Analyses of 27 years of stand structure development and basal area growth response to a range of initial basal area density levels, 1992-2019 
+author: "Mike Jull and Hardy Griesbauer"
+date: "29/03/2020"
+output:
+  word_document:
+    reference_docx: wordTemplate2.docx
+  html_document:
+    df_print: paged
+csl: cjfr.csl
+bibliography: ep1162Bib.bib
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(tidyverse)
+library(here)
+library(lme4)
+library(lmerTest)
+library(broom)
+library(MuMIn)
+library(ggeffects)
+library(car)
+
+
+# Load data
+load(here::here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_plotData.RData"))
+
+```
