@@ -13,7 +13,7 @@ bibliography: ep1162Bib.bib
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,message=FALSE,warning=FALSE)
 
 # Load libraries
 library(tidyverse)
@@ -24,10 +24,304 @@ library(broom)
 library(MuMIn)
 library(ggeffects)
 library(car)
-
+library(flextable)
+library(captioner)
 
 # Load data
 load(here::here("data","ep1162_Data.RData"))
 load(here::here("data","ep1162_plotData.RData"))
 
+# set up captions
+
+# Code to create captions for tables
+tableNums <- captioner(prefix = "Table")
+
+# Code to create captions for figures
+figNums <- captioner(prefix="Figure")
+
+# Code to create captions for appendices
+appNums <- captioner(prefix="Appendix")
+
 ```
+
+
+
+# Methods
+
+## Analysis
+
+### Tree-level growth responses
+To test the hypothesis that tree-level growth response over the 1992-2019 period varied with interactions between tree basal area at the time of treatment (1992) and (i) residual basal area; and (ii) species, we fit linear mixed effects models with log-transformed 1992-2019 basal area increment as the response variable, and treatment, species and log-transformed 1992 basal area as interacting fixed effects, with plot as a random intercept effect.  We also fit a similar model with the 1992-2019 basal area increment expressed as a percentage of 1992 basal.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagaw et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@add later].
+
+We also examined how basal area increment at the tree-level varied over the four measurement periods, by fitting a similar model as described above, with an additional fixed effect of measurement period.  This allowed us to examine potential lag responses in growth.
+
+
+## Stand structure and growth dynamics
+
+### Changes in tree density over time
+We qualitatively assessed changes in tree density over time through density diagrams that displayed tree density (stems per hectare) by diameter class, faceted by measurement period, species and treatment unit.  The effects of tree density changes on basal area was also qualitatively evaluated by summarizing basal area per hectare by diameter class, species and treatment unit.
+
+### Stand-level basal area and volume growth
+
+
+# Results
+
+### Tree-level growth responses
+```{r tree-level growth responses}
+
+# Let's filter only for trees that have measurements in 1992 and 2019 
+treeList<- # assign variable
+  dat %>% 
+  filter(TreeID!="New") %>% #remove new trees
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(Species %in% c("Sx","Bl")) %>% # filter birch and fdi out of dataset
+  filter(Status=="Live") %>% # filter for live trees
+  filter(Year %in% c(1992,2019)) %>% #filter for start and end dates
+  group_by(TreeID) %>% 
+  summarise(N=n()) %>% 
+  filter(N==2) %>% #filter for trees with 5 measurements
+  pull(TreeID)
+  
+
+# derive periodic increment (period diameter or basal area increment)
+piDat<-
+  dat %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% treeList) %>% 
+  mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  dplyr::select(Plot,TreeID,Species,Year,BA) %>% 
+  pivot_wider(names_from=Year,values_from=BA) %>% 
+  mutate(PI=`2019`-`1992`) %>% # 
+  filter(PI>0) %>% # one tree has a PI of 0, has to be removed
+  mutate(PIpct=PI/`1992`*100) %>% # express periodic increment a a percentage
+  dplyr::select(Plot,TreeID,Species,PI,PIpct,Init=`1992`) %>% 
+  left_join(plotDat,by="Plot") %>% 
+  mutate(BA.Target=paste("TU:",BA.Target,sep="")) # create facet column
+
+
+# Create figures of raw data to put into Appendix
+pi.Init.rawPlot<-  
+  piDat %>% 
+  ggplot(aes(x=log(Init),y=log(PI),color=Species))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE,color="black")+
+  facet_grid(Species~BA.Target)  +
+   ylab("log(BA increase, m²)")+
+  xlab("log(Tree BA in 1992, m²)")+
+    theme_bw()+
+  theme(legend.position = "none")
+
+
+piPCT.Init.rawPlot<-  
+  piDat %>% 
+  ggplot(aes(x=log(Init),y=log(PIpct),color=Species))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE,color="black")+
+  facet_grid(Species~BA.Target) +
+  ylab("log(% BA increase)")+
+  xlab("log(Tree BA in 1992, m²)")+
+  theme_bw()+
+  theme(legend.position="none")
+
+
+# fixed effects model with species pooled, using PBAI
+fitBA<-
+  piDat %>% 
+  lmer(log(PI)~BA.Target:log(Init):Species+(1|Plot),data=.)
+
+# fixed effects model with species pooled, using PBAIpct
+fitBApct<-
+  piDat %>% 
+  lmer(log(PIpct)~BA.Target:log(Init):Species+(1|Plot),data=.)
+
+# Create figure showing marginal means from model
+fitBA.plot<-
+  ggpredict(fitBA,terms=c("Init [exp]","Species","BA.Target")) %>% 
+  dplyr::rename(Species=group) %>% 
+  ggplot(aes(x,predicted,color=Species))+
+  geom_line()+
+  facet_wrap(~facet)+
+  ylab("Predicted 27-year basal area increment (m²)")+
+  xlab("Tree BA in 1992 (m²)")+
+  theme_bw()+
+  theme(legend.position="bottom")
+  
+
+# Create figure showing marginal means from model
+fitBApct.plot<-
+  ggpredict(fitBApct,terms=c("Init [exp]","Species","BA.Target")) %>% 
+  dplyr::rename(Species=group) %>% 
+  ggplot(aes(x,predicted,color=Species))+
+  geom_line()+
+  facet_wrap(~facet)+
+  ylab("Predicted 27-year basal area % increase")+
+  xlab("Tree BA in 1992 (m²)")+
+  theme_bw()+
+  theme(legend.position="bottom")
+
+  
+
+
+# Captions
+appNums(name="piInitRaw",display=FALSE)
+appNums(name="piPCTInitRaw",display=FALSE)
+figNums(name="fitBA.plot",display=FALSE)
+figNums(name="fitBApct.plot",display=FALSE)
+
+```
+
+A comparison of tree-level 1992-2019 basal area increment to tree size at the time of treatment showed that basal area increment over 27 years increased with tree size, and that this relationship varied between species and among treatment units (`r appNums("piInitRaw",display="cite")`).  A linear mixed effects model using 
+`r nrow(piDat)`
+ trees (
+`r nrow(filter(piDat,Species=="Sx"))`
+Spruce, 
+`r nrow(filter(piDat,Species=="Bl"))` Fir) confirmed that slopes and intercepts varied with species and residual basal area (p<0.001 for all interactions).  This model explained 
+`r round(r.squaredGLMM(fitBA)[1]*100,1)`
+% variation (marginal R^2^) in diameter increment over the 27 years of the study, and showed that diameter increment increased with initial tree size, and increment was higher in the treatment units with basal area removed, compared to the control, and that spruce trees had higher basal area increment than fir (`r figNums("fitDBH.plot",display="cite")`).  A similar model predicting basal area increment as a percentage of tree size at the time of treatment showed that smaller trees grew proportionally more than larger trees, with a strong negative exponential decrease with initial tree size (`r figNums("fitDBHpct.plot",display="cite")`), however, the model fit was poorer, explaining 
+`r round(r.squaredGLMM(fitBApct)[1]*100,1)`
+% of variation in % basal area increase.  
+
+```{r tree level time lag response}
+treeList<- # assign variable
+  dat %>% 
+  filter(TreeID!="New") %>% #remove new trees
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(Species %in% c("Sx","Bl")) %>% # filter birch and fdi out of dataset
+  filter(Status=="Live") %>% # filter for live trees
+  group_by(TreeID) %>% 
+  summarise(N=n()) %>% 
+  filter(N==5) %>% #filter for trees with 5 measurements
+  pull(TreeID)
+
+# derive mean annual increment by period
+
+piDat<-
+  dat %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% treeList) %>% 
+   left_join(plotDat,by="Plot") %>% 
+  mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  dplyr::select(BA.Target,Plot,TreeID,Species,Year,val=BA) %>% 
+  pivot_wider(names_from=Year,values_from=val) %>% 
+  mutate(BA.Target=paste("TU:",BA.Target,sep="")) %>%  # create facet column
+  
+  # Create growth columns
+  mutate(`2019`=(`2019`-`2009`)/11) %>% # divide by 11 to get annual increment
+  mutate(`2009`=(`2009`-`1997`)/11) %>% # divide by 11 to get annual increment
+  mutate(`1997`=(`1997`-`1994`)/3) %>% # divide by 3 to get annual increment
+  mutate(`1994`=(`1994`-`1992`)/3) %>% # divide by 3 to get annual increment
+  mutate(`Init`=`1992`) %>% # create initial size column
+  pivot_longer(cols=c(`1992`,`1994`,`1997`,`2009`,`2019`),values_to="Inc",names_to="Year") %>% 
+  filter(Year!=1992) %>% 
+  filter(Inc>0) %>% # need to remove any trees with increment of 0- %>% 
+  mutate(initClass=cut(Init,breaks=seq(from=7.5,to=90,by=20))) %>% 
+  mutate(incPCT=Inc/Init*100) 
+ 
+
+# Raw plots
+baAnn.raw.plot<-
+  # Plot boxplot of increment by year
+  piDat %>% 
+  ggplot(aes(x=Year,y=Inc,color=BA.Target))+
+  geom_boxplot()+
+  facet_grid(Species~BA.Target)+
+  xlab("Measurement year")+
+  ylab("Annualized basal area increment (m²)")+
+  theme(legend.position = "none")+
+    theme_bw()+
+  theme(legend.position = "none")
+
+
+# Fit lmer
+# fixed effects model
+fitBA.Ann<-
+  piDat %>% 
+  lmer(log(Inc)~Year+Species+BA.Target+ (1|Plot/TreeID) ,data=.)
+ 
+ # Create figure showing marginal means from model
+fitBA.Ann.plot<-
+  ggpredict(fitBA.Ann,terms=c("Year","Species","BA.Target"))  %>%
+  plot()+
+  theme_bw()+
+  ylab("Predicated annualized basal area increment (m²)")+
+  xlab("Measurement year")+
+  ggtitle("")+
+  theme(legend.position = "bottom")
+  
+# Captions 
+appNums(name="baAnnRaw",display=FALSE)
+figNums(name="fitBA.Ann.plot",display=FALSE)
+
+```
+
+To detect differences in growth rates over the 27-year period of this study, we compared growth rates between the four measurement periods, by species and treatment unit (`r appNums(name="baAnnRaw",display="cite")`).  Growth rates were lowest in the three years immediately after treatment, and increased over the subsequent two measurement periods (1994-1997 and 1997-2009), before decreasing again in the last measurement perid (2009-2019).  This temporal pattern appeared consistent between species and among treatment units; as well, spruce trees had higher growth rates than fir over all periods and treatment units, and growth rates were higher in the high-removal treatment unit, compared to the low-removal treatment and control units.  A linear mixed effects model with species, measurement year and treatment unit as fixed effects (not shown) explained `r MuMIn::r.squaredGLMM(fitBA.Ann)[1] %>% round(3)*100`% variation (marginal R^2^) in log-transformed basal area increment (m^2^ at breast height) over different periods (`r figNums("fitBA.Ann.plot",display="cite")`).
+
+# Discussion
+
+
+# Tables
+
+##### page break
+
+# Figures
+
+```{r plot marginal means DBH increment by tree size}
+fitBA.plot
+```
+
+`r figNums("fitBA.plot",caption=paste("Predicted basal area (m^2^ at breast height) increment (cm) by tree basal area at time of treatment, species and treatment unit.  Interactions between initial tree size, treatment unit and species were significant (p<0.001) in a linear model explaining ", MuMIn::r.squaredGLMM(fitBA)[1] %>% round(3)*100, "% variation in basal area increment.  Predictions are back-transformed to original response scale.",sep=""))`
+
+
+```{r plot marginal means DBH increment pct}
+
+fitBApct.plot
+
+```
+
+`r figNums("fitBApct.plot",caption=paste("Predicted basal area (m^2^ at breast height) increment (cm), as a percentage of tree basal area at the time of treatment, by initial tree size.  Interactions between initial tree size and (i) treatment unit and (ii) species factors were significant (p<0.001) in a linear model explaining ", MuMIn::r.squaredGLMM(fitBApct)[1] %>% round(3)*100, "% variation in basal area increment. Predictions are back-transformed to original response scale.",sep=""))`
+
+##### page break
+
+```{r plot marginal means BA increment by year}
+
+fitBA.Ann.plot
+
+
+```
+
+`r figNums("fitBA.Ann.plot",caption=paste("Predicted annualized basal area increment (m^2^ at breast height) over four periods.  Basal area increment are average for growing seasons within each period.  For example, values at x-axis value of 1994 are mean for three growing seasons (between 1992 and 1994).  Species and treatment units were significant factors (p<0.001 for both, not shown) in a linear mixed effects model explaining ", MuMIn::r.squaredGLMM(fitBA.Ann)[1] %>% round(3)*100, "% variation in log-transformed basal area increment. Predictions are back-transformed to original response scale.  Error bars represent 95% confidence intervals",sep=""))`
+
+##### page break
+
+# Appendices
+```{r plot raw PBAI by species and TU}
+
+pi.Init.rawPlot
+
+
+```
+
+`r appNums("piInitRaw",caption="Log-transformed basal area increment (m²) over 1992-2019 period by log-transformed tree size (basal area, m²) at the time of treatment, faceted by treatment unit and species.  Both axes have been log-transformed.  Linear regression lines added to emphasize slope.")`
+
+##### page break
+
+```{r plot raw PBAI as pct initial tree size by species and TU}
+
+piPCT.Init.rawPlot
+
+
+```
+
+`r appNums("piPCTInitRaw",caption="Log-transformed basal area increment (m²), as a pecentage of log-transformed initial tree size, over 1992-2019 period by tree size (basal area, m²) at the time of treatment, faceted by treatment unit and species.  Both axes have been log-transformed.  Linear regression lines added to emphasize slope.")`
+
+##### page break
+
+```{r plot raw basal area increment data by year}
+baAnn.raw.plot
+
+```
+
+
+`r appNums("baAnnRaw",caption="Annualized basal area increment (m² at breast height) over four measurement periods. Basal area increment are averaged at the tree-level for growing seasons within each period.  For example, values at x-axis value of 1994 are mean for three growing seasons (between 1992 and 1994).  Data are faceted by species and treatment unit.")`
+
+
