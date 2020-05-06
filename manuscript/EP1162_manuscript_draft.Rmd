@@ -9,6 +9,8 @@ output:
     df_print: paged
 csl: cjfr.csl
 bibliography: ep1162Bib.bib
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -26,6 +28,7 @@ library(ggeffects)
 library(car)
 library(flextable)
 library(captioner)
+library(lsmeans)
 
 # Load data
 load(here::here("data","ep1162_Data.RData"))
@@ -45,6 +48,15 @@ appNums <- captioner(prefix="Appendix")
 # Set ggplot theme
 theme_set(theme_bw())
 
+# Some additional data prep
+
+# set up diameter classes
+diamClass=seq(from=7.5,to=95,by=5)
+dat<- # assign variable
+  dat %>% 
+  mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F))
+
+
 ```
 
 
@@ -54,7 +66,7 @@ theme_set(theme_bw())
 ## Analysis
 
 ### Tree-level growth responses
-To test the hypothesis that tree-level growth response over the 1992-2019 period varied with interactions between (i) tree basal area at the time of treatment (1992); (ii) residual basal area; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 basal area increment as the response variable, and treatment, species and log-transformed 1992 basal area as interacting fixed effects, with plot as a random intercept effect.  We also fit a similar model with the 1992-2019 basal area increment expressed as a percentage of 1992 basal area.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagaw et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@add later].
+To test the hypothesis that tree-level growth response over the 1992-2019 period varied with interactions between (i) tree basal area at the time of treatment (1992); (ii) residual basal area; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 basal area increment as the response variable, and treatment, species and log-transformed 1992 basal area as interacting fixed effects, with plot as a random intercept effect.  We also fit a similar model with the 1992-2019 basal area increment expressed as a percentage of 1992 basal area.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@add later].
 
 We also examined how basal area increment at the tree-level varied over the four measurement periods, by fitting a similar model as described above, with an additional fixed effect of measurement period.  This allowed us to examine temporal changes in growth responses, including evaluating for a potential lag effect.
 
@@ -68,9 +80,13 @@ We qualitatively assessed changes in tree density over time through density diag
 
 
 #### Volume estimates
-Tree volumes were estimated using species- and region-specific equations [@Nigh2016] based on tree height and DBH.  We estimated tree heights by fitting diameter-height models developed separately for fir and spruce, and for each period.  Trees with broken tops were omitted from diameter-height models. 
+Tree volumes were estimated using species- and region-specific equations [@nigh2016] based on tree height and DBH.  We estimated tree heights by fitting diameter-height models developed separately for fir and spruce, and for each period.  Trees with broken tops were omitted from diameter-height models. 
+
+
 
 # Results
+
+
 
 ### Tree-level growth responses
 ```{r tree-level growth responses}
@@ -257,6 +273,107 @@ figNums(name="fitBA.Ann.plot",display=FALSE)
 
 To detect differences in growth rates over the 27-year period of this study, we compared growth rates between the four measurement periods, by species and treatment unit (`r appNums(name="baAnnRaw",display="cite")`).  Growth rates were lowest in the three years immediately after treatment, and increased over the subsequent two measurement periods (1994-1997 and 1997-2009), before decreasing again in the last measurement period (2009-2019).  This temporal pattern appeared consistent between species and among treatment units; as well, spruce trees had higher growth rates than fir over all periods and treatment units, and growth rates were higher in the high-removal treatment unit, compared to the low-removal treatment and control units.  A linear mixed effects model with species, measurement year and treatment unit as fixed effects (not shown) explained `r MuMIn::r.squaredGLMM(fitBA.Ann)[1] %>% round(3)*100`% variation (marginal R^2^) in log-transformed basal area increment (m^2^ at breast height) over different periods (`r figNums("fitBA.Ann.plot",display="cite")`).
 
+### Tree density
+```{r sph by diam class species and time}
+
+# need to create  a list of plots with five measurements
+plotDenom<-
+  dat %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+  group_by(BA.Target,Year,Plot) %>% 
+  summarise(Num.Plots=n()) %>% 
+  ungroup() %>% 
+  dplyr::select(BA.Target:Plot) %>% 
+  group_by(BA.Target,Year) %>% 
+  summarise(Num.Plots=n())
+ 
+
+# PLOTS
+# Raw plot - examine SPH in each plot to detect where mortality occurred
+# sphPlot.raw<-
+#   dat %>% 
+#   left_join(plotDat,by="Plot") %>% # join with plot data
+#   filter(Status=="Live") %>% # filter for live trees only
+#   group_by(BA.Target,Species,Plot,Year,DBH.class) %>% 
+#   summarise(SPH=n()*20)  %>% 
+#   filter(Species %in% c("Bl","Sx")) %>% # remove Fdi and Ep
+#   ggplot()+
+#   aes(x=DBH.class,y=SPH,group=Species,color=Species)+
+#   geom_point()+
+#   facet_grid(Plot~Year)+
+#   theme(axis.text.x = element_text(angle = 90, hjust = 1),
+#         legend.position="bottom")+
+#   xlab("DBH Class (cm)")
+# 
+# appNums(name="sphRawPlot",display=FALSE)
+
+# 1. SPH by diameter class and species for 1992 and 2019 periods
+sphPlot1<-
+  dat %>% 
+  filter(Year %in% c(1992,2019)) %>% # Select for two time periods
+    filter(Species %in% c("Bl","Sx")) %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+  group_by(BA.Target,Year,Species,DBH.class) %>% 
+  summarise(SPH.Sum=n()*20) %>% # plot multiplier
+  left_join(plotDenom,by=c("BA.Target","Year")) %>% 
+  mutate(SPH=SPH.Sum/Num.Plots) %>% 
+  
+  ggplot()+
+  aes(x=DBH.class,y=SPH,group=Species,fill=Species,color=Species)+
+  geom_point()+
+  geom_path()+
+    # geom_density(alpha=0.4)+
+  facet_grid(Year~BA.Target)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+        legend.position = "bottom")+
+  xlab("DBH Class (cm)")
+  
+  figNums(name="sphSpeciesPlot",display=FALSE)
+```
+  
+```{r plot pct change in SPH by diam class between 92 and 19}  
+
+# % change in diameter class between 1992 and 2019 time periods by species
+ sphPCTPlot<- 
+  dat %>% 
+  filter(Year %in% c(1992,2019)) %>% 
+  filter(Status=="Live") %>% 
+  filter(Species %in% c("Bl","Sx")) %>% 
+  group_by(Plot,Species,Year,DBH.class) %>% 
+  summarise(SPH.Total=n()) %>% 
+  pivot_wider(names_from="Year",values_from="SPH.Total") %>% 
+  mutate(Pct.Change=(`2019`-`1992`)/`1992`*100) %>% 
+  mutate(Pct.Change=round(Pct.Change,3)) %>%
+  drop_na(Pct.Change) %>% 
+  left_join(plotDat,by="Plot") %>% # join with plot data
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=Pct.Change,fill=Species)+
+  geom_boxplot()+
+  geom_hline(yintercept=0, linetype="dashed", color="darkgrey")+
+  facet_grid(Species~BA.Target)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+        legend.position="bottom")+
+  xlab("DBH Class (cm)")+
+  ylab("% change in SPH between 1992 and 2019")
+  
+
+  figNums(name="sphPCTPlot",display=FALSE)
+
+
+# ggsave(filename="baDiamClass.png")
+
+
+```
+
+Mean plot tree density by diameter class diagrams showed that across all treatment levels, subalpine fir comprised the majority of stems in the smaller diameter classes, both in the year after treatment, and in 2019 (`r figNums("sphSpeciesPlot",display="cite")`). The diameter class distribution of fir in all treatment units was negative exponential.  Mean spruce density was lower than fir, with a relatively flatter diameter distribution.  Within the high-removal treatment unit, fir density increased mostly in the smaller diameter classes between 1992 and 2019; in the low-removal treatment unit, fir density increased most in trees between 12.5 to 27.5cm DBH; and in the control treatment unit, fir density increased mostly in trees above 22.5cm DBH ( `r figNums("sphPCTPlot",display="cite")`).  Spruce tree density increased less than fir, with the exception of an increase of over 250% in SPH in the smallest diameter class in the light-removal treatment unit.
+
+## Stand-level changes
+
+### Volume estimates
+
+
 ### Height-diameter models
 
 ```{r height diameter raw plot}
@@ -286,19 +403,120 @@ htDiamFit<-
     filter(is.na(DBT)) %>% # filter for trees with no broken tops
     drop_na(Height) %>% # remove trees where height was not measured
   mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create tree ID column
-  lmer(Height~log(DBH)+(1|Plot/TreeID),data=.)
+  lmer(log(Height)~log(DBH)+(1|Plot/TreeID),data=.)
 
+# Apply fit model to data and create new height column
+dat<-
+  dat %>% 
+  mutate(Height.Pred=coalesce(Height,exp(fixef(htDiamFit)[1]+fixef(htDiamFit)[2]*log(DBH))))
 
+# Height model fit plot
+htModelFit.plot<-
+  dat %>% 
+  ggplot(aes(x=Height,y=Height.Pred))+
+  geom_point()+
+  xlim(0,40)+
+  ylim(0,40)+
+  geom_smooth(method="lm",se=F)+
+  ylab("Predicted height (m) from diameter-height model")+
+  xlab("Measured height (m)")
+
+# create captions
 appNums("heightDiamRawPlot",display="FALSE")
+appNums("htModelFit",display="FALSE")
+
 ```
 
-Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiamRawPlot",display="cite")`).  A comparison of height-diameter models showed that intercepts and slopes of log-transformed heights did not vary significantly (p<0.05) between species or time periods (not shown), therefore a single height-diameter linear mixed-effects model was developed using `r dat %>% filter(Species %in% c("Bl","Sx")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset, with log-transformed diameter as the fixed effect, and tree nested within plot as random effect. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log(DBH).  Residual plots were assessed to ensure goodness of fit.  This model was then applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@Nigh2016].
+Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiamRawPlot",display="cite")`).  A comparison of height-diameter models showed that intercepts and slopes of log-transformed heights did not vary significantly (p<0.05) between species or time periods (not shown), therefore a single height-diameter linear mixed-effects model was developed using `r dat %>% filter(Species %in% c("Bl","Sx")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset, with log-transformed diameter as the fixed effect, and tree nested within plot as random effect. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log(DBH).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`appNums("htModelFit",display="cite")`).  The model slightly overestimated tree heights in shorter trees, and underestimated tree heights in taller trees.  This model was applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@Nigh2016].
+
+```{r hardcode volume coefficients per Nigh}
+
+volCoef<-
+  
+  ## TOTAL VOLUME
+  #  Subalpine fir 
+  data.frame(Species="Bl",VolType="total",b0=-9.79,b1=1.813,b2=1.033) %>% 
+  
+  # Douglas-fir
+  add_row(Species="Fd",VolType="total",b0=-10.19,b1=1.73,b2=1.206) %>% 
+  
+  # Add spruce
+  add_row(Species="Sx",VolType="total",b0=-10.024,b1= 1.801,b2= 1.107) %>% 
+  
+  ## MERCHANTABLE VOLUME
+  # Subalpine fir
+  add_row(Species="Bl",VolType="merch",b0=-9.980,b1= 1.792,b2= 1.102) %>% 
+  
+  # Douglas-fir
+  add_row(Species="Fd",VolType="merch",b0=-10.503,b1= 1.724,b2= 1.296) %>% 
+  
+  # Spruce
+  add_row(Species="Sx",VolType="merch",b0=-10.280,b1= 1.769,b2= 1.206 ) %>% 
+  
+  mutate(BGC.Zone="SBS") %>% 
+  
+  # convert species to factor
+  mutate(Species=factor(Species)) %>% 
+  dplyr::select(Species,BGC.Zone,everything())
+
+```
 
 
 
+```{r generate volume estimates}
+
+dat<-
+  
+  # Total volumes
+  dat %>% 
+  left_join(filter(volCoef,VolType=="total"),by="Species") %>% 
+  mutate(VolTot=exp(1)^b0*DBH^b1*Height.Pred^b2) %>% 
+  dplyr::select(-c(BGC.Zone,VolType,b0,b1,b2)) %>% 
+
+  # Merchantable volume
+  left_join(filter(volCoef,VolType=="merch"),by="Species") %>% 
+  mutate(VolMerch=exp(1)^b0*DBH^b1*Height.Pred^b2) %>% 
+  dplyr::select(-c(BGC.Zone,VolType,b0,b1,b2)) %>% 
+  
+  # basal area
+  mutate(BA=(DBH/100/2)^2*pi) 
+
+# Create stand data
+standDat<-
+  dat %>% 
+  group_by(Plot,Year) %>% 
+  summarise(VolTot=sum(VolTot,na.rm=T)*20, # notice that all variables are by hectare
+            VolMerch=sum(VolMerch,na.rm=T)*20,
+            BA=sum(BA,na.rm=T)*20,
+            k=n()*20) %>% 
+  mutate(QMD=sqrt(BA/(k*0.0000785))) %>% 
+  left_join(plotDat,by="Plot") %>%  # joinwith plot Data
+   mutate(TU=paste("TU",BA.Target,sep=":"))  # create a TU column for plotting
+
+
+```
+
+```{r boxplot stand volumes by year}
+
+volPlot<-
+  standDat %>% 
+  # plot
+  ggplot()+
+  aes(x=Year,y=BA,fill=BA.Target)+
+  geom_boxplot()+
+  facet_wrap(~TU)+
+  theme(legend.position="none")+
+  ylab("Mean plot volume (m/hectare)")
+
+volFit<-
+  standDat %>% 
+  lm(VolTot~BA.Target*Year,data=.)
 
 
 
+```
+
+  
 
 
 # Discussion
@@ -338,6 +556,24 @@ fitBA.Ann.plot
 
 ##### page break
 
+```{r plot density by diameter class, fig.width=6}
+sphPlot1
+
+```
+
+`r figNums(name="sphSpeciesPlot",caption="Mean density of stems per hectare (SPH) by diameter class and species, faceted by treatment unit and two measurement periods.  Lowest value is included in each diameter class, highest value is not.")`
+
+##### page break
+
+```{r plot density change PCT by diameter class, fig.width=6}
+sphPCTPlot
+
+```
+
+`r figNums(name="sphSpeciesPlot",caption="Percentage change between 1992 and 2019 in stems per hectare (SPH) by diameter class, faceted by treatment unit and species.   tsphPCTPlotwo measurement periods.  Lowest value is included in each diameter class, highest value is not.")`
+
+##### page break
+
 # Appendices
 ```{r plot raw PBAI by species and TU}
 
@@ -371,7 +607,7 @@ baAnn.raw.plot
 
 ##### page break
 
-```{r plot height to diameter models by species and year, fig.width=6, fig.asp=1.2}
+```{r plot height to diameter models by species and year, fig.asp=1.2, fig.width=6}
 
 heightDiamRaw.plot
 
@@ -380,3 +616,11 @@ heightDiamRaw.plot
 `r appNums("heightDiamRawPlot",caption="Height and diameter comparisons for 870 tree measurements, faceted by species and measurement year.")`
 
 ##### page break
+```{r plot diam to height model fit}
+
+htModelFit.plot
+```
+
+`r appNums("htModelFit",caption="Predicted height against measured height for 870 tree measurements.  Outlier represents a tree with a broken top.")`
+
+
