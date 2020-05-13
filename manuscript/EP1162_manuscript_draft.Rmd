@@ -54,8 +54,13 @@ theme_set(theme_bw())
 diamClass=seq(from=7.5,to=95,by=5)
 dat<- # assign variable
   dat %>% 
-  mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F))
+  mutate(DBH.class=cut(DBH,diamClass,ordered_result = TRUE,right=F)) %>% 
+  mutate(Plot=as.factor(Plot))
 
+# formatting plotDat
+plotDat<-
+  plotDat %>% 
+  mutate(Plot=as.factor(Plot))
 
 ```
 
@@ -66,9 +71,9 @@ dat<- # assign variable
 ## Analysis
 
 ### Tree-level growth responses
-To test the hypothesis that tree-level growth response over the 1992-2019 period varied with interactions between (i) tree basal area at the time of treatment (1992); (ii) residual basal area; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 basal area increment as the response variable, and treatment, species and log-transformed 1992 basal area as interacting fixed effects, with plot as a random intercept effect.  We also fit a similar model with the 1992-2019 basal area increment expressed as a percentage of 1992 basal area.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@add later].
+To test the hypothesis that tree-level growth response over the 1992-2019 period varied with interactions between (i) tree basal area at the time of treatment (1992); (ii) residual basal area; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 basal area increment as the response variable, and treatment, species and log-transformed 1992 basal area as interacting fixed effects, and plot as a random intercept effect.  We also fit a similar model with the 1992-2019 basal area increment expressed as a percentage of 1992 basal area.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@add later].
 
-We also examined how basal area increment at the tree-level varied over the four measurement periods, by fitting a similar model as described above, with an additional fixed effect of measurement period.  This allowed us to examine temporal changes in growth responses, including evaluating for a potential lag effect.
+We also examined how basal area increment at the tree-level varied over the four measurement periods, by fitting a similar model as described above, with an additional fixed effect of measurement period.  This allowed us to examine temporal changes in growth responses, including evaluating for a potential lag effect.  We do note that because we did not measure increment before treatment, we cannot address questions regarding short-term growth declines associated with treatment.
 
 
 ## Stand structure and growth dynamics
@@ -413,7 +418,8 @@ dat<-
 # Height model fit plot
 htModelFit.plot<-
   dat %>% 
-  ggplot(aes(x=Height,y=Height.Pred))+
+  mutate(h2=exp(fixef(htDiamFit)[1]+fixef(htDiamFit)[2]*log(DBH))) %>% 
+  ggplot(aes(x=Height,y=h2))+
   geom_point()+
   xlim(0,40)+
   ylim(0,40)+
@@ -427,7 +433,7 @@ appNums("htModelFit",display="FALSE")
 
 ```
 
-Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiamRawPlot",display="cite")`).  A comparison of height-diameter models showed that intercepts and slopes of log-transformed heights did not vary significantly (p<0.05) between species or time periods (not shown), therefore a single height-diameter linear mixed-effects model was developed using `r dat %>% filter(Species %in% c("Bl","Sx")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset, with log-transformed diameter as the fixed effect, and tree nested within plot as random effect. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log(DBH).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`appNums("htModelFit",display="cite")`).  The model slightly overestimated tree heights in shorter trees, and underestimated tree heights in taller trees.  This model was applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@nigh2016].
+Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiamRawPlot",display="cite")`).  A comparison of height-diameter models showed that intercepts and slopes of log-transformed heights did not vary significantly (p<0.05) between species or time periods (not shown), therefore a single height-diameter linear mixed-effects model was developed using `r dat %>% filter(Species %in% c("Bl","Sx")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset, with log-transformed diameter as the fixed effect, and tree nested within plot as random effect. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log(DBH).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`r appNums("htModelFit",display="cite")`).  The model slightly overestimated tree heights in shorter trees, and underestimated tree heights in taller trees.  This model was applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@nigh2016].
 
 ```{r hardcode volume coefficients per Nigh}
 
@@ -582,10 +588,237 @@ figNums("incPlot",display=FALSE)
 
 Annual increment between the four periods differed between treatment units (`r figNums("incPlot",display="cite")`).  In the high-removal treatment unit, annual basal area increment increased in each subsequent measurement period, with the highest mean plot values of 0.9m^2^ per hectare.  In contrast, mean plot basal area annual increment was highest in the low-removal treatment unit during the 1994-1997 period, and decreased in subsequent periods.  A similar pattern was observed in the control treamtent unit.  Annual increment patterns in total and merchantable volumes were similar to basal area, with the exception of the high-removal treatment unit.  Here, maximum annual volume increment was highest between 1997 and 2009, with a mean plot value of 8m^3^ per year per hectare; this increment decreased slightly from 2009-2019 period.  In the control unit, volume increment from 2009-2019 was lower than from 1992-1994.
 
+### Species composition over time
+
+```{r create stand data by species}
+# Create stand data
+sppDat<-
+  dat %>% 
+  group_by(Plot,Species,Year) %>% 
+  summarise(Vol.Tot=sum(VolTot,na.rm=T)*20, # notice that all variables are by hectare
+            Vol.Merch=sum(VolMerch,na.rm=T)*20,
+            BA=sum(BA,na.rm=T)*20,
+            SPH=n()*20) %>% 
+  mutate(QMD=sqrt(BA/(SPH*0.0000785))) %>% 
+  left_join(plotDat,by="Plot") %>%  # joinwith plot Data
+  dplyr::select(Plot:BA.Target) %>% 
+  pivot_longer(cols=Vol.Tot:QMD,names_to="varName",values_to="Quantity") %>% 
+   mutate(TU=paste("TU",BA.Target,sep=":"))  # create a TU column for plotting
+
+sppIncFunc<-function(varName) {
 
 
+  sppDat %>% 
+  dplyr::select(Plot,BA.Target,varName,Year) %>% 
+  pivot_wider(names_from="Year",values_from=varName) %>% 
+  mutate(`1994Inc`=`1994`-`1992`) %>% # stand periodic increment 
+  mutate(`1997Inc`=`1997`-`1994`) %>% # stand periodic increment 
+  mutate(`2009Inc`=`2009`-`1997`) %>% # stand periodic increment 
+  mutate(`2019Inc`=`2019`-`2009`) %>%  # stand periodic increment 
+  
+  # divide by # growing seassons in each period
+  mutate(`1994Inc`=`1994Inc`/3) %>% # 3 growing seasons in this period 
+  mutate(`1997Inc`=`1997Inc`/3) %>% # 3 growing seasons in this period 
+  mutate(`2009Inc`=`2009Inc`/11) %>% # 11 growing seasons in this period 
+  mutate(`2019Inc`=`2019Inc`/11) %>% 
+    dplyr::select(Plot,Species,BA.Target,`1994`=`1994Inc`,`1997`=`1997Inc`,
+                  `2009`=`2009Inc`,`2019`=`2019Inc`) %>% 
+    pivot_longer(cols=`1994`:`2019`,names_to="Year",values_to="Inc") %>% 
+    mutate(varname=varName) %>% 
+    dplyr::select(Plot,Species,BA.Target,varname,Year,Inc) %>%
+    mutate(TU=paste("TU",BA.Target,sep=":")) %>% 
+    return() # return
+}
+
+
+```
+
+
+```{r plot species breakdown}
+sppPlot<-
+  sppDat %>% 
+  filter(Species %in% c("Bl","Sx")) %>% 
+  ggplot()+
+  aes(x=Year,y=Quantity,fill=Species)+
+  geom_boxplot()+
+  facet_grid(varName~TU,scales="free_y")+
+  theme(legend.position="bottom")
+
+# caption
+figNums("sppPlot",display=FALSE)
+
+```
+
+#### Volume and basal area
+Fir basal area and volume exceeded that of spruce in both the control and light-removal treatment unit; these differences increased in each subsequent period after ca.1997 (`r figNums("sppPlot",display="cite")`).  From 1997-2019, fir basal area and volume increased faster than spruce in the light-removal and control units.  The differences were not as clear in the high-removal treatment unit, as there was a lot of variation in spruce among plots.  *we could test this for significance*
+
+Among treatments, spruce volumes and basal were similar across the three treatment units, especially from 1997-2019.  Spruce volume and basal area varied substantially among plots within the high-removal treatment unit.  Fir basal area and volumes in the control unit exceeded other treatment units, with the largest difference between control and high-removal treatment unit.
+
+#### Tree density
+In the control and light-removal treatment unit, there were more fir trees than spruce across all time periods.  The difference between fir and spruce density appeared to remain stable in the control unit over the period of this study.  In the high-removal treatment unit, fir density began to noticeably exceed that of spruce starting ca.1997, although the variation in fir tree density among plots in this treatment was relatively high.  
+
+#### Quadratic mean diameter
+Quadratic mean diameter in both fir and spruce remained relatively stable over all measurement periods in the control unit.  In the low-removal treatment unit, spruce QMD exceeded that of fir across all periods, however, the differences between species apeared to be diminishing over time.  In the high-removal treatment unit, spruce QMD increased over time, and both species had approximately similar mean QMD.
+
+```{r compare sph and BA differences between periods and diam classes}
+perComp<-
+  dat %>%
+  filter(Year %in% c(1992,2019)) %>% # filter for start and end years
+  group_by(Plot,Year) %>% 
+  summarise(N.Plot=n()) %>% # summarise number of years per plot
+  group_by(Plot) %>% 
+  summarise(N.Plot=n()) %>% 
+  filter(N.Plot==2) %>% 
+  pull(Plot) %>% 
+  data.frame(Plot=.) %>% 
+  
+  # now filter dat for these plots
+  right_join(dat,by="Plot") %>% 
+  filter(Year %in% c(1992,2019)) %>% # filter for years
+  filter(Status=="Live") %>% #filter for live trees
+  
+  # break trees into diameter classes
+  mutate(DBH.class=cut(DBH,breaks=c(7.5,12.5,18.5,30,90),include.lowest = TRUE,right=FALSE)) %>% 
+  left_join(plotDat,by="Plot")
+
+# fit models
+fit1<-  
+  perComp %>% 
+  
+  # come up with a denominator (number of plots per BA.Target per year)
+  distinct(Plot,.keep_all = TRUE) %>% 
+  group_by(BA.Target) %>% 
+  summarise(Num.Plot=n()) %>% 
+  right_join(perComp,by="BA.Target") %>% 
+  
+  # Plot averages
+  group_by(Plot,Year,BA.Target,Num.Plot,Species,DBH.class) %>% 
+  summarise(BA=sum(BA)*20,# Notice the plot multiplier
+            Vol=sum(VolTot)*20,
+            SPH=n()*20) %>% 
+  filter(DBH.class=="[30,90]") %>% 
+  filter(Species=="Sx") %>% 
+  lm(BA~BA.Target+Year,data=.)
+
+
+# plotting
+perCompPlot<- # assign variable  
+  perComp %>% 
+  
+  # come up with a denominator (number of plots per BA.Target per year)
+  distinct(Plot,.keep_all = TRUE) %>% 
+  group_by(BA.Target) %>% 
+  summarise(Num.Plot=n()) %>% 
+  right_join(perComp,by="BA.Target") %>% 
+  
+  # Plot averages
+  group_by(Plot,Year,BA.Target,Num.Plot,Species,DBH.class) %>% 
+  summarise(BA=sum(BA)*20,# Notice the plot multiplier
+            Vol=sum(VolTot)*20,
+            SPH=n()*20) %>% 
+
+  #BA Target averages
+  group_by(BA.Target,Year,Species,Num.Plot,DBH.class) %>% 
+  summarise(BA.sum=sum(BA),
+            BA.se=sd(BA)/sqrt(length(BA)),
+            Vol.sum=sum(Vol),
+            Vol.se=sd(Vol)/sqrt(length(Vol)),
+            SPH.sum=sum(SPH),
+            SPH.se=sd(SPH)/sqrt(length(SPH))) %>% 
+  ungroup() %>% 
+  
+  # Select only for Sx and Bl
+  filter(Species %in% c("Bl","Sx")) %>% 
+  
+  # Compute means
+  mutate(BA.mean=BA.sum/Num.Plot,
+         Vol.mean=Vol.sum/Num.Plot,
+         SPH.mean=SPH.sum/Num.Plot) %>% 
+  
+  # format
+  dplyr::select(BA.Target,Year,Species,DBH.class,BA=BA.mean,Vol=Vol.mean,SPH=SPH.mean) %>% 
+  pivot_longer(cols=BA:SPH,names_to="var",values_to="value") 
+  
+vol.plot2<-  
+  perCompPlot %>% 
+  filter(var=="Vol") %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=value,fill=Species,group=Species)+
+  geom_bar(stat="Identity",position="dodge")+
+  facet_grid(Year~BA.Target)
+
+
+BA.plot2<-  
+  perCompPlot %>% 
+  filter(var=="BA") %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=value,fill=Species,group=Species)+
+  geom_bar(stat="Identity",position="dodge")+
+  facet_grid(Year~BA.Target)
+
+           
+SPH.plot2<-  
+  perCompPlot %>% 
+  filter(var=="SPH") %>% 
+  
+  # Plotting
+  ggplot()+
+  aes(x=DBH.class,y=value,fill=Species,group=Species)+
+  geom_bar(stat="Identity",position="dodge")+
+  facet_grid(Year~BA.Target)
+  
+
+
+```
 
 # Discussion
+Here are the main results that emerge to me from our data:
+
+1. All treatment units maintained a stand structure analagous to an uneven-aged stand (ie reverse-J diameter distribution).  In the high-removal TU, most recruitment was into the smallest size class (pole), whereas recruitment was into larger size classes in the light-removal and control.  This suggests that understory response may increase with level of change in the canopy.
+\newLine
+\newLine
+
+
+2. High-level of basal area removal stimulated a stronger and more sustained growth response
+Basal area increment has higher in the high-removal treatment units compared to other two, and peaked ~20 years after treatment, compared to ~5 years in control/light-removal.  What does this mean for stand development over the next 20-30 years?  
+- By 2019, the high-removal and light-removal TU converged in terms of volume and basal area.  This seems remarkable to me, and perhaps runs counter to what we learned in silviculture II: *one will never recoup thinned volume!*  Growth rates in the high-removal TU exceeded those in the light-removal; what does this mean for stand dynamics over the next 20 years?  Will the high-removal TU actually exceed light-removal in terms of volume?
+- Most basal area increases are from the larger trees, however, the smaller trees had stronger responses when considered as a % of initial tree size.  
+
+\newLine
+\newLine
+
+3. Partial cutting in this uneven-aged spruce-fir forest affected spruce-fir composition differently depending on harvest level
+- Stand development after harvest showed that spruce volume, basal area, and QMD increased more in the high-removal treatment compared to the other two treatments.  In many plots in the high-removal TU, spruce volumes exceeds control/light-removal spruce. 
+- High removal stimulated stronger growth responses in spruce trees, compared to fir. In the light-removal and control units, spruce basal area and volume changed much less over the 27 years of the trial, and in fact, have similar levels.  
+- Within a time period, spruce quadratic means diameters were inversely related to harvest level.  QMD is highest in the control unit, and lowest in the high-removal treatment unit, suggesting that there are fewer but larger trees in the control, whereas recuitment into sapling class trees has been highest in high-removal TU.  Does this suggest that spruce are well adapted to take advantage of canopy gaps?
+- Would we see this response in even more removal, say down to 5m^2^ per hectare?
+- An important note: fir stems per hectare were low in the high-removal TU until around 1997, and then increased more rapidly relative to other units from ca. 1997-2019.
+- Note that Figure 3 and 7 are similar - Figure 3 shows predicted BAI from model, and 7 shows actual data.  Recommend deleting Figure 3 and using 7, b/c prefer to use real data!  Appendix three is similar to Figure 7 - just uses boxplots instead of mean/se.  Recommend Figure 7 and delete Appendix 3.
+
+\newLine
+\newLine
+
+4. What other results emerge from the data?
+
+\newLine
+\newLine
+
+
+**Discussion structure from Mike below**
+
+1.  comparisons of findings to the related scientific literature
+2.  comparisons of findings to biological principles and current ecological understandings - e.g. do our results make sense based on our understandings of stand dynamics, or example?
+3.  discussion of findings that seem anomalous, counter-intuitive, or contrary to prevailing literature or theory, AND consideration of whether our results and data may be an advancement in the science.
+4.  future research directions
+5.  commentary and direction on our findings and current management practices relative to: (a) similar practices globally, (b) similar practices in similar Picea-Abies types elsewhere, and finally (c) practices in ESSF-SBS spruce fir types in BC.
+6.  Regarding commentary on BC management:  Keep this squarely focused on what the scientific foundation of these types of practices SHOULD be, based on the scientific evidence (and comparative literature) we have assembled. We can then comment on current practices and standards and whether they do or do not meet these tests. We must acknowledge that management standards for silviculture incorporate multiple considerations including best available science, but also other factors (e.g. simplicity, enforceability, etc).
+7.  Extrapolation and interpretation of our results beyond the bounds of this particular study and study site:  this is where the comparative literature and reference to established principles of stand dynamics and productivity will aid us - i.e. if our results are consistent with broad-based silvicultural and ecological understandings and principles, then we can have good confidence that our results are robust and sound for extrapolation of other similar stands and forest types.
+8.   Opportunities for modelling etc in future?
+
 
 
 # Tables
@@ -636,7 +869,7 @@ sphPCTPlot
 
 ```
 
-`r figNums(name="sphPCTPlot",caption="Percentage change between 1992 and 2019 in stems per hectare (SPH) by diameter class, faceted by treatment unit and species.   tsphPCTPlotwo measurement periods.  Lowest value is included in each diameter class, highest value is not.")`
+`r figNums(name="sphPCTPlot",caption="Percentage change between 1992 and 2019 in stems per hectare (SPH) by diameter class, faceted by treatment unit and species.  Lowest value is included in each diameter class, highest value is not.")`
 
 ##### page break
 
@@ -645,7 +878,7 @@ volPlot
 
 ```
 
-`r figNums("volPlot.plot",caption="Volume per plot (m³ per hectare) at five measurement years, faceted by treatment unit.")`
+`r figNums("volPlot.plot",caption="Variation in volume per plot (m³ per hectare) at five measurement years, faceted by treatment unit.")`
 
 ##### page break
 
@@ -655,8 +888,15 @@ incPlot
 
 ```
 
-`r figNums("incPlot",caption="Mean annual increment per plot over four measurement periods.  Top panel row shows basal area (BA), with units of m2 per hecatre.  Middle panel row shows merchantable volume (Vol.Merch), and bottom panel row shows total volume (Vol.Tot).  Volume units are m³ per hectare.")`
+`r figNums("incPlot",caption="Mean annual increment per plot over four measurement periods.  Top panel row shows basal area (BA), with units of m² per hectare.  Middle panel row shows merchantable volume (Vol.Merch), and bottom panel row shows total volume (Vol.Tot).  Volume units are m³ per hectare.")`
 
+##### page break
+```{r plot stand attributes by species,fig.height=8,fig.width=6}
+sppPlot
+
+```
+
+`r figNums("sppPlot",caption="Among-plot variation in stand attributes, by species and faceted by treatment unit and attribute.  Units are as follows: basal area (BA, m² per hectare); QMD (quadratic mean diameter,cm), trees per hectare (SPH, count), Merchantable volume (Vol.Merch, m³ per hectare); Total volume (Vol.Merch, m³ per hectare)")`
 
 # Appendices
 ```{r plot raw PBAI by species and TU}
@@ -705,7 +945,7 @@ heightDiamRaw.plot
 htModelFit.plot
 ```
 
-`r appNums("htModelFit",caption="Predicted height against measured height for 870 tree measurements.  Outlier represents a tree with a broken top.")`
+`r appNums("htModelFit",caption="Predicted height against measured height for 870 tree measurements.  Outliers above the line may represent a tree with a broken top.")`
 
 
 # References
