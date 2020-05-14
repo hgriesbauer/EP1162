@@ -29,6 +29,7 @@ library(car)
 library(flextable)
 library(captioner)
 library(lsmeans)
+library(cowplot)
 
 # Load data
 load(here::here("data","ep1162_Data.RData"))
@@ -508,7 +509,7 @@ volPlot<-
   standDat %>% 
   # plot
   ggplot()+
-  aes(x=Year,y=BA,fill=BA.Target)+
+  aes(x=Year,y=Vol.Tot,fill=BA.Target)+
   geom_boxplot()+
   facet_wrap(~TU)+
   theme(legend.position="none")+
@@ -586,7 +587,7 @@ figNums("incPlot",display=FALSE)
 
 ```
 
-Annual increment between the four periods differed between treatment units (`r figNums("incPlot",display="cite")`).  In the high-removal treatment unit, annual basal area increment increased in each subsequent measurement period, with the highest mean plot values of 0.9m^2^ per hectare.  In contrast, mean plot basal area annual increment was highest in the low-removal treatment unit during the 1994-1997 period, and decreased in subsequent periods.  A similar pattern was observed in the control treamtent unit.  Annual increment patterns in total and merchantable volumes were similar to basal area, with the exception of the high-removal treatment unit.  Here, maximum annual volume increment was highest between 1997 and 2009, with a mean plot value of 8m^3^ per year per hectare; this increment decreased slightly from 2009-2019 period.  In the control unit, volume increment from 2009-2019 was lower than from 1992-1994.
+Annual increment between the four periods differed between treatment units (`r figNums("incPlot",display="cite")`).  In the first three growing seasons after treatment, basal area and volume increments in the two treatment units with basal area removal were lower than increment in the control unit.  In the high-removal treatment unit, basal area increased in each subsequent measurement period, and exceeded the other units between 1997 and 2019.  In the low-removal and control treatment units, increment either declined or stabilized after ca.1997.  Volume increment declined in all units from 2009-2019, and in the control unit, annual volume increment was lower in 2019 than in 1992.  
 
 ### Species composition over time
 
@@ -660,8 +661,9 @@ In the control and light-removal treatment unit, there were more fir trees than 
 #### Quadratic mean diameter
 Quadratic mean diameter in both fir and spruce remained relatively stable over all measurement periods in the control unit.  In the low-removal treatment unit, spruce QMD exceeded that of fir across all periods, however, the differences between species apeared to be diminishing over time.  In the high-removal treatment unit, spruce QMD increased over time, and both species had approximately similar mean QMD.
 
-```{r compare sph and BA differences between periods and diam classes}
-perComp<-
+```{r compare species proportions as per Deal 2002}
+
+sppProp.Dat<-
   dat %>%
   filter(Year %in% c(1992,2019)) %>% # filter for start and end years
   group_by(Plot,Year) %>% 
@@ -679,100 +681,64 @@ perComp<-
   
   # break trees into diameter classes
   mutate(DBH.class=cut(DBH,breaks=c(7.5,12.5,18.5,30,90),include.lowest = TRUE,right=FALSE)) %>% 
-  left_join(plotDat,by="Plot")
-
-# fit models
-fit1<-  
-  perComp %>% 
   
-  # come up with a denominator (number of plots per BA.Target per year)
-  distinct(Plot,.keep_all = TRUE) %>% 
-  group_by(BA.Target) %>% 
-  summarise(Num.Plot=n()) %>% 
-  right_join(perComp,by="BA.Target") %>% 
-  
-  # Plot averages
-  group_by(Plot,Year,BA.Target,Num.Plot,Species,DBH.class) %>% 
-  summarise(BA=sum(BA)*20,# Notice the plot multiplier
+  # Calculate plot BA, Volume and SPH by species, plot and DBH.class 
+  group_by(Plot,Species,Year,DBH.class) %>%
+   summarise(BA=sum(BA)*20,# Notice the plot multiplier
             Vol=sum(VolTot)*20,
             SPH=n()*20) %>% 
-  filter(DBH.class=="[30,90]") %>% 
-  filter(Species=="Sx") %>% 
-  lm(BA~BA.Target+Year,data=.)
+  
+  # Calculate species proportions
+    filter(Species %in% c("Bl","Sx")) %>% # filter for Sx and Bl
+    pivot_longer(cols=BA:SPH,names_to="Var",values_to="Value") %>% 
+ pivot_wider(names_from=Species,values_from=Value) %>% 
+  replace_na(list(Bl=0,Sx=0))      # replace NA with 0
 
 
-# plotting
-perCompPlot<- # assign variable  
-  perComp %>% 
-  
-  # come up with a denominator (number of plots per BA.Target per year)
-  distinct(Plot,.keep_all = TRUE) %>% 
-  group_by(BA.Target) %>% 
-  summarise(Num.Plot=n()) %>% 
-  right_join(perComp,by="BA.Target") %>% 
-  
-  # Plot averages
-  group_by(Plot,Year,BA.Target,Num.Plot,Species,DBH.class) %>% 
-  summarise(BA=sum(BA)*20,# Notice the plot multiplier
-            Vol=sum(VolTot)*20,
-            SPH=n()*20) %>% 
-
-  #BA Target averages
-  group_by(BA.Target,Year,Species,Num.Plot,DBH.class) %>% 
-  summarise(BA.sum=sum(BA),
-            BA.se=sd(BA)/sqrt(length(BA)),
-            Vol.sum=sum(Vol),
-            Vol.se=sd(Vol)/sqrt(length(Vol)),
-            SPH.sum=sum(SPH),
-            SPH.se=sd(SPH)/sqrt(length(SPH))) %>% 
-  ungroup() %>% 
-  
-  # Select only for Sx and Bl
-  filter(Species %in% c("Bl","Sx")) %>% 
-  
-  # Compute means
-  mutate(BA.mean=BA.sum/Num.Plot,
-         Vol.mean=Vol.sum/Num.Plot,
-         SPH.mean=SPH.sum/Num.Plot) %>% 
-  
-  # format
-  dplyr::select(BA.Target,Year,Species,DBH.class,BA=BA.mean,Vol=Vol.mean,SPH=SPH.mean) %>% 
-  pivot_longer(cols=BA:SPH,names_to="var",values_to="value") 
-  
-vol.plot2<-  
-  perCompPlot %>% 
-  filter(var=="Vol") %>% 
-  
-  # Plotting
+# Plotting
+sppProp.Plot<-
+  sppProp.Dat %>% 
+  mutate(Total=Bl+Sx) %>% 
+  mutate(Bl=Bl/Total,
+         Sx=Sx/Total) %>% 
+  pivot_longer(cols=Bl:Sx,names_to="Species",values_to="Prop") %>% 
+  left_join(plotDat,by="Plot") %>% 
+  group_by(BA.Target,Year,DBH.class,Var,Species) %>% 
+  summarise(Prop=mean(Prop)) %>%
+  mutate(TU=paste("TU",BA.Target,sep=":")) %>% 
+  filter(Var=="Vol") %>% 
   ggplot()+
-  aes(x=DBH.class,y=value,fill=Species,group=Species)+
-  geom_bar(stat="Identity",position="dodge")+
-  facet_grid(Year~BA.Target)
+  aes(x=DBH.class,y=Prop,group=Species,fill=Species)+
+  geom_bar(stat="Identity")+
+  facet_grid(Year~TU)+
+  ylab("Proportion")+
+  xlab("Diameter class (cm)")+
+  theme(legend.position="bottom",
+        axis.text.x = element_text(angle = 270,vjust=0.2,hjust=0))
 
 
-BA.plot2<-  
-  perCompPlot %>% 
-  filter(var=="BA") %>% 
-  
-  # Plotting
+sppVol.Plot<-
+  sppProp.Dat %>% 
+  pivot_longer(cols=Bl:Sx,names_to="Species",values_to="Val") %>% 
+  left_join(plotDat,by="Plot") %>% 
+  group_by(BA.Target,Year,DBH.class,Var,Species) %>% 
+  summarise(Val=mean(Val)) %>%
+  mutate(TU=paste("TU",BA.Target,sep=":")) %>% 
+  filter(Var=="Vol") %>% 
   ggplot()+
-  aes(x=DBH.class,y=value,fill=Species,group=Species)+
-  geom_bar(stat="Identity",position="dodge")+
-  facet_grid(Year~BA.Target)
-
-           
-SPH.plot2<-  
-  perCompPlot %>% 
-  filter(var=="SPH") %>% 
-  
-  # Plotting
-  ggplot()+
-  aes(x=DBH.class,y=value,fill=Species,group=Species)+
-  geom_bar(stat="Identity",position="dodge")+
-  facet_grid(Year~BA.Target)
+  aes(x=DBH.class,y=Val,group=Species,fill=Species)+
+  geom_bar(stat="Identity")+
+  facet_grid(Year~TU)+
+  ylab("Volume (m³/ha)")+
+  xlab("Diameter class (cm)")+
+  theme(legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank())
   
 
+sppProp.plot<-plot_grid(sppVol.Plot,sppProp.Plot,nrow=2,rel_heights=c(1,1.5),axis="lr",align="h")
 
+figNums("sppProp.plot",display=FALSE)
 ```
 
 # Discussion
@@ -878,7 +844,7 @@ volPlot
 
 ```
 
-`r figNums("volPlot.plot",caption="Variation in volume per plot (m³ per hectare) at five measurement years, faceted by treatment unit.")`
+`r figNums("volPlot.plot",caption="Variation in total volume per plot (m³ per hectare) at five measurement years, faceted by treatment unit.")`
 
 ##### page break
 
@@ -897,6 +863,16 @@ sppPlot
 ```
 
 `r figNums("sppPlot",caption="Among-plot variation in stand attributes, by species and faceted by treatment unit and attribute.  Units are as follows: basal area (BA, m² per hectare); QMD (quadratic mean diameter,cm), trees per hectare (SPH, count), Merchantable volume (Vol.Merch, m³ per hectare); Total volume (Vol.Merch, m³ per hectare)")`
+
+##### page break
+```{r plot total volume species proportion,fig.height=6}
+
+sppProp.plot
+
+
+```
+
+`r figNums("sppProp.plot",caption="Proportion of mean plot volume by four diameter classes of fir and spruce, expressed as volume (m³ per hectare, top panel) and proportion in bottom panel.  Almost identical proportions were obtained when comparing basal area and tree density.")`
 
 # Appendices
 ```{r plot raw PBAI by species and TU}
