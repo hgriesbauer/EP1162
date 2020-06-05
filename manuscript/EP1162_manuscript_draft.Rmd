@@ -742,13 +742,65 @@ figNums("sppProp.plot",display=FALSE)
 ```
 
 # Discussion
+Partial cutting silviculture systems aim to affect the growth and structure of a stand primarily through the manipulation of stand density, tree spatial distribution, tree size distribution and species composition.  The growth and regeneration response of the residual stand will vary with type of tree removal (ie thinning from below or above, or mixed), residual stand structure, silvical characteristics of the residual species, site productivity, tree distribution, stand age and health, and other site-level factors.  We note that the literature contains ample studies of commercial thinning in even aged stands (references), however, studies of selection harvest systems in uneven-aged stands such as this study are relatively rare. 
+
+Consistent with other studies, we found that tree-level growth increment (basal area and volume) and recruitment of new trees into various size classes varied by species, tree size at the time of treatment, and level of basal area removal.  These changes in growth and stand structure resulted in stand-level changes that suggest the following, specific to uneven-aged spruce-fir forests in our study region:
+
+1. Higher levels of basal area removal can stimulate a stronger and more sustained growth response, resulting in overall more cumulative volume gains; 
+2. Partial cutting can be effectively applied to maintain similar proportions of spruce and fir;
+and 
+3. Different levels of partial cutting can effectively maintain a typical uneven-aged stand structure.
+
+## Growth responses to partial cutting
+Partial cutting in mixed-species uneven-aged stands requires an understanding of species- and size-specific growth responses to different levels of stand manipulation [@Deal2002].  Our results suggest that a higher level of basal area removal (i.e., a residual basal area (RBA) of 10m^2^ in 1992) stimulated a stronger and more sustained growth (both volume and basal area increment) response than the high RBA treatment unit and the control unit.  Over each period, basal area increment was higher in the low RBA treatment units compared to other two, and peaked ca. 20 years after treatment, compared to  ca. 5 years in high RBA and control units.  At the tree-level, spruce trees grew faster than fir, and in both species, larger trees responded with more growth increment than smaller trees (although this was reversed when increment was expressed as a percentage of original tree size). 
+
+
+### Species- and tree-size factors influencing growth responses
+
+Our results show that both species had initial delayed growth response after treatment.  Trees acclimated to shady conditions may suffer a shock after release due to relatively rapid changes in light, temperatures and humidity which can increase evapotranspiration and respiration stress [get sources from @Wang2011].  A post-release lag in height growth response may also reflect the tree's reallocation of of carbon to below-ground structures at the expense of aboveground, as per the functional balance theory [@Kneeshaw2002; @Brouwer1962]; a relatively immediate response in basal area increment response after treatment may represent a species strategy to thicken stem afer release in response to increased wind stress [@Wang2011].
+
+### Spruce
+
+### Fir
+In an overstory removal experiment near our study region, understorey subalpine fir height growth responded best over three years to partial canopy removal, whereas radial growth responded strongest under complete canopy removal [@Wang2011].   Subalpine fir height growth response after overstory thinning varied with tree size and level of removal; trees of all sizes responded with positive height growth responses after partial canopy removal, whereas small tree also responded with positive growth after complete removal, which conversely caused height growth reductions in both intermediate and large trees [@Wang2011].  Radial growth was highest under a complete overstory removal, especially in intermediate trees, after an initial lag [@Wang2011].    
+
+### Tree size
+Across both species and all treatments, post-harvest growth increment increased with residual tree size.  This likely reflects that larger trees simply put on more growth in terms of basal area or volume than smaller trees.  This also suggests that the trees in this study were not so large that they could not respond to changes in stand conditions [@reference].  
+Intermediate crown-class trees may respond better to partial cutting, because the treatment will result in a greater shift in light conditions for these trees compared to larger trees occupying a dominant or co-dominant crown class[@Wang2011].  Intermediate trees also may have higher vigour than suppressed trees, with a greater corresponding ability to release after treatment [@Wang2011].
+
+
+## Stand structure dynamics over time
+
+All treatment units maintained a stand structure analagous to an uneven-aged stand (ie reverse-J diameter distribution).  In the low RBA unit, most recruitment was into the smallest size classes, whereas recruitment was into larger size classes in the high RBA and control units.  This suggests that understory response may increase with level of change in the canopy, and that  more substantial changes to the stand conditions can create more favourable conditions for understory suppressed and intermediate trees to release and increase size.  We did not account for trees smaller than 7.5cm DBH in the study, therefore, we do not have data on seedling germination and establishment after treatment.  THe increase of tree density in the lower size classes in the low RBA may have been a result of increased seedling establishment after harvest.  However, our data show that tree density increased in the smaller size classes in the low RBA unit.  Natural regeneration is complex and in some cases can be largely stochastic, which can make its use difficult to achieve management objectives [@Bataineh2013].
+
+Within a time period, spruce quadratic means diameters were inversely related to harvest level.  QMD was highest in the control unit, and lowest in the high-removal treatment unit, suggesting that there are fewer but larger trees in the control, whereas recuitment into sapling class (>7.5cm DBH) trees was higher in high-removal TU.  
+
+## Management implications
+Partial harvesting 
+
+***
+Draft material below this line
+
 Here are the main results that emerge to me from our data:
 
-1. All treatment units maintained a stand structure analagous to an uneven-aged stand (ie reverse-J diameter distribution).  In the high-removal TU, most recruitment was into the smallest size class (pole), whereas recruitment was into larger size classes in the light-removal and control.  This suggests that understory response may increase with level of change in the canopy.
+Silviculture treatments aim to affect the growth of stands through the manipulation of stand density, composition, distribution.  Effects of stand density and composition management on growth and yield will vary with type of treatment (from below or above), site productivity, silvics of the residual species, tree distribution (clumped, dispersed, etc.), stand age, forest health factors and other factors.
+
+Partial removal of the overstorey can allow forest managers to manipulate light levels in the stand, however, the successful application of this treatment requires an understanding of how the understory trees will respond [@Wang2011].
+
+
+
+
+
+
+
+Across species, removal intensity and size classes, trees showed a growth response after treatment.  
+
+
 \newLine
 \newLine
 
 
+## Density-growth relationship
 2. High-level of basal area removal stimulated a stronger and more sustained growth response
 Basal area increment has higher in the high-removal treatment units compared to other two, and peaked ~20 years after treatment, compared to ~5 years in control/light-removal.  What does this mean for stand development over the next 20-30 years?  
 - By 2019, the high-removal and light-removal TU converged in terms of volume and basal area.  This seems remarkable to me, and perhaps runs counter to what we learned in silviculture II: *one will never recoup thinned volume!*  Growth rates in the high-removal TU exceeded those in the light-removal; what does this mean for stand dynamics over the next 20 years?  Will the high-removal TU actually exceed light-removal in terms of volume?
@@ -757,10 +809,20 @@ Basal area increment has higher in the high-removal treatment units compared to 
 \newLine
 \newLine
 
-3. Partial cutting in this uneven-aged spruce-fir forest affected spruce-fir composition differently depending on harvest level
-- Stand development after harvest showed that spruce volume, basal area, and QMD increased more in the high-removal treatment compared to the other two treatments.  In many plots in the high-removal TU, spruce volumes exceeds control/light-removal spruce. 
+## Species differences in growth response
+
+
+### Spruce
+
+
+
+
+## Species composition
+In a retrospective analysis of partially cut hemlock-sitka spruce stands in Alaska, partial cutting had little effect on species composition after treatment [@Deal2002].  
+Partial cutting in this uneven-aged spruce-fir forest affected spruce-fir composition differently depending on harvest level, as well as tree sizes.
+- Stand development after harvest showed that spruce volume, basal area, and QMD increased more in the high-removal treatment compared to the other two treatments.  In several plots in the high-removal TU, spruce volumes exceeds control/light-removal spruce. 
 - High removal stimulated stronger growth responses in spruce trees, compared to fir. In the light-removal and control units, spruce basal area and volume changed much less over the 27 years of the trial, and in fact, have similar levels.  
-- Within a time period, spruce quadratic means diameters were inversely related to harvest level.  QMD is highest in the control unit, and lowest in the high-removal treatment unit, suggesting that there are fewer but larger trees in the control, whereas recuitment into sapling class trees has been highest in high-removal TU.  Does this suggest that spruce are well adapted to take advantage of canopy gaps?
+- 
 - Would we see this response in even more removal, say down to 5m^2^ per hectare?
 - An important note: fir stems per hectare were low in the high-removal TU until around 1997, and then increased more rapidly relative to other units from ca. 1997-2019.
 - Note that Figure 3 and 7 are similar - Figure 3 shows predicted BAI from model, and 7 shows actual data.  Recommend deleting Figure 3 and using 7, b/c prefer to use real data!  Appendix three is similar to Figure 7 - just uses boxplots instead of mean/se.  Recommend Figure 7 and delete Appendix 3.
@@ -772,6 +834,9 @@ Basal area increment has higher in the high-removal treatment units compared to 
 
 \newLine
 \newLine
+
+5. Management implications
+
 
 
 **Discussion structure from Mike below**
