@@ -746,13 +746,18 @@ Partial cutting silviculture systems aim to affect the growth and structure of a
 
 Consistent with other studies, we found that tree-level growth increment (basal area and volume) and recruitment of new trees into various size classes varied by species, tree size at the time of treatment, and level of basal area removal.  These changes in growth and stand structure resulted in stand-level changes that suggest the following, specific to uneven-aged spruce-fir forests in our study region:
 
-1. Higher levels of basal area removal can stimulate a stronger and more sustained growth response, resulting in overall more cumulative volume gains; 
-2. Partial cutting can be effectively applied to maintain similar proportions of spruce and fir;
+1. Higher levels of basal area removal can stimulate a stronger and more sustained growth response; 
+2. Partial cutting can be used to maintain pre-harvest species composition (in other words, maintain proportions of spruce and fir that are similar to pre-harvest stand composition);
 and 
-3. Different levels of partial cutting can effectively maintain a typical uneven-aged stand structure.
+3. Different levels of partial cutting can maintain a stand structure with trees well represented in different size classes (commonly referred to as uneven-aged stand structure).
 
 ## Growth responses to partial cutting
-Partial cutting in mixed-species uneven-aged stands requires an understanding of species- and size-specific growth responses to different levels of stand manipulation [@Deal2002].  Our results suggest that a higher level of basal area removal (i.e., a residual basal area (RBA) of 10m^2^ in 1992) stimulated a stronger and more sustained growth (both volume and basal area increment) response than the high RBA treatment unit and the control unit.  Over each period, basal area increment was higher in the low RBA treatment units compared to other two, and peaked ca. 20 years after treatment, compared to  ca. 5 years in high RBA and control units.  At the tree-level, spruce trees grew faster than fir, and in both species, larger trees responded with more growth increment than smaller trees (although this was reversed when increment was expressed as a percentage of original tree size). 
+Partial cutting in mixed-species uneven-aged stands requires an understanding of species- and size-specific growth responses to different levels of stand manipulation [@Deal2002].  Our results suggest that a higher level of basal area removal (i.e., a residual basal area (RBA) of 10m^2^ in 1992) stimulated a stronger and more sustained tree-level growth (both volume and basal area increment) response than the high RBA treatment unit and the control unit.  Over each period, basal area increment was higher in the low RBA treatment units compared to other two, and peaked ca. 20 years after treatment, compared to an increment peak of ca. 5 years in high RBA and control units.  At the tree-level, spruce trees grew faster than fir, and in both species, larger trees responded with more growth increment than smaller trees (although this was reversed when increment was expressed as a percentage of original tree size). 
+
+
+## Stand-level changes
+
+A stand's cumulative volume over time can be estimated with stand density and periodic increment [@Pretzsch2005]. 
 
 
 ### Species- and tree-size factors influencing growth responses
@@ -780,6 +785,11 @@ Partial harvesting
 
 ***
 Draft material below this line
+
+-	Our study was conducted in a relatively homogenous site (most plots are located on sites with circum-mesic soil edaphics) which represents the majority of managed forests in this region.  The application of partial harvesting on azonal sites should be guided by site-specific data, as site productivity was found to have an important (and potentially opposite) effect on stand dynamics after harvesting [@Pretzch2005].  
+-	Stand-level periodic increment follows a unimodal density optimum pattern [@Pretzsch2005], which can be used by silviculturists to manipulate density in order to maximize periodic increment and cumulative volume.  Our results suggest that higher levels of basal area removal resulted in tree-level growth rate increases that were higher and more sustained than the high RBA treaetment unit and control.  After approximately 20 years, the low RBA unit had converged with the high RBA unit in terms of stand-level basal area and volume, suggesting a higher cumulative volume in the low RBA unit.  Presumably, an even higher level of removal (e.g., residual basal area of 5m2/ha) could have resulted in a reduced stand-level periodic increment and subsequent lower cumulative volume, as increased growth rates would be offset by lower stand density, reflecting the unimodal density optimum pattern [@Pretzsch2005].  This density optimum may also vary with stand age [@Pretzsch2005].  
+-	By three decades after treatment, both treatment units still had lower volume than the control, however, the differences between the three units diminished over time.  Given enough time, stand volumes may converge.  A study in thinned Norway spruce stands found that cumulative volumes in thinned treatments exceeded unthinned volumes by 30-39 years after treatment [@Pretzsch2005]; however, it may not be suitable to compare these fiindings to our study, as the treatment was a thin from below.
+
 
 Here are the main results that emerge to me from our data:
 
