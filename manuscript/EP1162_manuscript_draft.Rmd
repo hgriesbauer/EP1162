@@ -126,7 +126,29 @@ piDat<-
   left_join(plotDat,by="Plot") %>% 
   mutate(BA.Target=paste("TU:",BA.Target,sep="")) # create facet column
 
-
+# Create a table for the appendix with growth rates
+piDat.table<-
+  dat %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% treeList) %>%
+  filter(Year %in% c(1992,2019)) %>% 
+  # mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  dplyr::select(Plot,TreeID,Species,Year,DBH) %>% 
+  pivot_wider(names_from=Year,values_from=DBH) %>% 
+  mutate(BA92=(`1992`/2/100)^2*pi) %>% 
+  mutate(BA19=(`2019`/2/100)^2*pi) %>%
+  mutate(PI=BA19-BA92) %>% # 
+  filter(PI>0) %>%   # one tree has a PI of 0, has to be removed
+  mutate(initDiam=`1992`) %>% 
+  mutate(diamClass=cut(initDiam,breaks=c(7.5,12.5,18.5,30,90),include.lowest=T,right=F)) %>% 
+  left_join(plotDat,by="Plot") %>% 
+  mutate(BA.Target=paste("TU:",BA.Target,sep="")) %>%  # create facet column
+  group_by(BA.Target,Species,diamClass) %>% 
+  summarise(BAImean=mean(PI),
+            BAIse=sd(PI)/sqrt(length(PI))) %>% 
+  arrange(BA.Target,diamClass,Species)
+  
+  
 # Create figures of raw data to put into Appendix
 pi.Init.rawPlot<-  
   piDat %>% 
@@ -190,6 +212,8 @@ fitBApct.plot<-
 # Captions
 appNums(name="piInitRaw",display=FALSE)
 appNums(name="piPCTInitRaw",display=FALSE)
+appNums(name="piDataRaw",display=FALSE)
+
 figNums(name="fitBA.plot",display=FALSE)
 figNums(name="fitBApct.plot",display=FALSE)
 
@@ -750,6 +774,7 @@ Consistent with other studies, we found that tree-level growth increment (basal 
 2. Partial cutting can be used to maintain pre-harvest species composition (in other words, maintain proportions of spruce and fir that are similar to pre-harvest stand composition);
 and 
 3. Different levels of partial cutting can maintain a stand structure with trees well represented in different size classes (commonly referred to as uneven-aged stand structure).
+
 
 ## Growth responses to partial cutting
 Partial cutting in mixed-species uneven-aged stands requires an understanding of species- and size-specific growth responses to different levels of stand manipulation [@Deal2002].  Our results suggest that a higher level of basal area removal (i.e., a residual basal area (RBA) of 10m^2^ in 1992) stimulated a stronger and more sustained tree-level growth (both volume and basal area increment) response than the high RBA treatment unit and the control unit.  
