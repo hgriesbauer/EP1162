@@ -1,0 +1,154 @@
+---
+title: "Question for Peter"
+author: "Hardy Griesbauer"
+date: "03/11/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# load data
+library(tidyverse)
+library(emmeans)
+library(lme4)
+
+# Load data
+load("~/Documents/Git/EP1162/analysis/standData.RData")
+
+options(contrasts=c(factor="contr.sum", ordered="contr.poly"))
+
+```
+
+## Study background
+
+The data were taken from a partial cutting silviculture trial established in 1992 near Prince George (EP1162).  The study is set up as follows:
+
+1. Nineteen 50m x 50m sites were harvested with three levels of basal area retention (treatments were randomly assigned to each site);
+2. The three levels of basal area retention are as follows: (i) control (no harvest, around 30m2/hectare in 1992); (ii) 10m2/hectare residual basal area (relatively high level of partial harvest); (iii) 20m2/hectare residual basal area (relatively light level of partial harvest);
+3. Each of the 19 sites has one 11.28m fixed-radius permanent sample plot established in the centre;
+4. Data were collected at the 19 plots over 5 years: 1992, 1994, 1997, 2009 and 2019.  Not all plots were measured at each period!
+
+Below are the number of plots measured in each of the three treatment units and five years:
+
+```{r}
+
+standData2.X %>% 
+  group_by(BA.Target,Year) %>% 
+  summarise(Obs=n()) %>% 
+  rename(Treatment="BA.Target") %>% 
+  pivot_wider(names_from="Year",values_from="Obs") %>% 
+  knitr::kable()
+```
+
+This table shows that in a given measurement year, data were collected in between 17-19 plots.  Most plots were visited in all five measurement years.
+
+Here is a screenshot of some of the stand-level data:
+
+```{r show data}
+ep1162.dat<-
+  standData2.X %>% 
+  setNames(c("Treatment","Plot","Year","Volume","Basal.Area","SPH","QMD")) %>% 
+  # mutate(Year=as.integer(as.character(Year))) %>% 
+  as.tibble()
+
+ep1162.dat %>% 
+  head(10)
+
+
+```
+
+Here is a plot of mean plot-level basal area trend over time:
+```{r plot stand basal area}
+
+load("~/Documents/Git/EP1162/analysis/standBA.plot.RData")
+
+standBA.plot
+```
+
+*Whiskers are standard error of the mean*
+
+To me, it looks like the plots in TU:10 increased their basal area faster than plots in the other two units. This was the one of the study's hypotheses (opening the stand up more will stimulate faster growth).  To test that hypothesis, I would like to contrast the slope of the lines between treatments.
+
+I believe I can do this in R with the following code:
+
+```{r lmer, echo=TRUE}
+
+fit.BA<-lmer(Basal.Area~Year*Treatment+(1|Plot),data=ep1162.dat)
+
+summary(fit.BA)
+
+
+```
+
+## Contrasts between slopes
+Using the `emmeans` package, I contrast the slopes as follows:
+
+```{r test the interaction, echo=TRUE}
+# emtrends(fit.BA, pairwise ~ Treatment, var = "Year")
+
+library(lmerTest)
+anova(fit.BA, type="3")
+
+
+
+```
+
+-----------------
+
+## Generate cell means
+
+```{r cell means,echo=TRUE}
+
+# joint_tests(fit.BA) #another way to see the ANOVA table for the overall tests
+
+cell.means <- emmeans(fit.BA, ~ Treatment*Year)
+
+cell.means
+
+
+
+
+```
+
+```{r plot cell means with confint,echo=TRUE}
+plot(cell.means, by="Year")
+
+```
+
+---------------------------
+
+## Contrasts
+
+
+This is the code with interaction="consec".
+```{r contrasts,echo=TRUE}
+
+year.by.trt <- contrast(cell.means, interaction = "consec", by = NULL) #might need to change the by = option here. 
+
+
+
+```
+
+Need a slight change in code so that all treatments are contrasted.  Right now it's only contrasting consecutive treatments.  Let's change the interaction to "pairwise":
+
+```{r pairwise, echo=TRUE}
+
+year.by.trt <- contrast(cell.means,interaction="pairwise") #might need to change the 
+
+year.by.trt 
+
+```
+
+
+
+------------------------------
+
+## Test
+
+```{r, echo=TRUE}
+test(year.by.trt, joint=TRUE)
+```
+

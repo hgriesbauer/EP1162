@@ -148,7 +148,12 @@ piDat.table<-
             BAIse=sd(PI)/sqrt(length(PI))) %>% 
   arrange(BA.Target,diamClass,Species)
   
-  
+  # piDat.table %>% 
+  #   ggplot(aes(x=diamClass,y=BAImean,color=BA.Target))+
+  #   geom_point()+
+  #   facet_wrap(~Species)
+
+
 # Create figures of raw data to put into Appendix
 pi.Init.rawPlot<-  
   piDat %>% 
@@ -290,7 +295,7 @@ fitBA.Ann.plot<-
   ggpredict(fitBA.Ann,terms=c("Year","Species","BA.Target"))  %>%
   plot()+
   theme_bw()+
-  ylab("Predicated annualized basal area increment (m²)")+
+  ylab("Predicted annualized basal area increment (m²)")+
   xlab("Measurement year")+
   ggtitle("")+
   theme(legend.position = "bottom")

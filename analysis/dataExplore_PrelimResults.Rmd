@@ -1,0 +1,238 @@
+---
+title: "EP1162 Data and Prelim Results"
+author: "Hardy Griesbauer"
+date: "19/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(tidyverse)
+library(lme4)
+library(emmeans)
+library(flextable)
+library(officer)
+
+# Load data
+load(here::here("data","ep1162_Data.RData"))
+load(here::here("data","ep1162_plotData.RData"))
+
+# Merge data
+X<-
+  dat %>% 
+  left_join(plotDat,by="Plot") %>% 
+  
+  # replace species codes with words
+  mutate(Species=recode_factor(Species,Bl="Fir",Sx="Spruce"))
+  
+
+
+
+
+# Set against scientific notation
+options(scipen=999)
+
+```
+
+## Data exploration
+
+### Question: How did tree diameter distribution vary by treatment and measurement period?
+
+``` {r create histogram of diameter data}
+
+# Create histogram of plots of DBH by species and basal area treatments
+X %>% 
+  filter(Species %in% c("Fir","Spruce")) %>% # drop Fdi and Ep trees
+  ggplot()+
+  aes(x=DBH,color=Species,fill=Species)+
+  geom_histogram(fill="white", alpha=0.5, position="identity")+
+ 
+  facet_grid(Year~BA.Target)
+
+
+```
+
+
+``` {r create density diagram of diameter data}
+
+# Create histogram of plots of DBH by species and basal area treatments
+X %>% 
+  filter(Species %in% c("Fir","Spruce")) %>% # drop Fdi and Ep trees
+  ggplot()+
+  aes(x=DBH,color=Species,fill=Species)+
+  geom_density(alpha=0.6)+
+  facet_grid(Year~BA.Target)
+
+
+```
+
+*Note*  
+- These are density plots, not true histograms.  
+- They can be used to compare how the distribution of diameters changes among measurement periods within a single species.  
+- They cannot be used to compare frequency of diameters between species nor among treatments.
+- The number of plots by measurement period varies, which will explain some of the variability in this plot.
+
+**Of interest**
+- As might be expected, we see that trees got larger over time, and proportionally, more occupied larger diameter classes over time.
+- We can see that spruce occupied the larger diameter classes (40+) more than fir.
+- Subalpine fir generally maintained a reverse-J diameter distribution across all measurement periods and treatments.
+- In the low-removal and control units, spruce maintained a more even diameter distribution.
+- In the low-removal unit, we see that spruce started to develop a bimodal distribution in the last two measurment periods.  Does this mean more recruitment into the smaller size classes?
+- In the high-removal treatment unit, spruce maintained a more reverse-J distribution.  More trees concentrated in the smaller size classes.
+
+Implications:
+- Subalpine fir seems to continuously recruit into smaller size classes
+- Spruce trees form the largest trees in all treatment units
+- Do the bimodal spruce diameter distributions in the low-removal and control units suggest some spruce seedling establishment and subsequent recruitment into the smaller size classes?
+
+
+### Question: how did tree-level growth response vary with initial tree size, treatment and species?
+
+To test the hypothesis that tree-level growth response over the 1992-2019 period varied with interactions between (i) tree diameter at the time of treatment (1992); (ii) residual basal area; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 diameter increment as the response variable, and the interaction between treatment, species and log-transformed 1992 diameter as a fixed effect, and plot as a random intercept effect.  The figure below shows the output from the model:
+
+
+```{r}
+
+# Let's filter only for trees that have measurements in 1992 and 2019 
+treeList<- # assign variable
+  X %>% 
+  filter(TreeID!="New") %>% #remove new trees
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(Species %in% c("Spruce","Fir")) %>% # filter birch and fdi out of dataset
+  filter(Status=="Live") %>% # filter for live trees
+  filter(Year %in% c(1992,2019)) %>% #filter for start and end dates
+  group_by(TreeID) %>% 
+  summarise(N=n()) %>% 
+  filter(N==2) %>% #filter for trees with 5 measurements
+  pull(TreeID)
+  
+
+# derive periodic increment (period diameter or basal area increment)
+piDat<-
+  X %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% treeList) %>% 
+  mutate(BA=(DBH/2/100)^2*pi) %>% # convert DBH to basal area
+  dplyr::select(Plot,TreeID,Species,Year,DBH) %>% 
+  pivot_wider(names_from=Year,values_from=DBH) %>% 
+  mutate(PI=`2019`-`1992`) %>% # 
+  filter(PI>0) %>% # one tree has a PI of 0, has to be removed
+  mutate(PIpct=PI/`1992`*100) %>% # express periodic increment a a percentage
+  dplyr::select(Plot,TreeID,Species,PI,PIpct,Init=`1992`) %>% 
+  left_join(plotDat,by="Plot") %>% 
+  mutate(BA.Target=paste("TU:",BA.Target,sep="")) # create facet column
+
+# fit lmer model
+# fixed effects model with species pooled, using PBAI
+fitBA<-
+  piDat %>% 
+  lmer(log(PI)~BA.Target:log(Init):Species+(1|Plot),data=.)
+
+# create estimates of marginal means
+# We'll estimate marginal means at four different diameter classes (10,20,30,40cm DBH)
+rg<-ref_grid(fitBA,at = list(Init = c(10, 20, 30, 40)),cov.keep=4)
+
+
+```
+
+
+```{r did spruce outgrow fir figure}
+
+
+emmeans(rg,~Init|BA.Target+Species) %>% 
+  as.data.frame() %>% 
+  
+  # plotting
+  ggplot()+
+  aes(x=Init,y=emmean,fill=Species,color=Species)+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=emmean-SE, ymax=emmean+SE), width=.2,
+                 position=position_dodge(0.05))+
+  xlab("1992 DBH (cm)")+
+  ylab("Diameter growth from 1992-2019 (cm)")+
+  facet_wrap(~BA.Target)
+
+
+  
+```
+
+In this figure, we can see a lot of interesting relationships.  The question is, which ones are significant?  We can look at this in more detail with some contrasts (below):
+
+### Question: At the tree-level, how did 27-year growth responses vary by species and initial tree size?
+
+```{r did spruce outgrow fir table}
+
+pairs(rg,by=c("BA.Target","Init"),type="response") %>% 
+  as.data.frame() %>% 
+  arrange(BA.Target,Init) %>% 
+  rename(DBH.1992="Init") %>% 
+  mutate_if(is.double,round,5) %>%  # round to five digits
+
+  
+  # format table
+    
+  # flextable
+  flextable(col_keys = c(colnames(.)[c(1:2,6:8,3:5)])) %>% 
+  
+  align(align="left",part = "all") %>% 
+  vline( border = fp_border(color="#2c3a51" , width = 1), part = "all" ) %>% 
+  hline( border = fp_border(color="#2c3a51" , width = 1), part = "all" ) %>% 
+  merge_v(j=c(1:2,6:8)) %>% 
+  valign(valign="top") %>%
+ border_outer(part="all", border = fp_border(color="#2c3a51" , width = 2)) %>% 
+   fix_border_issues()  # border(border.bottom = fp_border(color="black"))
+  
+```
+This table contrasts 1992-2019 diameter growth between fir and spruce trees by (a) treatment and (b) initial DBH.  The contrast is expressed in the 'ratio' column, and is the ratio of modeled fir growth to spruce growth.  Values are based on estimated marginal means from the mixed effects model fitted previously.
+
+Results indicate that spruce radial growth exceeded that of fir across all diameter classes (p=0.0001), but only in the high-removal unit.  Spruce and fir radial growth rates were close to equal in the low-removal unit (p=0.5849) and control unit (fir slightly less than spruce, p=0.09890).
+
+
+### Question: At the species level, did tree growth vary with treatment?
+
+```{r how did growth vary by treatment}
+
+
+pairs(rg,by=c("Species","Init"),type="response") %>% 
+  as.data.frame() %>% 
+  arrange(Species,contrast,Init) %>% 
+  rename(DBH.1992="Init") %>% 
+  mutate_if(is.double,round,5) %>% 
+  
+  # flextable
+  flextable(col_keys = c(colnames(.)[c(2,1,6:8,3:5)])) %>% 
+  border_outer(part="all", border = fp_border(color="#2c3a51" , width = 2)) %>% 
+  align(align="left",part = "all") %>% 
+  vline( border = fp_border(color="#2c3a51" , width = 1), part = "all" ) %>% 
+  hline( border = fp_border(color="#2c3a51" , width = 1), part = "all" ) %>% 
+  merge_v(j=c(1:2,6:8)) %>% 
+  valign(valign="top") %>%
+  hline_bottom() %>% 
+  fix_border_issues()# border(border.bottom = fp_border(color="black"))
+
+
+
+```
+
+This table indicates that:
+
+1. Spruce in the high-removal treatment grew faster (radial growth) than spruce in the other treatment units.  Our model suggests that spruce growth in the high-removal unit was almost four times higher than spruce radial growth in the control, for trees that were 40cm at the time of treatment.  However, this seems high, I would interpret this with caution.  Spruce growth in the low-removal and control units were close to equal (p=0.8).
+2. Fir radial growth in both high- and low-removal units exceeded growth in the control unit (p=).  Fir diameter growth did not differ between high- and low-removal units.
+
+
+
+
+# Stand-level changes
+
+The following stand-level changes:
+
+1. Quadratic mean diameters by species, TU and time
+2. Volume and basal area by species, TU and time
+3. Species diameter distributions
+4. Species composition by: SPH and basal area, by diameter class
+
+
+
