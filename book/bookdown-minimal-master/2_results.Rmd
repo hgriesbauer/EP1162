@@ -684,10 +684,15 @@ vol.means <- emmeans(fit.vol, ~ BA.Target*Year)
 ba.means <- emmeans(fit.ba, ~ BA.Target*Year)
 sph.means <- emmeans(fit.sph, ~ BA.Target*Year)
 
-# Contrasts
+# Slope Contrasts
 vol.contrast <- contrast(vol.means,interaction="pairwise")
 ba.contrast <- contrast(ba.means,interaction=c("pairwise")) 
 sph.contrast <- contrast(sph.means,interaction=c("pairwise"))
+
+# Mean contrasts
+volM.contrast <- pairs(vol.means,by="Year")
+baM.contrast <- pairs(ba.means,by="Year")
+sphM.contrast <- pairs(sph.means,by="Year")
 
 # CREATE TABLES
 
@@ -709,19 +714,24 @@ standFit.X<-
          `F value`="F.value",
          `p value`="P.value")
 
-# Create contrasts table
+# Create slope contrasts table
 standFit.contrasts<-
   data.frame(Variable="Volume",vol.contrast) %>% 
   rbind(data.frame(Variable="Basal area",ba.contrast)) %>% 
   rbind(data.frame(Variable="Stand density",sph.contrast)) %>% 
-  filter(Year_pairwise %in% c("1992 - 2019","1997 - 2019")) %>% 
+  filter(Year_pairwise %in% c("1992 - 2019")) %>% 
   dplyr::select(Variable,`Year contrast`="Year_pairwise",`Treatment contrast`="BA.Target_pairwise",everything()) %>% 
   rename(`t ratio`="t.ratio",
          `p value`="p.value") %>% 
   mutate_at(vars(estimate:`t ratio`),round,3) %>% 
   mutate_at(vars(`p value`),round,5)
   
-
+# Create mean contrasts table
+standFitM.contrasts<-
+  data.frame(Variable="Volume",volM.contrast) %>% 
+  rbind(data.frame(Variable="Basal area",baM.contrast)) %>% 
+  rbind(data.frame(Variable="Stand density",sphM.contrast)) %>% 
+  filter(Year %in% c(1992,2019))
 
 figNums("standFit.X",display=FALSE)
 appNums("standFit.contrasts",display=FALSE)  
@@ -731,9 +741,19 @@ appNums("standFit.contrasts",display=FALSE)
 ```
 
 
+_Observations:_
 
-Plot means of volume and basal area show that from 2009-2019, stand volume and basal area converged between both harvested treatment units, and were less than the control (
-`r figNums("standPlots",display="cite")`).  The slope of all attributes showed that the low RBA accrued volume, density and diameter faster than the other units over the 27-year period of this study.  A linear model     
+1. All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  
+
+2. The rate of change differed between units.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by by 8.4 and 7.8m² per hectare more than the high RBA and control units, respectively.
+
+3. The low RBA unit also significantly increased its stand density by an estimated 340 stems per hectare more than the control unit. The rate of change in tree density did not differ significantly between the two harvested units.  
+
+4. The rate of change in volume in trees over 18.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
+
+
+
+   
 
 -----------
 
@@ -764,14 +784,19 @@ standFit.X %>%
 ```
 *Trt, treatment; Sq., squares, Num., numerator; Den., denominator; DF, degrees of freedom*
 
+--------------------
+
+`r appNums("standFit.contrasts",caption="Contrasts of 1992-2019 stand structure development over 1992-2019 between treatments.  Contrasts are shown for three variables: volume, basal area and stand density.")`
+
 ```{r show contrasts between plot means}
 
 standFit.contrasts %>% 
+  dplyr::select(-`Year contrast`) %>% 
   flextable() %>% 
    align(align="left",part="all") %>% 
-  merge_v(j=c("Variable","Year contrast")) %>% 
+  merge_v(j=c("Variable")) %>% 
   valign(valign="top",part="body") %>% 
-    hline(i=c(3,6,9,12,15),border=fp_border(color="black")) %>% 
+    hline(i=c(3,6,9),border=fp_border(color="black")) %>% 
     fix_border_issues() %>% 
   autofit()
 
