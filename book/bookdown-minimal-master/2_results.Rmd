@@ -652,8 +652,10 @@ standK.plot<-
   
 standQMD.plot<-standPlot("QMD",y.label="QMD (cm)") 
 
-standPlots<-cowplot::plot_grid(standVol.plot,standBA.plot,standK.plot,standQMD.plot,ncol=1,
+standPlots<-cowplot::plot_grid(standVol.plot,standBA.plot,standK.plot,ncol=1,
                       align="v")
+
+# could put in standQMD.plot as well
 
 figNums("standPlots",display=FALSE)
 ```
@@ -675,17 +677,57 @@ fit.sph<-lmer(SPH~BA.Target*Year+(1|Plot),data=plotData.X)
 
 # Summarize models
 library(lmerTest)
-anova(fit.vol, type="3") 
-  rbind(anova(fit.ba, type="3"))
-anova(fit.sph, type="3")
+
 
 # Create estimated marginal means
+vol.means <- emmeans(fit.vol, ~ BA.Target*Year)
 ba.means <- emmeans(fit.ba, ~ BA.Target*Year)
 sph.means <- emmeans(fit.sph, ~ BA.Target*Year)
 
 # Contrasts
-ba.contrast <- contrast(ba.means,interaction=c("pairwise","revpairwise")) 
-sph.contrast <- contrast(sph.means,interaction=c("pairwise","revpairwise"))
+vol.contrast <- contrast(vol.means,interaction="pairwise")
+ba.contrast <- contrast(ba.means,interaction=c("pairwise")) 
+sph.contrast <- contrast(sph.means,interaction=c("pairwise"))
+
+# CREATE TABLES
+
+# create the data frame of ANOVA
+standFit.X<-
+  data.frame(Variable="Volume",anova(fit.vol, type="3")) %>% 
+  rbind(data.frame(Variable="Basal area",anova(fit.ba, type="3"))) %>% 
+   rbind(data.frame(Variable="Stand density",anova(fit.sph, type="3"))) %>% 
+  
+  # formatting
+  rownames_to_column("Fixed effect") %>% 
+  dplyr::select(Variable,`Fixed effect`,Sum.Sq:F.value,P.value="Pr..F.") %>% 
+  mutate_at(vars("F.value","P.value"),round,5) %>% 
+  mutate(`Fixed effect`=rep(c("Treatment","Year","Trt.*Year"),times=3)) %>% 
+  rename(`Sum sq.`="Sum.Sq",
+         `Mean sq.`="Mean.Sq",
+         `Num. DF`="NumDF",
+         `Den. DF`="DenDF",
+         `F value`="F.value",
+         `p value`="P.value")
+
+# Create contrasts table
+standFit.contrasts<-
+  data.frame(Variable="Volume",vol.contrast) %>% 
+  rbind(data.frame(Variable="Basal area",ba.contrast)) %>% 
+  rbind(data.frame(Variable="Stand density",ba.contrast)) %>% 
+  filter(Year_pairwise %in% c("1992 - 2019","1997 - 2019")) %>% 
+  dplyr::select(Variable,`Year contrast`="Year_pairwise",`Treatment contrast`="BA.Target_pairwise",everything()) %>% 
+  rename(`t ratio`="t.ratio",
+         `p value`="p.value") %>% 
+  mutate_at(vars(estimate:`t ratio`),round,3) %>% 
+  mutate_at(vars(`p value`),round,5)
+  
+
+
+figNums("standFit.X",display=FALSE)
+  
+  
+
+
 ```
 
 
@@ -707,6 +749,27 @@ standPlots
 
 ---------------
 
+`r tableNums("standFit.X",caption="Output from three separate linear models testing the effect of the interaction between treatment and year on plot-level volume, basal area and density." )`
+
+```{r stand variable model output}
+
+standFit.X %>% 
+  flextable() %>% 
+  align(align="left",part="all") %>% 
+  merge_v(j="Variable") %>% 
+  valign(valign="top",part="body") %>% 
+    hline(i=c(3,6,9),border=fp_border(color="black")) %>% 
+    fix_border_issues() %>% 
+  autofit()
+```
+*Trt, treatment; Sq., squares, Num., numerator; Den., denominator; DF, degrees of freedom*
+
+```{r show contrasts between plot means}
+
+
+
+
+```
 
 
 ### Stand attribute by diameter class
