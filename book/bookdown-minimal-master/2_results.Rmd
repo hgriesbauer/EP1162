@@ -713,7 +713,7 @@ standFit.X<-
 standFit.contrasts<-
   data.frame(Variable="Volume",vol.contrast) %>% 
   rbind(data.frame(Variable="Basal area",ba.contrast)) %>% 
-  rbind(data.frame(Variable="Stand density",ba.contrast)) %>% 
+  rbind(data.frame(Variable="Stand density",sph.contrast)) %>% 
   filter(Year_pairwise %in% c("1992 - 2019","1997 - 2019")) %>% 
   dplyr::select(Variable,`Year contrast`="Year_pairwise",`Treatment contrast`="BA.Target_pairwise",everything()) %>% 
   rename(`t ratio`="t.ratio",
@@ -724,7 +724,7 @@ standFit.contrasts<-
 
 
 figNums("standFit.X",display=FALSE)
-  
+appNums("standFit.contrasts",display=FALSE)  
   
 
 
@@ -766,6 +766,14 @@ standFit.X %>%
 
 ```{r show contrasts between plot means}
 
+standFit.contrasts %>% 
+  flextable() %>% 
+   align(align="left",part="all") %>% 
+  merge_v(j=c("Variable","Year contrast")) %>% 
+  valign(valign="top",part="body") %>% 
+    hline(i=c(3,6,9,12,15),border=fp_border(color="black")) %>% 
+    fix_border_issues() %>% 
+  autofit()
 
 
 
