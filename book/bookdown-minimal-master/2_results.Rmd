@@ -46,7 +46,7 @@ piDat<-
          caption="Summary of mixed effects model of tree-level growth")
   
   # create a reference grid for five different diameter classes (converted to BA)
-  rg<-ref_grid(fitBA,at=list(Init=d2ba(c(10,20,30,40,50))),type="response")
+  rg<-ref_grid(fitBA,at=list(Init=d2ba(c(10,20,30,40,50))),type="response",nesting=NULL)
 
   # Using PBAIpct
   fitBApct<-
@@ -58,7 +58,7 @@ piDat<-
          caption="Summary of mixed effects model of tree-level periodic basal area % increment (PBAI %")
   
   # create a reference grid for five different diameter classes (converted to BA)
-  rg.pbaipct<-ref_grid(fitBApct,at=list(Init=d2ba(c(10,20,30,40,50))),type="response")
+  rg.pbaipct<-ref_grid(fitBApct,at=list(Init=d2ba(c(10,20,30,40,50))),type="response",nesting=NULL)
 
 
 
@@ -586,8 +586,8 @@ plotData.X<-
   dplyr::select(BA.Target,Plot:Species,Year,DBH,BA,vol,DBH.class,Height.Pred) %>% 
   mutate(Species=factor(Species)) %>% 
   
-  # Remove volumes below 18.5cm DBH
-  mutate(vol=replace(vol,DBH<18.5,0)) %>% 
+  # Remove volumes below 17.5cm DBH
+  mutate(vol=replace(vol,DBH<17.5,0)) %>% 
   
   # now create plot sums grid so that you can calculate means
   group_by(BA.Target,Plot,Year) %>% 
@@ -749,7 +749,7 @@ _Observations:_
 
 3. The low RBA unit also significantly increased its stand density by an estimated 340 stems per hectare more than the control unit. The rate of change in tree density did not differ significantly between the two harvested units.  
 
-4. The rate of change in volume in trees over 18.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
+4. The rate of change in volume in trees over 17.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
 
 
 
@@ -824,14 +824,14 @@ diamK.plot
 ---------------
 
 ```{r}
-diamVol.plot
+diamBA.plot
 
 
 ```
 
 `r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.")`
 
-*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).*
+*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 17.5cm DBH).*
 
 ---------------
 
@@ -876,7 +876,7 @@ sppComp.plot<-function(standVar){
 } # end function
 
 # create stand-level plots by diameter distribution
-sppVol.plot<-sppComp.plot("Vol")
+sppVol.plot<-sppComp.plot("BA")
 
 figNums("sppVol.plot",display=FALSE)
  
