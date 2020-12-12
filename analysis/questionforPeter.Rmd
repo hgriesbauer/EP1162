@@ -136,7 +136,7 @@ Need a slight change in code so that all treatments are contrasted.  Right now i
 
 ```{r pairwise, echo=TRUE}
 
-year.by.trt <- contrast(cell.means,interaction="pairwise") #might need to change the 
+year.by.trt <- contrast(cell.means,interaction=c("pairwise","revpairwise")) #might need to change the 
 
 year.by.trt 
 
