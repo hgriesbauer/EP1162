@@ -20,7 +20,9 @@ library(officer)
 library(sjPlot)
 library(emmeans)
 
- 
+load("~/Documents/Git/EP1162/data/ep1162_Data.RData")
+load("~/Documents/Git/EP1162/data/ep1162_plotData.RData")
+
 # SOME PRELIM DATA FORMATTING
 # formatting plotDat
 plotDat<-
@@ -112,7 +114,7 @@ Analyses are grouped into three main categories (below).  These are treated as s
   
  
   # Diameter class analysis
-  figNums("diamVol.plot", caption="Mean plot volume distribution by diameter class and treatment, for two periods.  Black line shows total volume.  Volume calculated on trees meeting 17.5cm DBH limit.  Spruce and fir contribution to volume by diameter class are shown with bar plots.  Douglas-fir volume contribution by diameter class is not shown.",display="FALSE")
+  figNums("diamVol.plot", caption="Mean plot volume distribution by diameter class and treatment, for two periods.  Black line shows total volume.  Volume calculated on trees meeting 18.5cm DBH limit.  Spruce and fir contribution to volume by diameter class are shown with bar plots.  Douglas-fir volume contribution by diameter class is not shown.",display="FALSE")
   
   figNums("diamBA.plot", caption="Mean plot basal area distribution by diameter class and treatment, for two periods.  Black line shows total basal area.  Spruce and fir contribution by diameter class are shown ith bar plots.  Douglas-fir contribution by diameter class is not shown.",display="FALSE")
   
@@ -129,7 +131,7 @@ To test the hypothesis that tree-level radial growth response over the 1992-2019
 ## Stand-level growth and structure
 
 ### Stand-level volume and basal area estimates
-Total and merchantable volumes were estimated for trees using species- and region-specific equations [@nigh2016] based on tree height and DBH.  Consistent with forest management practices in British Columbia, we estimated volumes for trees meeting a minimum diameter utilization limit of 17.5cm DBH.  For trees lacking a tree height measurement, we estimated height by fitting a single diameter-height model developed with a linear mixed effects model, with log-transformed DBH as a fixed effect, and tree nested within plot as a random effect.  Trees with broken tops were omitted from diameter-height models. We summed tree-level estimates of volume and basal area to generate stand-level estimates for each plot. To test the hypothesis that changes in stand attributes over 27 years varied by treatment, we fit separate linear models with stand total volume, basal area, and density as response variables, and the interaction between treatment and year as the independent variable.    
+Total and merchantable volumes were estimated for trees using species- and region-specific equations [@nigh2016] based on tree height and DBH.  Consistent with forest management practices in British Columbia, we estimated volumes for trees meeting a minimum diameter utilization limit of 18.5cm DBH.  For trees lacking a tree height measurement, we estimated height by fitting a single diameter-height model developed with a linear mixed effects model, with log-transformed DBH as a fixed effect, and tree nested within plot as a random effect.  Trees with broken tops were omitted from diameter-height models. We summed tree-level estimates of volume and basal area to generate stand-level estimates for each plot. To test the hypothesis that changes in stand attributes over 27 years varied by treatment, we fit separate linear models with stand total volume, basal area, and density as response variables, and the interaction between treatment and year as the independent variable.    
 
 ----------------
 

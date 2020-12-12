@@ -46,7 +46,7 @@ piDat<-
          caption="Summary of mixed effects model of tree-level growth")
   
   # create a reference grid for five different diameter classes (converted to BA)
-  rg<-ref_grid(fitBA,at=list(Init=d2ba(c(10,20,30,40,50))),type="response",nesting=NULL)
+  rg<-ref_grid(fitBA,at=list(Init=d2ba(c(10,20,30,40,50))),type="response")
 
   # Using PBAIpct
   fitBApct<-
@@ -58,7 +58,7 @@ piDat<-
          caption="Summary of mixed effects model of tree-level periodic basal area % increment (PBAI %")
   
   # create a reference grid for five different diameter classes (converted to BA)
-  rg.pbaipct<-ref_grid(fitBApct,at=list(Init=d2ba(c(10,20,30,40,50))),type="response",nesting=NULL)
+  rg.pbaipct<-ref_grid(fitBApct,at=list(Init=d2ba(c(10,20,30,40,50))),type="response")
 
 
 
@@ -163,7 +163,7 @@ table=
 
 ```
 
-The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[1]*100,1)`% (marginal R²) of the variation in tree log-transformed 1992-2019 BAI (`r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area more than than fir in the high-removal treatment unit, whereas basal growth between the two species was close to equal in the low-removal and control units (`r appNums("sppContrast.table",display="cite")`).  Within each species, treatment contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).
+The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[1]*100,1)`% (marginal R²) of the variation in tree log-transformed 1992-2019 BAI (`r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`).  Across diameter classes, spruce trees had more basal area increment than fir in the high-removal treatment unit, whereas growth between the two species was close to equal in the low-removal and control units (`r appNums("sppContrast.table",display="cite")`).  Spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`).  Spruce growth was similar between the low-removal and control units.  Fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).
 
 ----------------
 
@@ -586,8 +586,8 @@ plotData.X<-
   dplyr::select(BA.Target,Plot:Species,Year,DBH,BA,vol,DBH.class,Height.Pred) %>% 
   mutate(Species=factor(Species)) %>% 
   
-  # Remove volumes below 17.5cm DBH
-  mutate(vol=replace(vol,DBH<17.5,0)) %>% 
+  # Remove volumes below 18.5cm DBH
+  mutate(vol=replace(vol,DBH<18.5,0)) %>% 
   
   # now create plot sums grid so that you can calculate means
   group_by(BA.Target,Plot,Year) %>% 
@@ -749,7 +749,7 @@ _Observations:_
 
 3. The low RBA unit also significantly increased its stand density by an estimated 340 stems per hectare more than the control unit. The rate of change in tree density did not differ significantly between the two harvested units.  
 
-4. The rate of change in volume in trees over 17.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
+4. The rate of change in volume in trees over 18.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
 
 
 
@@ -824,14 +824,14 @@ diamK.plot
 ---------------
 
 ```{r}
-diamBA.plot
+diamVol.plot
 
 
 ```
 
 `r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.")`
 
-*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 17.5cm DBH).*
+*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).*
 
 ---------------
 
@@ -876,7 +876,7 @@ sppComp.plot<-function(standVar){
 } # end function
 
 # create stand-level plots by diameter distribution
-sppVol.plot<-sppComp.plot("BA")
+sppVol.plot<-sppComp.plot("Vol")
 
 figNums("sppVol.plot",display=FALSE)
  
