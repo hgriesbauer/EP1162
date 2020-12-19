@@ -406,32 +406,7 @@ standDiam.X<-
     mutate(Species=fct_relevel(Species, "Fd", after = Inf)) %>% 
     mutate(Species=fct_recode(Species,`Douglas-fir`="Fd"))
 
-  diamClass.plot<-function(standVar,y.label) {
-   
-  diamClass.spp %>% 
-   ggplot()+
-  geom_bar(aes(x=DBH.class,y=get(standVar),group=Species,fill=Species),stat="identity")+
-  # geom_point(data=filter(diamClass.spp,Species=="Total"),
-  #              aes(x=DBH.class,y=get(standVar)))+
-  #   geom_line(data=filter(diamClass.spp,Species=="Total"),
-  #              aes(x=DBH.class,y=get(standVar),group=Species))+  
-   scale_fill_manual(values=c("#F8766D", "#00BFCA","azure4")) +  # control color
-     theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
-        legend.position = "bottom")+
-    ylab(y.label)+
-    xlab("DBH class (cm)")+
  
-    # coord_flip()+
-    facet_grid(Year~BA.Target) %>% 
-    return()
-}
-  
-# create stand-level plots by diameter distribution
-diamVol.plot<-diamClass.plot("Vol",y.label="Mean plot volume (m³/ha)")
-diamBA.plot<-diamClass.plot("BA",y.label="Mean plot basal area (m²/ha)")  
-diamK.plot<-diamClass.plot("SPH",y.label="Mean plot tree density (sph)") 
-  
-# diamClass.plot<-cowplot::plot_grid(diamVol.plot,diamBA.plot,diamK.plot,ncol=1)
 ```
 
 ### Plot means
@@ -451,8 +426,8 @@ plotData.X<-
   dplyr::select(BA.Target,Plot:Species,Year,DBH,BA,vol,DBH.class,Height.Pred) %>% 
   mutate(Species=factor(Species)) %>% 
   
-  # Remove volumes below 17.5cm DBH
-  mutate(vol=replace(vol,DBH<17.5,0)) %>% 
+  # Remove volumes below 18.5cm DBH
+  mutate(vol=replace(vol,DBH<18.5,0)) %>% 
   
   # now create plot sums grid so that you can calculate means
   group_by(BA.Target,Plot,Year) %>% 
@@ -575,25 +550,9 @@ _Observations:_
 4. The rate of change in volume in trees over 17.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
 
 
+### Stand attributes by diameter class
 
-   
-
------------
-
-
-
----------------
-
-
-
---------------------
-
-
-
-
-### Stand attribute by diameter class
-
-Among treatments and throughout the stand development after treatment, the stands have maintained a reverse-J diameter class distribution (`r figNums("diamK.plot",display="cite")`).  
+Among treatments and throughout the stand development after treatment, the stands maintained a reverse-J diameter class distribution (`r figNums("diamK.plot",display="cite")`).  
 Immediately after the partial harvest, the diameter class distribution of volume differed between the treatment.  In the 27 years since partial harvest, volume in all three treatment units was mostly concentrated in the 22.5-27.5cm DBH class, and mostly comprised of fir (`r figNums("diamVol.plot",display="cite")`).  Over both time periods shown in the figure and all three treatments, most of the spruce volume was concentrated in DBH classes spanning 37.5 to 47.5cm.  Basal area trends were very similar to volume, and are not shown.  
 
 
@@ -617,7 +576,7 @@ diamBA.plot
 
 `r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.")`
 
-*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 17.5cm DBH).*
+*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).*
 
 ---------------
 
@@ -761,6 +720,39 @@ standPlots
 `r figNums("standPlots",caption="Mean plot attributes by treatment unit and year.  Whiskers are one standard error of the mean.  Vol., volume; BA, basal area; Tree dens., tree density")`
 
 \newpage
+ 
+
+```{r plot species composition by diameter class}
+
+# Create plotting function  
+
+diamClass.plot<-function(standVar,y.label) {
+diamClass.spp %>% 
+   ggplot()+
+  geom_bar(aes(x=DBH.class,y=get(standVar),group=Species,fill=Species),stat="identity")+
+  # geom_point(data=filter(diamClass.spp,Species=="Total"),
+  #              aes(x=DBH.class,y=get(standVar)))+
+  #   geom_line(data=filter(diamClass.spp,Species=="Total"),
+  #              aes(x=DBH.class,y=get(standVar),group=Species))+  
+   scale_fill_manual(values=c("#F8766D", "#00BFCA","azure4")) +  # control color
+     theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+        legend.position = "bottom")+
+    ylab(y.label)+
+    xlab("DBH class (cm)")+
+ 
+    # coord_flip()+
+    facet_grid(Year~BA.Target) %>% 
+    return()
+}
+  
+# create stand-level plots by diameter distribution
+diamVol.plot<-diamClass.plot("Vol",y.label="Mean plot volume (m³/ha)")
+diamBA.plot<-diamClass.plot("BA",y.label="Mean plot basal area (m²/ha)")  
+diamK.plot<-diamClass.plot("SPH",y.label="Mean plot tree density (sph)") 
+  
+# diamClass.plot<-cowplot::plot_grid(diamVol.plot,diamBA.plot,diamK.plot,ncol=1)
+```
+
 
 ```{r species composition plots by diameter class}
 
@@ -804,6 +796,8 @@ sppComp.plot("BA")
 
 ```
 
+
+\newpage
 
 `r figNums("sppComp.plot",caption="Spruce-fir volume proportional composition by diameter class, treatment and year.")`
 
