@@ -271,8 +271,8 @@ appNums("htModelFit.plot",display="FALSE") # model output
 ```
 
 
-### Estimating tree height from diameter
-Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiam.plot",display="cite")`).  A comparison of height-diameter models showed that intercepts and slopes of log-transformed heights did not vary significantly (i.e., p>0.05) between species or time periods (not shown), therefore a single height-diameter linear mixed-effects model was developed using `r X %>% filter(Species %in% c("Fir","Spruce")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset, with log-transformed diameter as the fixed effect, and tree nested within plot as random effects. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log-transformed DBH (not shown).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`r appNums("htModelFit.plot",display="cite")`). This model was applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@nigh2016].
+### Tree height modeling
+Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiam.plot",display="cite")`).  We modeled tree height using a linear mixed effects model with log-transformed diameter as the fixed effect, and tree nested within plot as a random effect.  We originally developed separate models for each species and time period, however, a comparison of height-diameter models showed that intercepts and slopes odid not vary significantly (i.e., p>0.05) between species or time periods (not shown).  Therefore, we developed a single height-diameter linear mixed-effects model was developed using `r X %>% filter(Species %in% c("Fir","Spruce")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log-transformed DBH (not shown).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`r appNums("htModelFit.plot",display="cite")`). This model was applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@nigh2016].
 
 
 
@@ -539,15 +539,15 @@ appNums("standFit.contrasts",display=FALSE)
 ```
 
 
-_Observations:_
+All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  The rate of change differed between units.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by 
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[1]`
+and
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[2]`
+m² per hectare more than the high RBA and control units, respectively (p<0.01 for both). The low RBA unit also significantly increased its stand density by an estimated 
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[2]`
+stems per hectare more than the control unit (p<0.001). The rate of change in tree density did not differ significantly between the two harvested units.  
 
-1. All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  
-
-2. The rate of change differed between units.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by by 8.4 and 7.8m² per hectare more than the high RBA and control units, respectively.
-
-3. The low RBA unit also significantly increased its stand density by an estimated 340 stems per hectare more than the control unit. The rate of change in tree density did not differ significantly between the two harvested units.  
-
-4. The rate of change in volume in trees over 17.5cm DBH was barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
+The rate of change in volume in trees over 18.5cm DBH was different between barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
 
 
 ### Stand attributes by diameter class
@@ -556,29 +556,9 @@ Among treatments and throughout the stand development after treatment, the stand
 Immediately after the partial harvest, the diameter class distribution of volume differed between the treatment.  In the 27 years since partial harvest, volume in all three treatment units was mostly concentrated in the 22.5-27.5cm DBH class, and mostly comprised of fir (`r figNums("diamVol.plot",display="cite")`).  Over both time periods shown in the figure and all three treatments, most of the spruce volume was concentrated in DBH classes spanning 37.5 to 47.5cm.  Basal area trends were very similar to volume, and are not shown.  
 
 
------------
-
-```{r}
-diamK.plot
 
 
-```
 
-`r figNums("diamVol.plot",caption="Diameter-class distribution of tree density (stems/hectare) by species, treatment and year.")`
-
----------------
-
-```{r}
-diamBA.plot
-
-
-```
-
-`r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.")`
-
-*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).*
-
----------------
 
 ### Species composition
 
@@ -752,6 +732,18 @@ diamK.plot<-diamClass.plot("SPH",y.label="Mean plot tree density (sph)")
   
 # diamClass.plot<-cowplot::plot_grid(diamVol.plot,diamBA.plot,diamK.plot,ncol=1)
 ```
+
+
+```{r show volume by diameter class}
+diamVol.plot
+
+```
+
+`r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.")`
+
+*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).*
+
+\newpage
 
 
 ```{r species composition plots by diameter class}
