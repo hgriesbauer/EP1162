@@ -458,6 +458,53 @@ standData.X<-
 figNums("standPlots",display=FALSE)
 ```
 
+```{r periodic increment by treatment level}
+
+# Create a function to compute standard error for vectors with NA
+incSE<-function(x) {
+  
+  x2<-
+    x %>% 
+    .[!is.na(.)] 
+  
+  
+    sd(x2)/sqrt(length(x2)) %>% 
+    return()
+  }
+
+perInc.X<-
+  plotData.X %>% 
+  pivot_longer(cols=Vol.sum:QMD.mean,names_to="var",values_to = "val") %>% 
+  pivot_wider(names_from = Year,values_from = val) %>% 
+  mutate(Period1=(`1994`-`1992`)/3,
+         Period2=(`1997`-`1994`)/3,
+         Period3=(`2009`-`1997`)/11,
+         Period4=(`2019`-`2009`)/11) %>% 
+  dplyr::select(BA.Target:var,Period1:Period4) %>% 
+  pivot_longer(cols=Period1:Period4,names_to="Period",values_to="Values") %>% 
+  pivot_wider(names_from=var,values_from=Values) %>% 
+  
+  # now summarize at treatment unit level
+  group_by(BA.Target,Period) %>% 
+   summarise(Vol=mean(Vol.sum,na.rm=T),
+            Vol.se=incSE(Vol.sum),
+            BA=mean(BA.sum,na.rm=T),
+            BA.se=incSE(BA.sum),
+            SPH=mean(SPH.sum,na.rm=T),
+            SPH.se=incSE(SPH.sum),
+            QMD=mean(QMD.mean,na.rm=T),
+            QMD.se=incSE(QMD.mean))
+            
+  
+
+# create captions for figures and table
+figNums("perInc.plot",display=FALSE)
+appNums("perInc.table",display=FALSE)
+
+
+```
+
+
 ```{r fit model to plot data}
 
 # Rename columns in plotData.X
@@ -537,6 +584,8 @@ appNums("standFit.contrasts",display=FALSE)
 
 
 ```
+
+
 
 
 All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  The rate of change differed between units.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by 
@@ -708,6 +757,30 @@ standPlots
 
 \newpage
  
+
+```{r plot periodic increment}
+
+periodInc.plot<-function(standVar,y.label){
+  
+  
+  perInc.X %>%
+  dplyr::select(BA.Target,Period,standVar,paste0(standVar,".se")) %>% 
+    setNames(c("BA.Target","Period","Mean","SE")) %>% 
+  
+  ggplot(aes(x=Period,y=Mean,group=BA.Target,color=BA.Target))+
+  geom_point()+
+  geom_line()+
+     geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
+                   position=position_dodge(0)) %>% 
+    return()
+}
+  
+periodInc.plot("BA",y.label="BA (m²/ha)")
+periodInc.plot("Vol",y.label="BA (m²/ha)")
+
+
+```
+
 
 ```{r plot species composition by diameter class}
 
