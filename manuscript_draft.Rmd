@@ -137,7 +137,7 @@ To test the hypothesis that tree-level radial growth response over the 1992-2019
 ## Stand-level growth and structure
 
 ### Stand-level volume and basal area estimates
-Total and merchantable volumes were estimated for trees using species- and region-specific equations [@nigh2016] based on tree height and DBH.  Consistent with forest management practices in British Columbia, we estimated volumes for trees meeting a minimum diameter utilization limit of 17.5cm DBH.  For trees lacking a tree height measurement, we estimated height by fitting a single diameter-height model developed with a linear mixed effects model, with log-transformed DBH as a fixed effect, and tree nested within plot as a random effect.  Trees with broken tops were omitted from diameter-height models. We summed tree-level estimates of volume and basal area to generate stand-level estimates for each plot. To test the hypothesis that changes in stand attributes over 27 years varied by treatment, we fit separate linear models with stand total volume, basal area, and density as response variables, and the interaction between treatment and year as the independent variable.  
+Total and merchantable volumes were estimated for trees using species- and region-specific equations [@nigh2016] based on tree height and DBH.  Consistent with forest management practices in British Columbia, we estimated volumes for trees meeting a minimum diameter utilization limit of 18.5cm DBH.  For trees lacking a tree height measurement, we estimated height by fitting a single diameter-height model developed with a linear mixed effects model, with log-transformed DBH as a fixed effect, and tree nested within plot as a random effect.  Trees with broken tops were omitted from diameter-height models. We summed tree-level estimates of volume and basal area to generate stand-level estimates for each plot. To test the hypothesis that changes in stand attributes over 27 years varied by treatment, we fit separate linear models with stand total volume, basal area, and density as response variables, and the interaction between treatment and year as the independent variable.  
 
 # Results
 
@@ -493,9 +493,14 @@ perInc.X<-
             SPH=mean(SPH.sum,na.rm=T),
             SPH.se=incSE(SPH.sum),
             QMD=mean(QMD.mean,na.rm=T),
-            QMD.se=incSE(QMD.mean))
-            
+            QMD.se=incSE(QMD.mean)) %>% 
   
+  # rename periods
+  mutate(Period=dplyr::recode(Period,
+                       Period1="1992-1994",
+                       Period2="1994-1997",
+                       Period3="1997-2009",
+                       Period4="2009-2019")) 
 
 # create captions for figures and table
 figNums("perInc.plot",display=FALSE)
@@ -588,15 +593,15 @@ appNums("standFit.contrasts",display=FALSE)
 
 
 
-All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  The rate of change differed between units.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by 
+All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by 
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[1]`
 and
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[2]`
 m² per hectare more than the high RBA and control units, respectively (p<0.01 for both). The low RBA unit also significantly increased its stand density by an estimated 
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[2]`
-stems per hectare more than the control unit (p<0.001). The rate of change in tree density did not differ significantly between the two harvested units.  
+stems per hectare more than the control unit (p<0.001). The rate of change in tree density did not differ significantly between the two harvested units.  The rate of change in volume in trees over 18.5cm DBH was different between barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
 
-The rate of change in volume in trees over 18.5cm DBH was different between barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
+
 
 
 ### Stand attributes by diameter class
@@ -621,6 +626,8 @@ A comparison of proportional species composition by diameter class, treatment an
 
 In the low RBA, the species composition distribution by diameter class was different.  Here, both fir and spruce maintained similar proportions across diameter classes smaller than 37.5cm DBH.  Spruce formed the leading species in diameter classes above 37.5cm DBH, with the exception of the largest class.
 
+## Mortality
+
 
 # Discussion
 
@@ -631,6 +638,9 @@ At the tree-level, our results suggest that while both species respond to thinni
 Other comparative studies of spruce and fir growth rates present differing evidence regarding species differences in release potential to thinning.  In mature Engelmann spruce (Picea engelmannii) – subalpine fir forests in western North America, understory spruce growth rates exceeded those of fir, allowing spruce to achieve canopy position faster, including after canopy gaps were created through disturbance (Antos et al. 2000, Andrus et al. 2018).  In mature forest in central BC, spruce growth exceeded that of subalpine fir after age 80 (Eis and Craigdallie 1983).  Because spruce tends to live longer than subalpine fir, higher growth rates at later ages may allow this species to become larger than fir.  In contrast, thinning studies in spruce-fir forests in eastern North America report that balsam fir (Abies balsamifera) responds to release with faster height and diameter growth than co-occurring red spruce (Picea rubens) (Dumais and Prevost, 2007; Dumais et al. 2014, Messier et al. 1999). Although both species are similar in shade tolerance, firs are considered to be better adapted to low light conditions in the understory, allowing them to persist longer in undisturbed forest  (Antos 2000) and potentially able to respond faster to changes in understory light (Dumais et al 2014, Messier et al. 1999).  Other studies have found no difference in growth response between spruce and fir species after treatment (MCaughey and Smith1982).   Our study also suggests that at lower levels of basal area removal, spruce and fir growth responses will be similar.
 
 
+## Management considerations
+1. Both species responded with increased growth after partial harvest.  High removal of basal area in these forests stimulated stronger spruce growth.  This information can help silviculturists manipulate stand structure to preferentially ...
+2. Partial harvesting at both intensities delayed peak volume and basal area increment by approximately 10 years.  Annual increment in the control unit declined faster over the last measurement period compared to previous periods, perhaps suggesting that the stand is becoming mature and losses due to mortality may substantially offset growth increment.
 
 \newpage
 
@@ -760,27 +770,35 @@ standPlots
 
 ```{r plot periodic increment}
 
-periodInc.plot<-function(standVar,y.label){
-  
+# Note this function performs the operation for basal area and volume only
+
   
   perInc.X %>%
-  dplyr::select(BA.Target,Period,standVar,paste0(standVar,".se")) %>% 
-    setNames(c("BA.Target","Period","Mean","SE")) %>% 
+  dplyr::select(BA.Target:BA.se) %>% 
+    setNames(c("BA.Target","Period","Vol_mean","Vol_SE","BA_mean","BA_SE")) %>% 
+    pivot_longer(cols=-c(BA.Target,Period),
+                 names_to=c("Var","SE"),
+                 names_sep="_",
+                 values_to="Value") %>% 
+    pivot_wider(names_from="SE",values_from="Value") %>% 
   
-  ggplot(aes(x=Period,y=Mean,group=BA.Target,color=BA.Target))+
+  ggplot(aes(x=Period,y=mean,group=BA.Target,color=BA.Target))+
   geom_point()+
   geom_line()+
-     geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
-                   position=position_dodge(0)) %>% 
-    return()
-}
+   
+     geom_errorbar(aes(ymin=mean-SE, ymax=mean+SE, width=.2),
+                   position=position_dodge(0))+
+    facet_wrap(~Var,nrow=2,
+               scales="free_y", strip.position = "left",
+               labeller=as_labeller(c(BA="Basal area inc. (m²/ha/year)",Vol="Volume inc. (m²/ha/year)")))+
+    ylab(NULL)+
+     theme(strip.background = element_blank(),
+           strip.placement = "outside")
   
-periodInc.plot("BA",y.label="BA (m²/ha)")
-periodInc.plot("Vol",y.label="BA (m²/ha)")
-
 
 ```
 
+`r figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")`
 
 ```{r plot species composition by diameter class}
 
