@@ -613,16 +613,71 @@ Immediately after the partial harvest, the diameter class distribution of volume
 
 ### Species composition
 
+```{r generate species composition data}
 
+sppComp.X<-
+  X %>% 
+  filter(Status=="Live") %>% # filter for live trees
+  filter(Species %in% c("Spruce","Fir")) %>% # filter for spruce and fir trees
+  
+  # Compute basal area and volume
+ left_join(filter(volCoef,VolType=="total"),by="Species") %>% 
+  mutate(vol=exp(1)^b0*DBH^b1*Height.Pred^b2) %>% 
+  mutate(BA=d2ba(DBH)) %>% 
+  dplyr::select(BA.Target,Plot:Species,Year,DBH,BA,vol) %>% 
+  mutate(Species=factor(Species)) %>% 
+  
+  # Need to add zero values for spruce in Plot 19
+  add_row(BA.Target="TU:10",Plot=19,Year=c(1992,1994,1997,2009,2019),Species="Spruce",DBH=20,vol=0,BA=0) %>% 
+  
+  
+  # Remove volumes below 18.5cm DBH
+  mutate(vol=replace(vol,DBH<18.5,0)) %>%
+  
+  # summarise 
+  group_by(BA.Target,Plot,Species,Year) %>% 
+  summarise(sph=n()*20,
+            BA=sum(BA)*20,
+            Vol=sum(vol)*20) %>% 
+  ungroup() %>% 
+  
+  # pivot_longer
+  pivot_longer(cols=sph:Vol,names_to="Var",values_to = "Value")
+
+plotTotal.X<-
+  sppComp.X %>% 
+  pivot_wider(names_from="Var",values_from = "Value") %>% 
+  group_by(BA.Target,Plot,Year) %>% 
+   summarise(sph=sum(sph),
+            BA=sum(BA),
+            Vol=sum(Vol)) %>% 
+  pivot_longer(cols=sph:Vol,names_to="Var",values_to="Plot.Total") %>% 
+  inner_join(sppComp.X,by=c("BA.Target","Plot","Year","Var")) %>% 
+  
+  # create proportion column
+  mutate(Prop=Value/Plot.Total) %>% 
+  ungroup() %>% 
+  
+  # a Few plots have no values in some years
+  drop_na(Prop)
+
+plotTotal.table<-
+  plotTotal.X %>% 
+  group_by(BA.Target,Year,Species,Var) %>% 
+  summarise(Prop=mean(Prop,na.rm=T))
+
+
+```
 
 
 ```{r caption for species composition plots}
 
 figNums("sppComp.plot",display=FALSE)
+figNums("sppCompDiam.plot",display=FALSE)
  
 ```
 
-A comparison of proportional species composition by diameter class, treatment and year showed that fir and spruce proportion by diameter class varied similarly between the high RBA and control units (`r figNums("sppComp.plot",display="cite")`).  In 1992, the largest diameter classes were dominated by spruce, whereas fir was the dominant species in the smallest diameter classes.  This pattern was found for volume, basal area, and tree density.  We only show volume in this document.  By 2019, the fir-spruce composition by distribution class was maintained in these two units, with small increases in spruce composition in the smallest diameter class.
+A comparison of proportional species composition by diameter class, treatment and year showed that fir and spruce proportion by diameter class varied similarly between the high RBA and control units (`r figNums("sppCompDiam.plot",display="cite")`).  In 1992, the largest diameter classes were dominated by spruce, whereas fir was the dominant species in the smallest diameter classes.  This pattern was found for volume, basal area, and tree density.  We only show volume in this document.  By 2019, the fir-spruce composition by distribution class was maintained in these two units, with small increases in spruce composition in the smallest diameter class.
 
 In the low RBA, the species composition distribution by diameter class was different.  Here, both fir and spruce maintained similar proportions across diameter classes smaller than 37.5cm DBH.  Spruce formed the leading species in diameter classes above 37.5cm DBH, with the exception of the largest class.
 
@@ -800,6 +855,15 @@ standPlots
 
 `r figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")`
 
+\newpage
+
+```{r plot species composition by attribute}
+
+
+
+
+```
+
 ```{r plot species composition by diameter class}
 
 # Create plotting function  
@@ -889,7 +953,7 @@ sppComp.plot("BA")
 
 \newpage
 
-`r figNums("sppComp.plot",caption="Spruce-fir volume proportional composition by diameter class, treatment and year.")`
+`r figNums("sppCompDiam.plot",caption="Spruce-fir volume proportional composition by diameter class, treatment and year.")`
 
 *Note this figure is almost identical for compairsons of basal area, volume or tree density. For brevity, we only show basal area.*
 
