@@ -132,7 +132,7 @@ Analyses are grouped into three main categories (below).  These are treated as s
 
 ## Tree-level growth responses
 
-To test the hypothesis that tree-level radial growth response over the 1992-2019 period varied with interactions between (i) tree diameter at the time of treatment (1992); (ii) treatment; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 diameter increment as the response variable, and treatment, species and log-transformed 1992 diameter as interacting fixed effects, and plot as a random intercept effect.  We also fit a similar model with the 1992-2019 diameter increment expressed as a percentage of 1992 diameter.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@add later].  
+To test the hypothesis that tree-level radial growth response over the 1992-2019 period varied with interactions between (i) tree diameter at the time of treatment (1992); (ii) treatment; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 diameter increment as the response variable, and treatment, species and log-transformed 1992 diameter as interacting fixed effects, and plot as a random intercept effect.  We also fit a similar model with the 1992-2019 diameter increment expressed as a percentage of 1992 diameter.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@barton2009mumin].  
 
 ## Stand-level growth and structure
 
@@ -272,7 +272,7 @@ appNums("htModelFit.plot",display="FALSE") # model output
 
 
 ### Tree height modeling
-Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiam.plot",display="cite")`).  We modeled tree height using a linear mixed effects model with log-transformed diameter as the fixed effect, and tree nested within plot as a random effect.  We originally developed separate models for each species and time period, however, a comparison of height-diameter models showed that intercepts and slopes odid not vary significantly (i.e., p>0.05) between species or time periods (not shown).  Therefore, we developed a single height-diameter linear mixed-effects model was developed using `r X %>% filter(Species %in% c("Fir","Spruce")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log-transformed DBH (not shown).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`r appNums("htModelFit.plot",display="cite")`). This model was applied to predict heights in trees without height measurements, and tree-volume estimates generated as per Nigh [-@nigh2016].
+Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiam.plot",display="cite")`).  We modeled tree height using a linear mixed effects model with log-transformed diameter as the fixed effect, and tree nested within plot as a random effect.  We originally developed separate models for each species and time period, however, a comparison of height-diameter models showed that intercepts and slopes did not vary significantly (i.e., p>0.05) between species or time periods (not shown).  Therefore, we developed a single height-diameter linear mixed-effects model using `r X %>% filter(Species %in% c("Fir","Spruce")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log-transformed DBH (not shown).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`r appNums("htModelFit.plot",display="cite")`). Using this model, we generated height estimates for trees without height measurements, and then estimated tree total volume as per Nigh [-@nigh2016].
 
 
 
@@ -535,9 +535,9 @@ ba.means <- emmeans(fit.ba, ~ BA.Target*Year)
 sph.means <- emmeans(fit.sph, ~ BA.Target*Year)
 
 # Slope Contrasts
-vol.contrast <- contrast(vol.means,interaction="pairwise")
-ba.contrast <- contrast(ba.means,interaction=c("pairwise")) 
-sph.contrast <- contrast(sph.means,interaction=c("pairwise"))
+vol.contrast <- contrast(vol.means,interaction=c("pairwise","revpairwise"))
+ba.contrast <- contrast(ba.means,interaction=c("pairwise","revpairwise")) 
+sph.contrast <- contrast(sph.means,interaction=c("pairwise","revpairwise"))
 
 # Mean contrasts
 volM.contrast <- pairs(vol.means,by="Year")
@@ -569,8 +569,8 @@ standFit.contrasts<-
   data.frame(Variable="Volume",vol.contrast) %>% 
   rbind(data.frame(Variable="Basal area",ba.contrast)) %>% 
   rbind(data.frame(Variable="Stand density",sph.contrast)) %>% 
-  filter(Year_pairwise %in% c("1992 - 2019")) %>% 
-  dplyr::select(Variable,`Year contrast`="Year_pairwise",`Treatment contrast`="BA.Target_pairwise",everything()) %>% 
+  filter(Year_revpairwise %in% c("2019 - 1992")) %>% 
+  dplyr::select(Variable,`Year contrast`="Year_revpairwise",`Treatment contrast`="BA.Target_pairwise",everything()) %>% 
   rename(`t ratio`="t.ratio",
          `p value`="p.value") %>% 
   mutate_at(vars(estimate:`t ratio`),round,3) %>% 
@@ -581,11 +581,11 @@ standFitM.contrasts<-
   data.frame(Variable="Volume",volM.contrast) %>% 
   rbind(data.frame(Variable="Basal area",baM.contrast)) %>% 
   rbind(data.frame(Variable="Stand density",sphM.contrast)) %>% 
-  filter(Year %in% c(1992,2019))
+  dplyr::select(Contrast=contrast,Variable,Year,everything())
 
 figNums("standFit.X",display=FALSE)
 appNums("standFit.contrasts",display=FALSE)  
-  
+appNums("standFitM.contrasts",display=FALSE)    
 
 
 ```
@@ -593,12 +593,15 @@ appNums("standFit.contrasts",display=FALSE)
 
 
 
-All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`.  The low RBA unit accrued basal area faster than the other two units over the 1992-2019 period, and this difference was significant (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit was higher by 
-`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[1]`
+All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`.  The low RBA unit accrued basal area significantly faster than the other two units over the 1992-2019 period (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit from 1992 to 2019 was higher by 
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]`
 and
-`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[2]`
-m² per hectare more than the high RBA and control units, respectively (p<0.01 for both). The low RBA unit also significantly increased its stand density by an estimated 
-`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,1) %>%  abs() %>%   .[2]`
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[2]`
+m² per hectare more than the high RBA and control units, respectively (p<0.01 for both). 
+
+
+The low RBA unit also significantly increased its stand density by an estimated 
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0)  %>%   .[2]`
 stems per hectare more than the control unit (p<0.001). The rate of change in tree density did not differ significantly between the two harvested units.  The rate of change in volume in trees over 18.5cm DBH was different between barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
 
 
@@ -682,6 +685,90 @@ A comparison of proportional species composition by diameter class, treatment an
 In the low RBA, the species composition distribution by diameter class was different.  Here, both fir and spruce maintained similar proportions across diameter classes smaller than 37.5cm DBH.  Spruce formed the leading species in diameter classes above 37.5cm DBH, with the exception of the largest class.
 
 ## Mortality
+
+```{r mortality data}
+
+# Create dead dataset
+
+# Dead species totals
+deadList<-
+  X %>% 
+  filter(Status=="Dead") %>% 
+  mutate(ID=paste(Plot,TreeID,sep="-")) %>% 
+  group_by(ID) %>% 
+  summarise_all(first)
+
+# Summarize mortality by treatment unit
+dead<-
+  X %>% 
+  filter(Status=="Dead") %>% 
+  mutate(ID=paste(Plot,TreeID,sep="-")) %>% 
+  mutate(Species=fct_recode(Species,`Douglas-fir`="Fd")) %>% 
+  group_by(ID) %>% 
+  summarise_all(first) %>% 
+  ungroup() %>% 
+  mutate(BA=d2ba(DBH)) %>% # convert to basal area per hectare 
+  group_by(BA.Target,DBH.class,Year) %>% 
+  summarise(BA=sum(BA),
+            k=n()) 
+
+# Summarize mortality by plot - this will be used for Figure
+deadPlot.X<-
+  X %>% 
+  filter(Status=="Dead") %>% 
+  mutate(ID=paste(Plot,TreeID,sep="-")) %>% 
+  mutate(Species=fct_recode(Species,`Douglas-fir`="Fd")) %>% 
+  group_by(ID) %>% 
+  summarise_all(first) %>% 
+  ungroup() %>% 
+  mutate(BA=d2ba(DBH)) %>% # convert to basal area per hectare 
+  group_by(BA.Target,Plot) %>% 
+  summarise(BA=sum(BA),
+            k=n()) %>% 
+  full_join(plotData.X,by=c("BA.Target","Plot")) %>% 
+  filter(Year==1997) %>% 
+  rename("BA.dead"=BA.x,"Num.dead"=k) %>% 
+  mutate(BA.dead=replace_na(BA.dead,0),
+         Num.dead=replace_na(Num.dead,0)) %>% 
+  mutate(prop.K=Num.dead/SPH,
+         prop.BA=BA.dead/BA.y)
+
+# linear model to analyze mortality by plot volume
+deadPlot.ANOVA<-
+  lm(Num.dead~Vol,data=deadPlot.X) 
+
+dead.Summ<-
+  dead %>% 
+  ungroup() %>% 
+  group_by(BA.Target) %>% 
+  summarise(BA=sum(BA)/sum(dead$BA)*100,
+            k=sum(k)/sum(dead$k)*100) %>% 
+  mutate_if(is.numeric,round,1)
+
+
+
+
+
+figNums("mort.plot",display=FALSE)
+figNums("mortDiam.plot",display=FALSE)
+
+```
+
+A total of `r deadList %>% nrow()` trees (`r deadList %>% filter(Species=="Fir") %>% nrow()` fir, `r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce, and `r deadList %>% filter(Species=="Fd") %>% nrow()` Douglas-fir) died in `r length(unique(deadList$Plot))` plots from 1997 to 2019. By treatment unit, the control unit had the highest mortality, in terms of trees and basal area (
+`r dead.Summ %>% filter(BA.Target=="TU:Control") %>% pull("k")` and 
+`r dead.Summ %>% filter(BA.Target=="TU:Control") %>% pull("BA")`% of tree mortality, respectively).  The high-removal treatment unit had the lowest mortality by number of trees and basal area (
+`r dead.Summ %>% filter(BA.Target=="TU:10") %>% pull("k")` and 
+`r dead.Summ %>% filter(BA.Target=="TU:10") %>% pull("BA")`% of tree mortality, respectively).  Tree mortality was concentrated in the smaller diameter classes in the control and low-removal treatment unit, and most mortality occured during the most recent measurement period of 2009-2019 (
+`r figNums("mort.plot",display="cite")`).
+
+
+
+
+
+
+
+
+
 
 
 # Discussion
@@ -845,7 +932,7 @@ standPlots
                    position=position_dodge(0))+
     facet_wrap(~Var,nrow=2,
                scales="free_y", strip.position = "left",
-               labeller=as_labeller(c(BA="Basal area inc. (m²/ha/year)",Vol="Volume inc. (m²/ha/year)")))+
+               labeller=as_labeller(c(BA="Basal area inc. (m²/ha/year)",Vol="Volume inc. (m³/ha/year)")))+
     ylab(NULL)+
      theme(strip.background = element_blank(),
            strip.placement = "outside")
@@ -859,10 +946,25 @@ standPlots
 
 ```{r plot species composition by attribute}
 
+plotTotal.table %>%
+  mutate(Var=fct_relevel(Var,"BA","Vol","sph")) %>% 
+  mutate(Var=dplyr::recode(Var,BA="Basal area",
+                    Vol="Volume",
+                    sph="Tree density")) %>%
+  
+  ggplot()+
+  aes(x=Year,y=Prop,fill=Species)+
+  ylab("Proportion")+
+   geom_bar(position="fill",stat="identity")+
+   geom_hline(yintercept=0.5, linetype="dashed", color = "black")+
+  theme(legend.position = "bottom")+
+  facet_grid(Var~BA.Target)
 
 
 
 ```
+
+`r figNums("sppComp.plot",caption="Mean proportion of spruce and fir basal area, volume, and tree density by treatment and year.")`
 
 ```{r plot species composition by diameter class}
 
@@ -899,6 +1001,7 @@ diamK.plot<-diamClass.plot("SPH",y.label="Mean plot tree density (sph)")
 ```{r show volume by diameter class}
 diamVol.plot
 
+
 ```
 
 `r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.")`
@@ -907,6 +1010,18 @@ diamVol.plot
 
 \newpage
 
+
+```{r show tree density by diameter class}
+diamK.plot
+
+
+```
+
+`r figNums("diamK.plot",caption="Diameter-class distribution of tree density (stems/hectare) by species, treatment and year.")`
+
+
+
+\newpage
 
 ```{r species composition plots by diameter class}
 
@@ -956,6 +1071,89 @@ sppComp.plot("BA")
 `r figNums("sppCompDiam.plot",caption="Spruce-fir volume proportional composition by diameter class, treatment and year.")`
 
 *Note this figure is almost identical for compairsons of basal area, volume or tree density. For brevity, we only show basal area.*
+
+\newpage
+
+```{r plot mortality as a function of 1997 stand attributes}
+
+deadPlot.X %>% 
+  ggplot()+
+  aes(x=Vol,y=Num.dead,color=BA.Target,shape=BA.Target)+
+  geom_point(size=4)+
+  stat_smooth(method = lm, formula = y ~ x,se=FALSE,aes(group=1))+
+  ylab("Tree mortality from 1997-2019")+
+  xlab("Plot 1997 volume (m³/hectare) ")+
+  theme(legend.position = "bottom")
+
+
+
+```
+
+
+```{r plot mortality by treatment}
+
+
+
+dead %>% 
+  pivot_longer(cols=BA:k,names_to = "Var",values_to = "Value") %>% 
+  
+  
+  
+  mutate(Var=factor(Var)) %>% 
+  mutate(Var=fct_relevel(Var,"k","BA")) %>% 
+  
+  
+  
+  mutate(Var=dplyr::recode(Var,BA="Basal area (m²)",k="Number of trees")) %>% 
+  ggplot()+
+  aes(x=DBH.class,y=Value,fill=Year)+
+  geom_bar(stat="identity")+
+  facet_grid(Var~BA.Target,
+               scales="free_y",
+               switch="y")+
+    ylab(NULL)+
+  xlab("DBH class (cm)")+
+     theme( strip.placement = "outside",
+            strip.background.y = element_blank(),
+            legend.position = "bottom",
+            axis.text.x = element_text(angle=270,vjust = 0.3))
+  
+
+
+```
+
+
+`r figNums("mort.plot",caption="Total tree mortality recorded in plots from 1997-2019, presented as number of trees (top panel) and basal area (bottom panel).")`
+
+\newpage
+
+
+```{r plot mortality by year and DBH class}
+
+dead %>% 
+  pivot_longer(cols=BA:k,names_to = "Var",values_to = "Value") %>% 
+  mutate(Var=factor(Var)) %>% 
+  mutate(Var=fct_relevel(Var,"k","BA")) %>% 
+  mutate(Var=dplyr::recode(Var,BA="Basal area (m²)",k="Number of trees")) %>% 
+  ggplot()+
+  aes(x=DBH.class,y=Value,fill=Year)+
+  geom_bar(stat="identity")+
+  facet_grid(Var~BA.Target,
+               scales="free_y",
+               switch="y")+
+    ylab(NULL)+
+  xlab("DBH class (cm)")+
+     theme( strip.placement = "outside",
+            strip.background.y = element_blank(),
+            legend.position = "bottom",
+            axis.text.x = element_text(angle=270,vjust = 0.3))
+  
+
+
+```
+
+`r figNums("mortDiam.plot",caption="Total tree mortality recorded in plots from 1997-2019, presented as number of trees (top panel) and basal area (bottom panel).")`
+
 
 # Appendices
 
@@ -1072,6 +1270,26 @@ trtContrast %>%
 
 \newpage
 
+`r appNums("standFitM.contrasts",caption="Contrasts of stand attributes (volume, basal area and tree density) between treatments.  Contrasts are presented for five measurement years. SE, standard error, df, degrees freedom")`
+
+```{r table contrasts between plot means}
+
+standFitM.contrasts %>% 
+  arrange(Contrast,Variable,Year) %>% 
+  mutate_if(is.numeric,round,5) %>% 
+  
+  flextable() %>% 
+   align(align="left",part="all") %>% 
+  merge_v(j=c("Contrast","Variable","Year")) %>% 
+  valign(valign="top",part="body") %>% 
+    hline(i=seq(from=5,to=40,by=5),border=fp_border(color="black")) %>% 
+    fix_border_issues() %>% 
+  autofit()
+
+```
+
+\newpage
+
 `r appNums("standFit.contrasts",caption="Contrasts of 1992-2019 stand structure development over 1992-2019 between treatments.  Contrasts are shown for three variables: volume, basal area and stand density.")`
 
 ```{r show contrasts between plot means}
@@ -1089,6 +1307,8 @@ standFit.contrasts %>%
 ```
 
 \newpage
+
+
 
 # References
 
