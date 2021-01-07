@@ -86,39 +86,38 @@ ba2d<-function(ba) {return(sqrt(ba/pi)*200)}
 
 # To-do list
 
-Comments from Mike - we can put text below each comment to describe how it was addressed, and then delete comments for any issues once they are resolved.
+### Comments from Mike's emails
 
-From November 6 e-mail:
-
-Use of terminology
+we can put text below each comment to describe how it was addressed, and then delete comments for any issues once they are resolved.
 
 
-  *   The term "units" is used in several places, where it seems that you mean "treatments" (or treatment types, treatment unit).
+#### Use of terminology
 
-  *   The use of the term "plot" or "plots" is used appropriately as far as I can see.
+- The term "units" is used in several places, where it seems that you mean "treatments" (or treatment types, treatment unit).
 
-  *   The term "fir" is used to describe subalpine fir or 'balsam' in several parts of the text, including possibly figure and table captions. I know what species you are referring to, of course, but others, especially cursory readers, may misconstrue it. The colloquial use of 'fir" is spread across both Abies and Douglas-fir. "Balsam" as a term has well-documented ambiguities, and while Canadians tend to use balsam for Abies, Americans often call Abies "firs", as in the various species of true fir. I would recommend using Abies as the shorthand descriptor in the text and captions for subalpine fir.  It is a short word, and we have only 1 Abies species at this site. Also, my experience in the on-line-search literature world and with things like Google Scholar is that Abies is a much better and more diagnostic search word for this subject matter than fir or balsam. "Spruce-Abies" is very unambiguous as a descriptor for this forest type.
+- The use of the term "plot" or "plots" is used appropriately as far as I can see.
 
-  *   Rate of change (increase, decrease) in vol, BA, and sph: In both in your stats tables and figure captions, and in the text narrative, ensure that what you are describing is clearly and accurately described as either:  (a) the incremental change in values between two measurement periods, or (b)  the difference in absolute value in certain parameters (e.g. standing volume) between two measurement periods, or between two treatments. Also, the annualized growth rate of something averaged over a measurement period (e.g. mean PBAI, like BA growth in m2/yr over a period) is different than the rate of change in a growth rate over time (e.g. is a growth rate increasing or decreasing).  I got confused a few times on this issue.
+- The term "fir" is used to describe subalpine fir or 'balsam' in several parts of the text, including possibly figure and table captions. I know what species you are referring to, of course, but others, especially cursory readers, may misconstrue it. The colloquial use of 'fir" is spread across both Abies and Douglas-fir. "Balsam" as a term has well-documented ambiguities, and while Canadians tend to use balsam for Abies, Americans often call Abies "firs", as in the various species of true fir. I would recommend using Abies as the shorthand descriptor in the text and captions for subalpine fir.  It is a short word, and we have only 1 Abies species at this site. Also, my experience in the on-line-search literature world and with things like Google Scholar is that Abies is a much better and more diagnostic search word for this subject matter than fir or balsam. "Spruce-Abies" is very unambiguous as a descriptor for this forest type.
+
+- Rate of change (increase, decrease) in vol, BA, and sph: In both in your stats tables and figure captions, and in the text narrative, ensure that what you are describing is clearly and accurately described as either:  (a) the incremental change in values between two measurement periods, or (b)  the difference in absolute value in certain parameters (e.g. standing volume) between two measurement periods, or between two treatments. Also, the annualized growth rate of something averaged over a measurement period (e.g. mean PBAI, like BA growth in m2/yr over a period) is different than the rate of change in a growth rate over time (e.g. is a growth rate increasing or decreasing).  I got confused a few times on this issue.
 
 
-Commentary on sections and sub-sections
+### Commentary on sections and sub-sections
 
+#### Section 3.1.1 BA increment from 1992 to 2019
 
-Section 3.1.1 BA increment from 1992 to 2019
+- Great: Very clear and straightforward. i.e. - log-transformed treatment (initial BA) was a very statistically significant predictor of tree response across dbh classes for both Sx and Bl.
+- Don't know what all the random effects outputs are. I am sure they are meaningful, but I just dont know what they mean.
+- Number of observations of 510: Should ensure it is clear that only trees > 7.5 cm dbh are counted.
+- Would be good to define the dbh class limits somewhere. In Appendix 6 table, we describe the class mid-point.
+- For Appendix 6, I assume that the null hypothesis for the ratio is = 1.
 
-  *   Great: Very clear and straightforward. i.e. - log-transformed treatment (initial BA) was a very statistically significant predictor of tree response across dbh classes for both Sx and Bl.
-  *   Don't know what all the random effects outputs are. I am sure they are meaningful, but I just dont know what they mean.
-  *   Number of observations of 510: Should ensure it is clear that only trees > 7.5 cm dbh are counted.
-  *   Would be good to define the dbh class limits somewhere. In Appendix 6 table, we describe the class mid-point.
-  *   For Appendix 6, I assume that the null hypothesis for the ratio is = 1.
+#### Section 3.1.2 Mortality
 
-Section 3.1.2 Mortality
-
-  1.  I am thinking that mortality should / could be analysed as a frequency response - i.e. - expected vs actual distribution of mortality by size class and/or species. e.g. a Chi-squared or allied type of analysis. Null hypothesis is that mortality of stems is randomly distributed across different sizes and species of trees. H1 is that it is non-random.
-  2.  I'd suggest that we don't compare total mortality (e.g # of stems) across treatment units, but rather frequency relative to initial number of stems (i.e. - at beginning of observation period). That way we normalize mortality rates relative to initial stem densities. Otherwise, results could be mis-leading - e.g. Control treatments could have more mortality in overall sph, simply because they have more initial stems.
-  3.  ACTION ITEM FOR ME:  I need to check my original datasets and data sorting iterations to see how I handled mortality observations for the 1992 and 1994 plot remeasurements.
-  4.  Note for you:  All of the mortality you've analysed and identified so far is mortality that is incremental following 92/94, so it is still solid analysis data, just with that qualification. I will clarify the 92/94 mortalilty observations for the Methods section; we did observe dead trees at these times, but these mortality pre-dated our treatments and/or first measurements. Anyway, probably not a big deal, but this needs examination and clarification to explain this. If necessary, I will quantify observations of dead trees observed on these years, because they are actually > 0.
+- I am thinking that mortality should / could be analysed as a frequency response - i.e. - expected vs actual distribution of mortality by size class and/or species. e.g. a Chi-squared or allied type of analysis. Null hypothesis is that mortality of stems is randomly distributed across different sizes and species of trees. H1 is that it is non-random.
+- I'd suggest that we don't compare total mortality (e.g # of stems) across treatment units, but rather frequency relative to initial number of stems (i.e. - at beginning of observation period). That way we normalize mortality rates relative to initial stem densities. Otherwise, results could be mis-leading - e.g. Control treatments could have more mortality in overall sph, simply because they have more initial stems.
+- ACTION ITEM FOR ME:  I need to check my original datasets and data sorting iterations to see how I handled mortality observations for the 1992 and 1994 plot remeasurements.
+- Note for you:  All of the mortality you've analysed and identified so far is mortality that is incremental following 92/94, so it is still solid analysis data, just with that qualification. I will clarify the 92/94 mortalilty observations for the Methods section; we did observe dead trees at these times, but these mortality pre-dated our treatments and/or first measurements. Anyway, probably not a big deal, but this needs examination and clarification to explain this. If necessary, I will quantify observations of dead trees observed on these years, because they are actually > 0.
 
 Testing for density-dependence of mortality responses... some ideas or hypotheses..  Note that f (___) means "a function of"...
 
@@ -131,32 +130,31 @@ Caveats:   (a) our plots and tree distributions might be too spatially variable 
 
 
 
-3.2.1  Estimating tree height from diameter
+#### 3.2.1  Estimating tree height from diameter
 
 
-  *   Really solid stats and rationale for a single ht:dbh model. Great !
-  *   What is really interesting and useful about this is that the ht:dbh relationship is seemingly statistically independent of treatment or, that is, initial density,  A very useful simplifying assumption proven for future modellers of these stands. We should highlight this in either our results or discussion.
+- Really solid stats and rationale for a single ht:dbh model. Great !
+- What is really interesting and useful about this is that the ht:dbh relationship is seemingly statistically independent of treatment or, that is, initial density,  A very useful simplifying assumption proven for future modellers of these stands. We should highlight this in either our results or discussion.
 
-3.2.2 Plot means
+#### 3.2.2 Plot means
 
-  *   See notes above about use of term "units" vs treatment (or similar).
-  *   Clarify effects of treatment and/or species on growth rate vs standing vol / BA at each measurement period.
-  *   A Figure 7b or equivalent could visually present changes in growth rate over time. (e.g. previous graphs we've developed)
-  *   Under Observations, # 2 - the 2nd sentence needs work to edit and clarify.
+- See notes above about use of term "units" vs treatment (or similar).
+- Clarify effects of treatment and/or species on growth rate vs standing vol / BA at each measurement period.
+- A Figure 7b or equivalent could visually present changes in growth rate over time. (e.g. previous graphs we've developed)
+- Under Observations, # 2 - the 2nd sentence needs work to edit and clarify.
 
-3.2.3 Stand attributes by diameter class
+#### 3.2.3 Stand attributes by diameter class
 
-  *   We should define what we mean by the term inverse J or inverse J-shaped dbh distribution. Just for clarity.
-  *   Should we quantitatively describe these distributions? Don't have to, just asking the question.
-  *   Is the merch limit for min merch tree size 18.5 cm dbh, or 17.5 cm dbh? I remember the latter from various cruises and cruise compilations.
-  *   There are two Figure 2's, one is for vol and one is for sph.
-  *   Clarify in figures and text that sph is based on trees 7.5 cm dbh and greater. Increases in sph can be from ingress of trees growing from size classes below this limit.
-  *   A suggestion:  Have a table comparing total volume to merch volume by treatment, etc?  Would be useful for some readers, and communicate MAI and volume growth rates too.
+- We should define what we mean by the term inverse J or inverse J-shaped dbh distribution. Just for clarity.
+- Should we quantitatively describe these distributions? Don't have to, just asking the question.
+- Is the merch limit for min merch tree size 18.5 cm dbh, or 17.5 cm dbh? I remember the latter from various cruises and cruise compilations.
+- There are two Figure 2's, one is for vol and one is for sph.
+- Clarify in figures and text that sph is based on trees 7.5 cm dbh and greater. Increases in sph can be from ingress of trees growing from size classes below this limit.
+- A suggestion:  Have a table comparing total volume to merch volume by treatment, etc?  Would be useful for some readers, and communicate MAI and volume growth rates too.
 
-3.2.4  Species composition
+#### 3.2.4  Species composition
 
-
-  *   First sentence:  Clarify what you mean by "organized similarly". Does this refer to frequency distribution ? What constitutes similarity?
+- First sentence:  Clarify what you mean by "organized similarly". Does this refer to frequency distribution ? What constitutes similarity?
 
 
 \newpage
@@ -343,20 +341,8 @@ trtContrast<-
 
 ```
 
-```{r set up tree BAI references}
 
-
-  figNums(name="treeBAI.plot",display=FALSE) # Estimated marginal means from Lme
-
-  tableNums("fitBA.table",display=FALSE) # Summary of mixed effects model for BAI
-  tableNums("fitBApct.table",display=FALSE) # Summary of mixed effects model for BAI
-  
-  appNums("sppContrast.table",display=FALSE) # Species contrasts from treeBAI model
-  appNums("trtContrast.table",display=FALSE) # Treatment contracts from treeBAI model
-
-```
-
-The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[1]*100,1)`% (marginal R²) of the variation in log-transformed 1992-2019 tree-level BAI (`r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area more than than fir in the high-removal treatment unit, whereas basal growth between the two species was close to equal in the low-removal and control units (`r appNums("sppContrast.table",display="cite")`).  Within each species, treatment contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).
+The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in log-transformed 1992-2019 tree-level BAI (`r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area more than than fir in the high-removal treatment unit, whereas basal growth between the two species was close to equal in the low-removal and control units (`r appNums("sppContrast.table",display="cite")`).  Within each species, treatment contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).
 
 
 
@@ -573,7 +559,7 @@ standData.X<-
 
 
 
-figNums("standPlots",display=FALSE)
+
 ```
 
 ```{r periodic increment by treatment level}
@@ -620,9 +606,7 @@ perInc.X<-
                        Period3="1997-2009",
                        Period4="2009-2019")) 
 
-# create captions for figures and table
-figNums("perInc.plot",display=FALSE)
-appNums("perInc.table",display=FALSE)
+
 
 
 ```
@@ -701,9 +685,7 @@ standFitM.contrasts<-
   rbind(data.frame(Variable="Stand density",sphM.contrast)) %>% 
   dplyr::select(Contrast=contrast,Variable,Year,everything())
 
-figNums("standFit.X",display=FALSE)
-appNums("standFit.contrasts",display=FALSE)  
-appNums("standFitM.contrasts",display=FALSE)    
+ 
 
 
 ```
@@ -711,7 +693,7 @@ appNums("standFitM.contrasts",display=FALSE)
 
 
 
-All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`.  The low RBA unit accrued basal area significantly faster than the other two units over the 1992-2019 period (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit from 1992 to 2019 was higher by 
+All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  The low RBA unit accrued basal area significantly faster than the other two units over the 1992-2019 period (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit from 1992 to 2019 was higher by 
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]`
 and
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[2]`
@@ -791,14 +773,8 @@ plotTotal.table<-
 ```
 
 
-```{r caption for species composition plots}
 
-figNums("sppComp.plot",display=FALSE)
-figNums("sppCompDiam.plot",display=FALSE)
- 
-```
-
-A comparison of proportional species composition by diameter class, treatment and year showed that fir and spruce proportion by diameter class varied similarly between the high RBA and control units (`r figNums("sppCompDiam.plot",display="cite")`).  In 1992, the largest diameter classes were dominated by spruce, whereas fir was the dominant species in the smallest diameter classes.  This pattern was found for volume, basal area, and tree density.  We only show volume in this document.  By 2019, the fir-spruce composition by distribution class was maintained in these two units, with small increases in spruce composition in the smallest diameter class.
+A comparison of proportional species composition by diameter class, treatment and year showed that fir and spruce volume proportion by diameter class varied similarly between the high RBA and control units (`r figNums("sppCompDiam.plot",display="cite")`).  In 1992, the largest diameter classes were dominated by spruce, whereas fir was the dominant species in the smallest diameter classes.  This pattern was also found for basal area and tree density (not shown).  By 2019, the fir-spruce composition by distribution class was maintained in these two units, with small increases in spruce composition in the smallest diameter class.
 
 In the low RBA, the species composition distribution by diameter class was different.  Here, both fir and spruce maintained similar proportions across diameter classes smaller than 37.5cm DBH.  Spruce formed the leading species in diameter classes above 37.5cm DBH, with the exception of the largest class.
 
@@ -865,9 +841,6 @@ dead.Summ<-
   mutate_if(is.numeric,round,1)
 
 
-figNums("mort.plot",display=FALSE)
-figNums("mortDiam.plot",display=FALSE)
-figNums("mortSppDiam.plot",display=FALSE)
 
 ```
 
@@ -951,7 +924,8 @@ standFit.X %>%
                  position=position_dodge(0.05))+
   xlab("1992 DBH (cm)")+
   ylab("Basal area increment from 1992-2019 (m²)")+
-  facet_wrap(~BA.Target)
+  facet_wrap(~BA.Target)+
+  theme(legend.position="bottom")
 
 
 ```
@@ -967,50 +941,87 @@ standFit.X %>%
 
 # Plotting
 
-# Create function
-standPlot<-function(standVar,y.label) {
-
-    standData.X %>% 
-    mutate(Year=as.numeric(as.character(Year))) %>% 
-    dplyr::select(BA.Target,Year,standVar,paste0(standVar,".se")) %>% 
-    setNames(c("BA.Target","Year","Mean","SE")) %>% 
+standData.X %>% 
+  setNames(c("BA.Target","Year","Vol_mean","Vol_se",
+             "BA_mean","BA_se",
+             "SPH_mean","SPH_se",
+             "QMD_mean","QMD_se")) %>% 
   
-    ggplot(aes(x=Year,y=Mean,color=BA.Target,group=BA.Target))+
-    geom_point()+
-    geom_line()+
-    geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
-                   position=position_dodge(.9))+
-    facet_wrap(~BA.Target)+
-      scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+  # Need to change year to numeric for plotting
+  mutate(Year=as.numeric(as.character(Year))) %>% 
+  
+  # reshape for ggplot
+  pivot_longer(cols=Vol_mean:last_col(),names_to=c("Var","Metric"),names_sep="_",values_to="Values") %>%   pivot_wider(names_from="Metric",values_from="Values") %>% 
+  
+  # Filter to remove quadratic mean diameter
+  filter(Var!="QMD") %>% 
+  
+  # Reset factor levels for plotting
+  mutate(Var=fct_relevel(Var,"Vol","BA","SPH")) %>% 
+  mutate(Var=fct_recode(Var,Volume="Vol",
+                        `Basal area`="BA",
+                        `Stand density (stems per hectare)`="SPH")) %>% 
+  
+  ggplot()+
+  aes(x=Year,y=mean,fill=BA.Target,color=BA.Target,group=BA.Target)+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, width=.2))+
+                   # position=position_dodge(.9))+
+   scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
                      minor_breaks = c(1992,1994,1997,2009,2019),
                      name="Measurement year")+ # stretch out x-axis
-  theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
-        legend.position = "none")+
-    ylab(y.label)
+  facet_wrap(~Var,scales="free_y")+
+  xlab("Plot mean")+
+  theme(legend.position = "bottom")
 
-}
-    
-standVol.plot<-
-  standPlot("Vol",y.label="Vol. (m³/ha)")+
-  theme(axis.text.x=element_blank(),axis.title.x=element_blank())
-  
-standBA.plot<-
-  standPlot("BA",y.label="BA (m²/ha)")+
-  theme(axis.text.x=element_blank(),axis.title.x=element_blank())
-  
-standK.plot<-
-  standPlot("SPH",y.label="Tree dens. (sph)")
-  
-standQMD.plot<-standPlot("QMD",y.label="QMD (cm)") 
 
-standPlots<-cowplot::plot_grid(standVol.plot,standBA.plot,standK.plot,ncol=1,
-                      align="v")
+# Old code to produce separate grapohs below
 
-# display plot
-standPlots
+# Create function
+# standPlot<-function(standVar,y.label) {
+# 
+#     standData.X %>% 
+#     mutate(Year=as.numeric(as.character(Year))) %>% 
+#     dplyr::select(BA.Target,Year,standVar,paste0(standVar,".se")) %>% 
+#     setNames(c("BA.Target","Year","Mean","SE")) %>% 
+#   
+#     ggplot(aes(x=Year,y=Mean,color=BA.Target,group=BA.Target))+
+#     geom_point()+
+#     geom_line()+
+#     geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
+#                    position=position_dodge(.9))+
+#     # facet_wrap(~BA.Target)+
+#       scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+#                      minor_breaks = c(1992,1994,1997,2009,2019),
+#                      name="Measurement year")+ # stretch out x-axis
+#   theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+#         legend.position = "none")+
+#     ylab(y.label)
+# 
+# }
+#     
+# standVol.plot<-
+#   standPlot("Vol",y.label="Vol. (m³/ha)")+
+#   theme(axis.text.x=element_blank(),axis.title.x=element_blank())
+#   
+# standBA.plot<-
+#   standPlot("BA",y.label="BA (m²/ha)")+
+#   theme(axis.text.x=element_blank(),axis.title.x=element_blank())
+#   
+# standK.plot<-
+#   standPlot("SPH",y.label="Tree dens. (sph)")
+#   
+# standQMD.plot<-standPlot("QMD",y.label="QMD (cm)") 
+# 
+# standPlots<-cowplot::plot_grid(standVol.plot,standBA.plot,standK.plot,ncol=1,
+#                       align="v")
+# 
+# # display plot
+# standPlots
 ```
 
-`r figNums("standPlots",caption="Mean plot attributes by treatment unit and year.  Whiskers are one standard error of the mean.  Vol., volume; BA, basal area; Tree dens., tree density")`
+`r figNums("standPlots",caption="Mean plot live-tree attributes by treatment unit and year.  Whiskers are one standard error of the mean.  Vol., volume; BA, basal area; Tree dens., tree density")`
 
 \newpage
  
