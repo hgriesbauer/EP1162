@@ -159,7 +159,7 @@ Caveats:   (a) our plots and tree distributions might be too spatially variable 
   *   First sentence:  Clarify what you mean by "organized similarly". Does this refer to frequency distribution ? What constitutes similarity?
 
 
-
+\newpage
 
 # Introduction
 
@@ -247,6 +247,14 @@ Mortality occurring between Fall 1994 and Fall 1997 remeasurements was captured 
 “The difference in basal area between 1992 and 1994 is a result of basal area reductions through the sanitation felling of some stems and some minor natural mortality, combined with basal area increases through the growth of remaining live stems.”
 
 A review of the various plots indicates that between 1992 and 1994, some PSP’s decreased in BA (as sanitation removals and minor mortality exceeded growth of live stems), while others increased in BA as tree growth exceeded BA removals. 
+
+  *   Is there any change in which sizes or size classes of trees die as stand volume increases? - e.g. is competition asymmetrical or symmetrical? Currently the y axis is total number of trees, I believe.
+  *   Not sure if we have enough sample size of trees to look at species dynamics (Sx vs Bl).
+  *   I am wondering if the same relationship that appears between volume and tree mortality, is mirrored in the relationship between BA and tree mortality. A bit more on this below...
+
+Foresters (like me) do like to use BA per ha as a density measure for field planning and stand assessment because it seems to be broadly useful and is easily assessed via stand walkthroughs or plots. Sapwood BA is pretty well correlated with foliar biomass of the stand - a biological linkage. Tree BA is often correlated well with things like crown width.
+
+I hadn't thought alot previously about vol per ha as a density measurement, but it does have the characteristic of integrating not just BA, but also tree height, so it integrates tree growing space occupancy in both in horizontal dimensions (crown width and probably root spread) but also vertical. Vol ha theoretically provides more of a 3D measure of how the trees are occupying a given land area. The fact that volume is of commercial interest is a bonus. Key assumptions here: That trees are healthy and most importantly, crowns are health and growing relatively optimally relative to their growing space opportunities. Once crown vigor etc starts to decline with age, pests or pathogens, then the relationship could start to break down.
 
 
 # Results
@@ -826,6 +834,7 @@ dead<-
 deadPlot.X<-
   X %>% 
   filter(Status=="Dead") %>% 
+  # filter(Species=="Spruce") %>% #dot this if you want to summarize by species
   mutate(ID=paste(Plot,TreeID,sep="-")) %>% 
   mutate(Species=fct_recode(Species,`Douglas-fir`="Fd")) %>% 
   group_by(ID) %>% 
@@ -836,16 +845,16 @@ deadPlot.X<-
   summarise(BA=sum(BA),
             k=n()) %>% 
   full_join(plotData.X,by=c("BA.Target","Plot")) %>% 
-  filter(Year==1997) %>% 
-  rename("BA.dead"=BA.x,"Num.dead"=k) %>% 
+  filter(Year==1994) %>% 
+  rename("BA.dead"=BA.x,"Num.dead"=k,"BA"=BA.y) %>% 
   mutate(BA.dead=replace_na(BA.dead,0),
          Num.dead=replace_na(Num.dead,0)) %>% 
   mutate(prop.K=Num.dead/SPH,
-         prop.BA=BA.dead/BA.y)
+         prop.BA=BA.dead/BA)
 
 # linear model to analyze mortality by plot volume
 deadPlot.ANOVA<-
-  lm(Num.dead~Vol,data=deadPlot.X) 
+  lm(Num.dead~BA,data=deadPlot.X)  
 
 dead.Summ<-
   dead %>% 
@@ -856,27 +865,13 @@ dead.Summ<-
   mutate_if(is.numeric,round,1)
 
 
-
-
-
 figNums("mort.plot",display=FALSE)
 figNums("mortDiam.plot",display=FALSE)
+figNums("mortSppDiam.plot",display=FALSE)
 
 ```
 
-A total of `r deadList %>% nrow()` trees (`r deadList %>% filter(Species=="Fir") %>% nrow()` fir, `r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce, and `r deadList %>% filter(Species=="Fd") %>% nrow()` Douglas-fir) died in `r length(unique(deadList$Plot))` plots from 1997 to 2019. By treatment unit, the control unit had the highest mortality, in terms of trees and basal area (
-`r dead.Summ %>% filter(BA.Target=="TU:Control") %>% pull("k")` and 
-`r dead.Summ %>% filter(BA.Target=="TU:Control") %>% pull("BA")`% of tree mortality, respectively).  The high-removal treatment unit had the lowest mortality by number of trees and basal area (
-`r dead.Summ %>% filter(BA.Target=="TU:10") %>% pull("k")` and 
-`r dead.Summ %>% filter(BA.Target=="TU:10") %>% pull("BA")`% of tree mortality, respectively).  Tree mortality was concentrated in the smaller diameter classes in the control and low-removal treatment unit, and most mortality occured during the most recent measurement period of 2009-2019 (
-`r figNums("mort.plot",display="cite")`).
-
-
-
-
-
-
-
+A total of `r deadList %>% nrow()` trees (`r deadList %>% filter(Species=="Fir") %>% nrow()` fir, `r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce, and `r deadList %>% filter(Species=="Fd") %>% nrow()` Douglas-fir) died in `r length(unique(deadList$Plot))` plots from 1994 to 2019. The number of trees that died per plot from 1994 to 2019 increased significantly with plot basal area in 1994 (`r figNums("mort.plot",display="cite")`, R^2 = `r glance(deadPlot.ANOVA) %>% .$r.squared %>% round(.,3)*100`, p = `r glance(deadPlot.ANOVA) %>% pull(p.value)`). Similar linear models fitted separately for fir and spruce showed that fir mortality had a similar relationship to plot basal area, whereas spruce mortality did not (not shown).  The diameter distribution of fir mortality followed a negative exponential distribution, with mortality concentrated in smaller diameter classes (`r figNums("mortSppDiam.plot",display="cite")`).  Spruce mortality was concentrated in larger diameter classes.  By treatment unit, the control unit had the highest mortality, whereas the high-removal treatment unit had the lowest mortality (`r figNums("mortDiam.plot",display="cite")`).  The majority of mortality occured during the most recent measurement period of 2009-2019.
 
 
 
@@ -885,7 +880,7 @@ A total of `r deadList %>% nrow()` trees (`r deadList %>% filter(Species=="Fir")
 
 ## Species differences in growth response to partial harvest
 
-At the tree-level, our results suggest that while both species respond to thinning with faster radial growth, heavy thinning can elicit a stronger radial growth response in spruce, compared to fir.  This coincides with our finding of proportionally higher spruce volume and basal area in the heavy thinning treatment in 2019, compared to the other treatments.  Where thinning treatments in this region retain both spruce and fir, high-removal treatments may favour spruce release.  Other studies have shown that residual spruce growth responds favourably to heavy thinning.  A 10-year analysis of white spruce growth underneath an aspen canopy found that a complete overstory removal and heavy basal area removal resulted in immediate and significant spruce radial and height growth responses, compared to control and partial cutting treatments (Smith et al. 2016).   In a 35-year old white spruce stand, diameter increment was maximized with the heaviest thinning intensity, however, the treatment in this study was thinning from below (Stiell 1970).  Frank (1973) also showed that 70-year old white spruce basal increment increased with the amount of thinning. Competition for light is a key factor that limits white spruce growth, and opening up the stand to allow for increased light penetration enhances white spruce growth responses [@Lieffers1994].  High basal area removal may also increase stand air and soil temperatures, which might preferentially favour spruce growth responses compared to fir (Lacjcerowicz et al. 2004).
+At the tree-level, our results suggest that while both hybrid white sruce and subalpine fir respond to thinning with faster radial growth, heavy thinning can elicit a stronger radial growth response in spruce, compared to fir.  This coincides with our finding of proportionally higher spruce volume and basal area in the heavy thinning treatment in 2019, compared to the other treatments.  Where thinning treatments in this region retain both species, removing a relatively high amount of the stand may favour spruce release.  Other studies have shown that residual spruce growth responds favourably to heavy thinning.  A 10-year analysis of white spruce growth underneath an aspen canopy found that a complete or high overstory removal resulted in immediate and significant spruce radial and height growth responses, compared to control and partial cutting treatments (Smith et al. 2016).   In a 35-year old white spruce stand, diameter increment was maximized with the heaviest thinning intensity, however, the treatment thinning from below (Stiell 1970).  Frank (1973) also showed that 70-year old white spruce basal increment increased with the amount of thinning. Competition for light is a key factor that limits white spruce growth, and opening up the stand to allow for increased light penetration may be a primary mechanism to enhance white spruce growth responses [@Lieffers1999].  High basal area removal may also increase stand air and soil temperatures, which can preferentially favour spruce growth responses compared to fir [@Lajzerowicz2004].
 
 Other comparative studies of spruce and fir growth rates present differing evidence regarding species differences in release potential to thinning.  In mature Engelmann spruce (Picea engelmannii) – subalpine fir forests in western North America, understory spruce growth rates exceeded those of fir, allowing spruce to achieve canopy position faster, including after canopy gaps were created through disturbance (Antos et al. 2000, Andrus et al. 2018).  In mature forest in central BC, spruce growth exceeded that of subalpine fir after age 80 (Eis and Craigdallie 1983).  Because spruce tends to live longer than subalpine fir, higher growth rates at later ages may allow this species to become larger than fir.  In contrast, thinning studies in spruce-fir forests in eastern North America report that balsam fir (Abies balsamifera) responds to release with faster height and diameter growth than co-occurring red spruce (Picea rubens) (Dumais and Prevost, 2007; Dumais et al. 2014, Messier et al. 1999). Although both species are similar in shade tolerance, firs are considered to be better adapted to low light conditions in the understory, allowing them to persist longer in undisturbed forest  (Antos 2000) and potentially able to respond faster to changes in understory light (Dumais et al 2014, Messier et al. 1999).  Other studies have found no difference in growth response between spruce and fir species after treatment (MCaughey and Smith1982).   Our study also suggests that at lower levels of basal area removal, spruce and fir growth responses will be similar.
 
@@ -1184,56 +1179,30 @@ sppComp.plot("BA")
 
 \newpage
 
-```{r plot mortality as a function of 1997 stand attributes}
+```{r plot mortality as a function of 1994 stand attributes}
+
+mortPlot.text<-paste("y = ",round(tidy(deadPlot.ANOVA)[1,"estimate"],4)," + ",round(tidy(deadPlot.ANOVA)[2,"estimate"],4),"x ",
+              "\np = ",round(tidy(deadPlot.ANOVA)[2,"p.value"],4),
+              "\nR² = ",round(glance(deadPlot.ANOVA)$r.squared, 3),sep="")
+
 
 deadPlot.X %>% 
   ggplot()+
-  aes(x=Vol,y=Num.dead,color=BA.Target,shape=BA.Target)+
+  aes(x=BA,y=Num.dead,color=BA.Target,shape=BA.Target)+
   geom_point(size=4)+
   stat_smooth(method = lm, formula = y ~ x,se=FALSE,aes(group=1))+
-  ylab("Tree mortality from 1997-2019")+
-  xlab("Plot 1997 volume (m³/hectare) ")+
-  theme(legend.position = "bottom")
+  ylab("Number of trees that died (1994-2019)")+
+  xlab("Plot 1994 basal area (m²/hectare) ")+
+  theme(legend.position = "bottom")+
+  geom_text(aes(x=7,y=10,label=mortPlot.text,hjust=0),color="black",check_overlap = TRUE,size=4)
 
 
 
 ```
 
-
-```{r plot mortality by treatment}
-
+`r figNums("mort.plot",caption="Total tree mortality over 1994-2019 period vs plot basal area in 1994.  Plots are symbolized to show three treatment types.")`
 
 
-dead %>% 
-  pivot_longer(cols=BA:k,names_to = "Var",values_to = "Value") %>% 
-  
-  
-  
-  mutate(Var=factor(Var)) %>% 
-  mutate(Var=fct_relevel(Var,"k","BA")) %>% 
-  
-  
-  
-  mutate(Var=dplyr::recode(Var,BA="Basal area (m²)",k="Number of trees")) %>% 
-  ggplot()+
-  aes(x=DBH.class,y=Value,fill=Year)+
-  geom_bar(stat="identity")+
-  facet_grid(Var~BA.Target,
-               scales="free_y",
-               switch="y")+
-    ylab(NULL)+
-  xlab("DBH class (cm)")+
-     theme( strip.placement = "outside",
-            strip.background.y = element_blank(),
-            legend.position = "bottom",
-            axis.text.x = element_text(angle=270,vjust = 0.3))
-  
-
-
-```
-
-
-`r figNums("mort.plot",caption="Total tree mortality recorded in plots from 1997-2019, presented as number of trees (top panel) and basal area (bottom panel).")`
 
 \newpage
 
@@ -1264,6 +1233,28 @@ dead %>%
 
 `r figNums("mortDiam.plot",caption="Total tree mortality recorded in plots from 1997-2019, presented as number of trees (top panel) and basal area (bottom panel).")`
 
+\newpage
+
+```{r plot mortality by species and diameter class}
+
+  deadList %>% 
+  filter(Species %in% c("Spruce","Fir")) %>% 
+  group_by(Species,DBH.class,BA.Target) %>% 
+  summarise(Num.Dead=n()) %>% 
+  
+  # plot
+  ggplot()+
+  aes(x=DBH.class,y=Num.Dead,fill=BA.Target) %>% 
+  geom_bar(stat="identity")+
+  facet_wrap(~Species)+
+  ylab("Number dead 1994-2019")+
+  xlab("DBH class (cm")+
+  theme(legend.position="bottom")
+```
+
+`r figNums("mortSppDiam.plot",caption="Fir and spruce mortality recorded in plots from 1997-2019, presented as number of trees, by diameter breast height class.  Numbers identifying each diameter classes represent the lower size limit for that class.  For example, trees in the 7.5cm DBH class are greater or equal to 7.5 and less than 12.5cm DBH.")`
+
+\newpage
 
 # Appendices
 
