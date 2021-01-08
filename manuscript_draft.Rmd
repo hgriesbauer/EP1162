@@ -179,17 +179,20 @@ Analyses are grouped into three main categories (below).  These are treated as s
 1. Tree-level responses to treatment;
 2. Stand-level responses to treatment:
 
+## Data analyses
 
-## Tree-level growth responses
+
+### Tree-level growth responses
 
 To test the hypothesis that tree-level radial growth response over the 1992-2019 period varied with interactions between (i) tree diameter at the time of treatment (1992); (ii) treatment; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 diameter increment as the response variable, and treatment, species and log-transformed 1992 diameter as interacting fixed effects, and plot as a random intercept effect.  We also fit a similar model with the 1992-2019 diameter increment expressed as a percentage of 1992 diameter.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@barton2009mumin].  
 
-## Stand-level growth and structure
+### Stand-level growth and structure
 
-### Stand-level volume and basal area estimates
+#### Stand-level volume and basal area estimates
 Total and merchantable volumes were estimated for trees using species- and region-specific equations [@nigh2016] based on tree height and DBH.  Consistent with forest management practices in British Columbia, we estimated volumes for trees meeting a minimum diameter utilization limit of 18.5cm DBH.  For trees lacking a tree height measurement, we estimated height by fitting a single diameter-height model developed with a linear mixed effects model, with log-transformed DBH as a fixed effect, and tree nested within plot as a random effect.  Trees with broken tops were omitted from diameter-height models. We summed tree-level estimates of volume and basal area to generate stand-level estimates for each plot. To test the hypothesis that changes in stand attributes over 27 years varied by treatment, we fit separate linear models with stand total volume, basal area, and density as response variables, and the interaction between treatment and year as the independent variable.  
 
-### Mortality
+
+#### Mortality
 
 From Mike's e-mail:
 
@@ -342,8 +345,7 @@ trtContrast<-
 ```
 
 
-The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in log-transformed 1992-2019 tree-level BAI (`r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area more than than fir in the high-removal treatment unit, whereas basal growth between the two species was close to equal in the low-removal and control units (`r appNums("sppContrast.table",display="cite")`).  Within each species, treatment contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).
-
+The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in log-transformed 1992-2019 tree-level BAI (`r tableNums("fitBA.table",display="cite")`), and `r round(r.squaredGLMM(fitBApct)[2]*100,1)`% of the variation in basal area increment as a percentage of tree size in 1992 (`r tableNums("fitBApct.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, basal area increment increased with tree size, meaning that larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`), although smaller trees increased their size proportionally more than large trees (`r figNums("treeGrowthPct.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area more than than fir in the high-removal treatment unit, whereas basal growth between the two species was close to equal in the low-removal and control units (`r appNums("sppContrast.table",display="cite")`).  Within each species, treatment contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).  
 
 
 
@@ -366,10 +368,6 @@ X<-
   X %>% 
   mutate(Height.Pred=coalesce(Height,exp(fixef(htDiamFit)[1]+fixef(htDiamFit)[2]*log(DBH))))
 
-appNums("htModelFit.plot",display="FALSE") # model output
-
-# Tree heights model
-  appNums("heightDiam.plot",display=FALSE) # Plot of diameter/heights`
 
 
 ```
@@ -931,13 +929,41 @@ standFit.X %>%
 ```
 
 
-`r figNums("treeBAI.plot",caption="Estimated marginal means of spruce and fir basal area increment (m²) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.")`
+`r figNums("treeGrowth.plot",caption="Estimated marginal means of spruce and fir basal area increment (m²) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.")`
 
 
 \newpage
 
 
-```{r function to create figure of plot means, fig.height=10}
+```{r tree BAI as percentage by treatment species and diameter class}
+
+
+# Create plot of periodic increment
+  
+# Using estimated marginal means
+  emmeans(rg.pbaipct,~Init|BA.Target+Species,type="response") %>% 
+  as.data.frame() %>%
+  mutate(Init=ba2d(Init)) %>% # convert initial basal area back to diameter
+  
+  # plotting
+  ggplot()+
+  aes(x=Init,y=response,fill=Species,color=Species)+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=response-SE, ymax=response+SE), width=.2,
+                 position=position_dodge(0.05))+
+  xlab("1992 DBH (cm)")+
+  ylab("Basal area increment from 1992-2019 (% increase)")+
+  facet_wrap(~BA.Target)+
+  theme(legend.position="bottom")
+
+
+```
+
+`r figNums("treeGrowthPct.plot",caption="Estimated marginal means of spruce and fir basal area increment (expressed as a percentage increase relative to 1992 DBH) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.")`
+
+
+```{r plot means plots, fig.height=10}
 
 # Plotting
 
@@ -1059,6 +1085,49 @@ standData.X %>%
 `r figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")`
 
 \newpage
+
+```{r plot means by species}
+
+plotSums<-
+  plotTotal.X %>% 
+  group_by(BA.Target,Plot,Year,Var) %>% 
+  summarise(Value=sum(Value)) %>% 
+  mutate(Species="Total") %>% 
+  dplyr::select(BA.Target,Plot,Year,Var,Species,Value)
+
+
+plotTotal.X %>% 
+  
+  # bring in plotSums
+  dplyr::select(BA.Target,Plot,Year,Var,Species,Value) %>% 
+  bind_rows(plotSums) %>% 
+  
+  # need to convert year to numeric for plotting
+  mutate(Year=as.numeric(as.character(Year))) %>% 
+  
+  group_by(BA.Target,Year,Species,Var) %>% 
+  summarise(Mean=mean(Value),
+            SE=sd(Value)/sqrt(length(Value))) %>% 
+  
+  
+ 
+  
+  ggplot()+
+  aes(x=Year,y=Mean,group=Species,fill=Species,color=Species)+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
+                   position=position_dodge(0))+
+ scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+                     minor_breaks = c(1992,1994,1997,2009,2019),
+                     name="Measurement year")+ # stretch out x-axis
+
+  facet_grid(Var~BA.Target,
+             scales="free_y")+
+  theme(legend.position = "bottom",
+  axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))
+  
+```
 
 ```{r plot species composition by attribute}
 
