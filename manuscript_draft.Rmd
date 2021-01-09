@@ -683,12 +683,66 @@ standFitM.contrasts<-
   rbind(data.frame(Variable="Stand density",sphM.contrast)) %>% 
   dplyr::select(Contrast=contrast,Variable,Year,everything())
 
- 
-
 
 ```
 
 
+```{r plot comparisons at the species level}
+
+# Summarize plot data at the species and treatment unit level
+speciesData.X<-
+  X %>% 
+
+  filter(Status=="Live") %>% 
+  filter(Species %in% c("Spruce","Fir")) %>% 
+    # Calculate volume
+  left_join(filter(volCoef,VolType=="total"),by="Species") %>% 
+  mutate(vol=exp(1)^b0*DBH^b1*Height.Pred^b2) %>% 
+  mutate(BA=d2ba(DBH)) %>% 
+  dplyr::select(BA.Target,Plot:Species,Year,DBH,BA,vol,DBH.class,Height.Pred) %>% 
+  mutate(Species=factor(Species)) %>% 
+  
+  # Remove volumes below 18.5cm DBH
+  mutate(vol=replace(vol,DBH<18.5,0)) %>% 
+  
+  # now create plot sums grid so that you can calculate means
+  group_by(BA.Target,Species,Plot,Year) %>% 
+    summarise(Vol=sum(vol,na.rm=T)*20,
+              BA=sum(BA)*20,
+              SPH=n()*20) %>% 
+              
+  ungroup() %>% 
+  
+  # Create QMD
+  mutate(QMD.mean=sqrt(BA/(SPH*0.0000785))) 
+
+# fit linear model
+# fit linear models
+fit.vol.spp<-lmer(Vol~BA.Target*Year*Species+(1|Plot),data=speciesData.X)
+fit.ba.spp<-lmer(BA~BA.Target*Year*Species+(1|Plot),data=speciesData.X)
+fit.sph.spp<-lmer(SPH~BA.Target*Year*Species+(1|Plot),data=speciesData.X)
+
+# Summarize models
+library(lmerTest)
+
+
+# Create estimated marginal means
+vol.spp.means <- emmeans(fit.vol.spp, ~ BA.Target*Year*Species)
+ba.spp.means <- emmeans(fit.ba.spp, ~ BA.Target*Year*Species)
+sph.spp.means <- emmeans(fit.sph.spp, ~ BA.Target*Year*Species)
+
+# Mean contrasts
+volM.spp.contrast <- pairs(vol.spp.means,by="Year")
+baM.spp.contrast <- pairs(ba.spp.means,by="Year")
+sphM.spp.contrast <- pairs(sph.spp.means,by="Year")
+
+
+# Create species mean contrasts table
+speciesFitM.contrasts<-
+
+
+
+```
 
 
 All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  The low RBA unit accrued basal area significantly faster than the other two units over the 1992-2019 period (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit from 1992 to 2019 was higher by 
@@ -921,7 +975,7 @@ standFit.X %>%
   geom_errorbar(aes(ymin=response-SE, ymax=response+SE), width=.2,
                  position=position_dodge(0.05))+
   xlab("1992 DBH (cm)")+
-  ylab("Basal area increment from 1992-2019 (m²)")+
+  ylab("Tree BAI from 1992-2019 (m²)")+
   facet_wrap(~BA.Target)+
   theme(legend.position="bottom")
 
@@ -929,7 +983,7 @@ standFit.X %>%
 ```
 
 
-`r figNums("treeGrowth.plot",caption="Estimated marginal means of spruce and fir basal area increment (m²) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.")`
+`r figNums("treeGrowth.plot",caption="Estimated marginal means of spruce and fir basal area increment (m²) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.  BAI, basal area increment")`
 
 
 \newpage
@@ -953,17 +1007,17 @@ standFit.X %>%
   geom_errorbar(aes(ymin=response-SE, ymax=response+SE), width=.2,
                  position=position_dodge(0.05))+
   xlab("1992 DBH (cm)")+
-  ylab("Basal area increment from 1992-2019 (% increase)")+
+  ylab("Tree BAI from 1992-2019 (% increase)")+
   facet_wrap(~BA.Target)+
   theme(legend.position="bottom")
 
 
 ```
 
-`r figNums("treeGrowthPct.plot",caption="Estimated marginal means of spruce and fir basal area increment (expressed as a percentage increase relative to 1992 DBH) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.")`
+`r figNums("treeGrowthPct.plot",caption="Estimated marginal means of spruce and fir basal area increment (expressed as a percentage increase relative to 1992 DBH) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model. BAI, basal area increment")`
 
 
-```{r plot means plots, fig.height=10}
+```{r plot means plots, fig.height=10,eval=FALSE}
 
 # Plotting
 
@@ -1047,10 +1101,64 @@ standData.X %>%
 # standPlots
 ```
 
+```{r plot means by species, fig.height=7}
+
+plotSums<-
+  plotTotal.X %>% 
+  group_by(BA.Target,Plot,Year,Var) %>% 
+  summarise(Value=sum(Value)) %>% 
+  mutate(Species="Total") %>% 
+  dplyr::select(BA.Target,Plot,Year,Var,Species,Value)
+
+
+plotTotal.X %>% 
+  
+  # bring in plotSums
+  dplyr::select(BA.Target,Plot,Year,Var,Species,Value) %>% 
+  bind_rows(plotSums) %>% 
+  
+  # need to convert year to numeric for plotting
+  mutate(Year=as.numeric(as.character(Year))) %>% 
+  
+  group_by(BA.Target,Year,Species,Var) %>% 
+  summarise(Mean=mean(Value),
+            SE=sd(Value)/sqrt(length(Value))) %>% 
+  
+  # reorder and relabel some factors
+   mutate(Var=factor(Var)) %>% 
+  mutate(Var=fct_relevel(Var,"Vol","BA","sph")) %>% 
+  mutate(Var=dplyr::recode(Var,BA="BA (m²/ha)",sph="SPH",
+                           Vol="Vol. (m³/ha)")) %>% 
+  
+  
+ 
+  
+  ggplot()+
+  aes(x=Year,y=Mean,group=Species,fill=Species,color=Species)+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
+                   position=position_dodge(0))+
+ scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
+                     minor_breaks = c(1992,1994,1997,2009,2019),
+                     name="Measurement year")+ # stretch out x-axis
+  ylab("")+
+  xlab("Measurement year")+
+  facet_grid(Var~BA.Target,
+             scales="free_y",
+              switch="y")+
+  theme(legend.position = "bottom",
+  axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5),
+  strip.placement = "outside",
+            strip.background.y = element_blank())
+  
+```
+
+
 `r figNums("standPlots",caption="Mean plot live-tree attributes by treatment unit and year.  Whiskers are one standard error of the mean.  Vol., volume; BA, basal area; Tree dens., tree density")`
 
 \newpage
- 
+
 
 ```{r plot periodic increment}
 
@@ -1080,54 +1188,15 @@ standData.X %>%
            strip.placement = "outside")
   
 
+# caption
+figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")
+
 ```
 
-`r figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")`
+r figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")`
 
 \newpage
 
-```{r plot means by species}
-
-plotSums<-
-  plotTotal.X %>% 
-  group_by(BA.Target,Plot,Year,Var) %>% 
-  summarise(Value=sum(Value)) %>% 
-  mutate(Species="Total") %>% 
-  dplyr::select(BA.Target,Plot,Year,Var,Species,Value)
-
-
-plotTotal.X %>% 
-  
-  # bring in plotSums
-  dplyr::select(BA.Target,Plot,Year,Var,Species,Value) %>% 
-  bind_rows(plotSums) %>% 
-  
-  # need to convert year to numeric for plotting
-  mutate(Year=as.numeric(as.character(Year))) %>% 
-  
-  group_by(BA.Target,Year,Species,Var) %>% 
-  summarise(Mean=mean(Value),
-            SE=sd(Value)/sqrt(length(Value))) %>% 
-  
-  
- 
-  
-  ggplot()+
-  aes(x=Year,y=Mean,group=Species,fill=Species,color=Species)+
-  geom_point()+
-  geom_line()+
-  geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
-                   position=position_dodge(0))+
- scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
-                     minor_breaks = c(1992,1994,1997,2009,2019),
-                     name="Measurement year")+ # stretch out x-axis
-
-  facet_grid(Var~BA.Target,
-             scales="free_y")+
-  theme(legend.position = "bottom",
-  axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))
-  
-```
 
 ```{r plot species composition by attribute}
 
