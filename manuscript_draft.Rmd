@@ -687,7 +687,7 @@ standFitM.contrasts<-
 ```
 
 
-```{r plot comparisons at the species level}
+```{r plot comparisons at the species level, eval=FALSE}
 
 # Summarize plot data at the species and treatment unit level
 speciesData.X<-
@@ -745,16 +745,21 @@ speciesFitM.contrasts<-
 ```
 
 
-All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  The low RBA unit accrued basal area significantly faster than the other two units over the 1992-2019 period (`r appNums("standFit.contrasts",display="cite")`).  The estimated rate of basal area increment in the low RBA unit from 1992 to 2019 was higher by 
+### Rate of change from 1992 to 2019
+All units increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")` and `r appNums("standPlot.table",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  From 1992 to 2019, estimated marginal means of basal area increment in the low RBA unit exceeded marginal means in the high RBA and control unit by an estimated 
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]`
 and
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[2]`
-m² per hectare more than the high RBA and control units, respectively (p<0.01 for both). 
+m² per hectare, respectively (p<0.01 for both, `r appNums("standFit.contrasts",display="cite")`). 
 
 
 The low RBA unit also significantly increased its stand density by an estimated 
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0)  %>%   .[2]`
-stems per hectare more than the control unit (p<0.001). The rate of change in tree density did not differ significantly between the two harvested units.  The rate of change in volume in trees over 18.5cm DBH was different between barely significant between the two harvested units, and there were no significant differences between the control and harvested units.  
+stems per hectare more than the control unit (p<0.001). The estimated rate of change in tree density did not differ significantly between the two harvested units.  The rate of change in volume in trees over 18.5cm DBH was different between barely significant (p=0.049) between the two harvested units, and was not significantly different between the control and harvested units. 
+
+
+
+### Mean stand attributes by year
 
 
 
@@ -1422,14 +1427,15 @@ dead %>%
 \newpage
 
 
-`r appNums("sppContrast.table",caption="Contrasts between predicted fir and spruce growth across treatment units and initial diameter classes.  Ratio between predicted fir and growth is in 'ratio' column.")`
+`r appNums("sppContrast.table",caption="Contrasts between estimated marginal means of fir and spruce growth across treatment units and initial diameter classes.  Ratio between predicted fir and growth is in 'ratio' column.")`
 
 ```{r treelevel species contrast table}
 
 # Tree-level species contrast table
   sppContrast %>% 
   
-  mutate_if(is.double,round,5) %>%  # round to five digits
+  mutate_if(is.double,round,4) %>%  # round to four digits
+  mutate_at(vars("df","t.ratio","ratio","SE"),round,2) %>% 
 
   # format table
   flextable(col_keys = c(colnames(.)[c(1:2,6:8,3:5)])) %>% 
@@ -1454,7 +1460,8 @@ dead %>%
 
 trtContrast %>% 
 
-  mutate_if(is.double,round,5) %>% 
+ mutate_if(is.double,round,4) %>%  # round to four digits
+  mutate_at(vars("df","t.ratio","ratio","SE"),round,2) %>% 
   
   # flextable
   flextable(col_keys = c(colnames(.)[c(2,1,6:8,3:5)])) %>% 
@@ -1519,6 +1526,77 @@ trtContrast %>%
 `r appNums("htModelFit.plot",caption="Scatterplot of predicted height(m) vs actual height(m) from diameter-height model.")`
 
 \newpage
+
+`r appNums("standPlot.table",caption="Plot means of volume, basal area and stand density, by species, year and treatment.")`
+
+```{r table of plot means}
+
+standData.X %>% 
+  ungroup() %>% 
+  mutate_at(vars(Vol:last_col()),round,1) %>% 
+  mutate_at(vars(contains("SPH")),round,0) %>% 
+  
+  # change to character to allow pasting
+  mutate_all(as.character) %>% 
+  mutate(Vol=paste0(Vol," (",Vol.se,")")) %>% 
+  mutate(BA=paste0(BA," (",BA.se,")")) %>% 
+  mutate(SPH=paste0(SPH," (",SPH.se,")")) %>% 
+  mutate(QMD=paste0(QMD," (",QMD.se,")")) %>% 
+  
+  # rename volume column
+  rename(Volume="Vol") %>% 
+  
+  # remove SE columns
+  dplyr::select(-contains(".se")) %>% 
+  
+  # rearrange
+  arrange(Year,BA.Target) %>% 
+  
+  # format table
+  flextable() %>%
+  align(align="left",part="all") %>% 
+  merge_v("Year") %>% 
+  valign(valign="top",part="body") %>% 
+  hline(i=seq(from=3,to=15,by=3),border=fp_border(color="black")) %>% 
+  fix_border_issues() %>% 
+   autofit()
+
+
+
+```
+
+*Volume is m3/hectare, BA = basal area (m2/ha), SPH = stems per hectare, QMD = quadratic mean diameter (cm) at 1.3m height.  Values in brackets are the standard error of the mean.*
+
+
+\newpage
+
+```{r table of periodic mean annual increment}
+
+
+perInc.X %>% 
+    ungroup() %>% 
+  mutate_at(vars(Vol:last_col()),round,1) %>% 
+  mutate_at(vars(contains("SPH")),round,0) %>% 
+  
+  # change to character to allow pasting
+  mutate_all(as.character) %>% 
+  mutate(Vol=paste0(Vol," (",Vol.se,")")) %>% 
+  mutate(BA=paste0(BA," (",BA.se,")")) %>% 
+  mutate(SPH=paste0(SPH," (",SPH.se,")")) %>% 
+  mutate(QMD=paste0(QMD," (",QMD.se,")")) %>% 
+  
+  # rename volume column
+  rename(Volume="Vol") %>% 
+  
+  # remove SE columns
+  dplyr::select(-contains(".se")) %>% 
+  
+  # rearrange
+  arrange(Year,BA.Target) %>% 
+
+```
+
+
 
 `r appNums("standFitM.contrasts",caption="Contrasts of stand attributes (volume, basal area and tree density) between treatments.  Contrasts are presented for five measurement years. SE, standard error, df, degrees freedom")`
 
