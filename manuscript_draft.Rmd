@@ -873,13 +873,14 @@ gd.Dat <-
       mutate(GDS=(Cumu.Prop.Inc+lag(Cumu.Prop.Inc,default=0))*(Cumu.Prop.BA-lag(Cumu.Prop.BA,default=0))) %>% 
       ungroup() %>% 
       group_by(Plot,Year) %>% 
-      summarise(GDS=1-sum(GDS))
+      summarise(GDS=1-sum(GDS)) %>% 
+      left_join(plotDat,by="Plot")
     
     gd.stats %>% 
+      filter(Year=="1994") %>% 
       ggplot()+
-      aes(x=Year,y=GDS)+
-      geom_point()+
-      facet_wrap(~Plot)
+      aes(x=Pre.Harvest,y=GDS)+
+      geom_point()
     
     
     ggplot()+
