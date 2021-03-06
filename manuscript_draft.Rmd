@@ -742,7 +742,7 @@ sphM.spp.contrast <- pairs(sph.spp.means,by="Year")
 
 
 # Create species mean contrasts table
-speciesFitM.contrasts<-
+
 
 
 
@@ -766,6 +766,137 @@ stems per hectare more than the control unit (p<0.001). The estimated rate of ch
 ### Stand attributes by year
 By year, mean plot volume, basal area and stand density did not differ significantly between both harvested units (i.e., p>0.05, `r appNums("standFitM.contrasts",display="cite")` and `r figNums("standPlots",display="cite")`).  Contrasts between the high-removal and control treatment units showed that volume, basal area and stand density differences were highest and significant (i.e., p<0.05) in the 1992 measurement year, and these differences diminshed over each subsequent measurement year.  For example, mean plot density in the high-removal treatment unit was approximately 600 trees per hectare less than the control in 1994 (p<0.05); by 2019, that difference had decreased to 219 trees per hectare (p>0.05).  Contrasts between the low-removal and the control treatment units showed a similar trend with basal area and stand density; the control unit had significanly higher basal area and stand density means in 1992, but the difference between the units diminished over each subsequent measurement, becoming non-significant (i.e., p>0.05) in 2019.  Plot means of volume did not differ significantly between the treatment units in any measurement year. 
 
+### Growth dominance statistics
+
+```{r calculate growth dominance}
+
+# Filter only for trees that have measurements in 1992 and 2019 
+gd.treeList<- # assign variable
+  X %>% 
+  filter(TreeID!="New") %>% # remove new trees
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(Status=="Live") %>% # filter for live trees
+  group_by(TreeID) %>% 
+  summarise(N=n()) %>% 
+  filter(N>=2) %>% #filter for trees with at least 2 measurements
+  pull(TreeID)
+  
+
+# derive periodic increment (period diameter or basal area increment)
+gd.BAInc<-
+  X %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% gd.treeList) %>% 
+  mutate(BA=d2ba(DBH)) %>% # convert DBH to basal area
+  dplyr::select(Plot,TreeID,Species,Year,BA) %>% 
+  pivot_wider(names_from=Year,values_from=BA) %>% 
+  mutate(PBAI_2019=`2019`-`2009`,
+         PBAI_2009=`2009`-`1997`,
+         PBAI_1997=`1997`-`1994`,
+         PBAI_1994=`1994`-`1992`) %>% 
+  dplyr::select(Plot,TreeID,Species,starts_with("PBAI_"))
+
+gd.Inc<-
+  X %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% gd.treeList) %>% 
+  left_join(filter(volCoef,VolType=="total"),by="Species") %>% 
+  mutate(vol=exp(1)^b0*DBH^b1*Height.Pred^b2) %>% 
+  dplyr::select(Plot,TreeID,Species,Year,Vol=vol) %>% 
+  pivot_wider(names_from=Year,values_from=Vol) %>%
+   mutate(PVI_2019=`2019`-`2009`,
+         PVI_2009=`2009`-`1997`,
+         PVI_1997=`1997`-`1994`,
+         PVI_1994=`1994`-`1992`) %>% 
+  dplyr::select(Plot,TreeID,Species,starts_with("PVI_")) %>% 
+  inner_join(gd.BAInc,by=c("Plot","TreeID","Species")) %>% 
+  pivot_longer(
+    cols = -c("Plot","Species","TreeID"),
+    names_to = c("Var", "Year"),
+    names_sep = "_",
+    values_to = "Inc") 
+
+gd.prelim<-
+  X %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% gd.treeList) %>% 
+  dplyr::select(Plot,TreeID,Species,Year,DBH.Init=DBH) %>% 
+  mutate(Year=fct_recode(Year,tmp_1994="1992",
+                         tmp_1997="1994",
+                         tmp_2009="1997",
+                         tmp_2019="2009")) %>% 
+  mutate(Year=str_remove(as.character(Year),pattern="tmp_")) %>% 
+  mutate(Year=factor(Year)) %>% 
+  mutate(BA.Init=d2ba(DBH.Init)) %>% 
+  dplyr::select(Plot:Year,BA.Init)
+
+
+gd.Dat <-
+  X %>% 
+  mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
+  filter(TreeID %in% gd.treeList) %>% 
+  dplyr::select(Plot,TreeID,Species,Year,Status,DBH,Height) %>% 
+  left_join(gd.Inc,by=c("Plot","TreeID","Species","Year")) %>% 
+  left_join(gd.prelim,by=c("Plot","TreeID","Species","Year")) %>% 
+  filter(Status=="Live") %>% 
+  drop_na(Inc)
+
+
+# clean up some objects
+  rm(gd.prelim,gd.BAInc,gd.Inc)
+  
+  
+# Plots of GD
+
+  ## Basal area
+  gd.cumu.Inc<-  
+    gd.Dat %>% 
+    filter(Var=="PBAI") %>% 
+    arrange(Plot,Year,BA.Init) %>% 
+    group_by(Plot,Year) %>% 
+    
+    # CUmulative increment
+    mutate(Cumu.Inc=cumsum(Inc)) %>% 
+    mutate(Cumu.Inc2=max(Cumu.Inc)) %>% 
+    mutate(Cumu.Prop.Inc=Cumu.Inc/Cumu.Inc2) %>% 
+    dplyr::select(-Cumu.Inc2) %>% 
+    
+    # Cumulative stand basal area
+    mutate(Cumu.BA=cumsum(BA.Init)) %>% 
+    mutate(Cumu.BA2=max(Cumu.BA)) %>% 
+    mutate(Cumu.Prop.BA=Cumu.BA/Cumu.BA2) %>% 
+    dplyr::select(-Cumu.BA2) 
+    
+    # Calculate Growth Dominance statistic
+    gd.stats<-
+      gd.cumu.Inc %>% 
+      mutate(GDS=(Cumu.Prop.Inc+lag(Cumu.Prop.Inc,default=0))*(Cumu.Prop.BA-lag(Cumu.Prop.BA,default=0))) %>% 
+      ungroup() %>% 
+      group_by(Plot,Year) %>% 
+      summarise(GDS=1-sum(GDS))
+    
+    gd.stats %>% 
+      ggplot()+
+      aes(x=Year,y=GDS)+
+      geom_point()+
+      facet_wrap(~Plot)
+    
+    
+    ggplot()+
+    aes(x=Cumu.Prop.BA,y=Cumu.Prop.Inc)+
+    geom_point()+
+    geom_line()+
+    geom_abline(slope=1,intercept=0,linetype = "dashed")+
+    theme(aspect.ratio = 1)+
+    facet_wrap(~Year,scales="free_y")
+
+
+
+
+
+
+
+```
 
 
 ### Stand attributes by diameter class
