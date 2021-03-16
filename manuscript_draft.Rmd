@@ -62,7 +62,10 @@ X<-
   mutate(Species=fct_drop(Species)) %>% # have an extra level in here for some reason
   
   # Create TU lookup
-  mutate(BA.Target=paste0("TU:",BA.Target))
+  mutate(BA.Target=paste0("TU:",BA.Target)) %>% 
+  
+  # need to remove plots 16-19 because they were only measured once
+  filter(!Plot %in% c(16,17,18,19))
 
 # set up captions
 
@@ -249,7 +252,7 @@ Analyses are grouped into three main categories (below).  These are treated as s
 
 ### Tree-level growth responses
 
-To test the hypothesis that tree-level radial growth response over the 1992-2019 period varied with interactions between (i) tree diameter at the time of treatment (1992); (ii) treatment; and (iii) species, we fit linear mixed effects models with log-transformed 1992-2019 diameter increment as the response variable, and treatment, species and log-transformed 1992 diameter as interacting fixed effects. To account for plot-level productivity differences, we included plot as a random intercept effect.  Models were fit using the 'lme4' package for R [@].  We also fit a similar model with the 1992-2019 diameter increment expressed as a percentage of 1992 diameter.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@barton2009mumin].  Pairwise contrasts were performed using the 'emmeans' package for R [@] and Tukey HSD method of *p* value adjustment was used to control for multiplicity.  We report all significant results at p<0.05.  
+To test the hypothesis that tree-level radial growth response over the 1994-2019 period varied with interactions between (i) tree diameter at the time of final treatment (1994); (ii) treatment; and (iii) species, we fit linear mixed effects models with log-transformed 1994-2019 diameter increment as the response variable, and treatment, species and log-transformed 1992 diameter as interacting fixed effects. To account for plot-level productivity differences, we included plot as a random intercept effect.  Models were fit using the 'lme4' package for R [@].  We also fit a similar model with the 1994-2019 diameter increment expressed as a percentage of 1994 diameter.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@barton2009mumin].  Pairwise contrasts were performed using the 'emmeans' package for R [@] and Tukey HSD method of *p* value adjustment was used to control for multiplicity.  We report all significant results at p<0.05.  
 
 ### Stand-level growth and structure
 
@@ -266,7 +269,7 @@ Total and merchantable volumes were estimated for trees using species- and regio
 
 ## Tree-level 
 
-### Basal area increment from 1992-2019
+### Basal area increment from 1994-2019
 
 ```{r mixed effects model of tree growth}
 
@@ -277,7 +280,7 @@ treeList<- # assign variable
   mutate(TreeID=paste(Plot,TreeID,sep="-")) %>% # create unique treeID
   filter(Species %in% c("Spruce","Fir")) %>% # filter birch and fdi out of dataset
   filter(Status=="Live") %>% # filter for live trees
-  filter(Year %in% c(1992,2019)) %>% #filter for start and end dates
+  filter(Year %in% c(1994,2019)) %>% #filter for start and end dates
   group_by(TreeID) %>% 
   summarise(N=n()) %>% 
   filter(N==2) %>% #filter for trees with 5 measurements
@@ -292,10 +295,10 @@ piDat<-
   mutate(BA=d2ba(DBH)) %>% # convert DBH to basal area
   dplyr::select(Plot,TreeID,Species,Year,BA) %>% 
   pivot_wider(names_from=Year,values_from=BA) %>% 
-  mutate(PI=`2019`-`1992`) %>% # 
+  mutate(PI=`2019`-`1994`) %>% # 
   filter(PI>0) %>% # one tree has a PI of 0, has to be removed
-  mutate(PIpct=PI/`1992`*100) %>% # express periodic increment a a percentage
-  dplyr::select(Plot,TreeID,Species,PBAI=PI,PBAIpct=PIpct,Init=`1992`) %>% 
+  mutate(PIpct=PI/`1994`*100) %>% # express periodic increment a a percentage
+  dplyr::select(Plot,TreeID,Species,PBAI=PI,PBAIpct=PIpct,Init=`1994`) %>% 
   left_join(plotDat,by="Plot") 
 
 # fit lmer model
@@ -330,7 +333,7 @@ sppContrast<-
     mutate(Init=as.numeric(as.character(Init))) %>% # change from factor to numeric
     mutate(Init=ba2d(Init)) %>% # convert basal area to diameter
   arrange(BA.Target,Init) %>% 
-  rename(DBH.1992="Init") 
+  rename(DBH.1994="Init") 
 
 
 ```
@@ -344,12 +347,12 @@ trtContrast<-
   mutate(Init=as.numeric(as.character(Init))) %>% # change from factor to numeric
   mutate(Init=ba2d(Init)) %>% # convert basal area to diameter
   arrange(Species,contrast,Init) %>% 
-  rename(DBH.1992="Init") 
+  rename(DBH.1994="Init") 
 
 ```
 
 
-The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in log-transformed 1992-2019 tree-level BAI, and `r round(r.squaredGLMM(fitBApct)[2]*100,1)`% of the variation in basal area increment as a percentage of tree size in 1992 (p<0.0001 for both, `r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, basal area increment increased with tree size, meaning that larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`), although smaller trees increased their size proportionally more than large trees (`r figNums("treeGrowthPct.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area significantly more than than fir in the high-removal and control treatment units, whereas basal growth between the two species was close to equal in the low-removal unit (`r appNums("sppContrast.table",display="cite")`).  Within-species contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).  
+The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in log-transformed 1994-2019 tree-level BAI, and `r round(r.squaredGLMM(fitBApct)[2]*100,1)`% of the variation in basal area increment as a percentage of tree size in 1994 (p<0.0001 for both, `r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, basal area increment increased with tree size, meaning that larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`), although smaller trees increased their size proportionally more than large trees (`r figNums("treeGrowthPct.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area significantly more than than fir in the high-removal and control treatment units, whereas basal growth between the two species was close to equal in the low-removal unit (`r appNums("sppContrast.table",display="cite")`).  Within-species contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).  
 
 
 
@@ -423,7 +426,7 @@ standDiam.X<-
   
   # Determine which plots have measurements in 1992 and 2019
   X %>% 
-   filter(Year %in% c(1992,2019)) %>% 
+   filter(Year %in% c(1994,2019)) %>% 
    filter(Status=="Live") %>% 
   
   group_by(Plot,Year) %>% 
@@ -441,7 +444,7 @@ standDiam.X<-
   mutate(Plot=fct_drop(Plot)) %>%  # drop unused levels
   
   # Filter for years of interest
-  filter(Year %in% c(1992,2019)) %>% 
+  filter(Year %in% c(1994,2019)) %>% 
   mutate(Year=fct_drop(Year)) %>% 
   filter(Status=="Live") %>% 
   
@@ -520,7 +523,7 @@ standDiam.X<-
 ```{r generate stand level plot means}
 
 plotData.X<-
-# Determine which plots have measurements in 1992 and 2019
+
   X %>% 
 
   filter(Status=="Live") %>% 
@@ -582,12 +585,11 @@ perInc.X<-
   plotData.X %>% 
   pivot_longer(cols=Vol.sum:QMD.mean,names_to="var",values_to = "val") %>% 
   pivot_wider(names_from = Year,values_from = val) %>% 
-  mutate(Period1=(`1994`-`1992`)/3,
-         Period2=(`1997`-`1994`)/3,
-         Period3=(`2009`-`1997`)/11,
-         Period4=(`2019`-`2009`)/11) %>% 
-  dplyr::select(BA.Target:var,Period1:Period4) %>% 
-  pivot_longer(cols=Period1:Period4,names_to="Period",values_to="Values") %>% 
+  mutate(Period1=(`1997`-`1994`)/3,
+         Period2=(`2009`-`1997`)/11,
+         Period3=(`2019`-`2009`)/11) %>% 
+  dplyr::select(BA.Target:var,Period1:Period3) %>% 
+  pivot_longer(cols=Period1:Period3,names_to="Period",values_to="Values") %>% 
   pivot_wider(names_from=var,values_from=Values) %>% 
   
   # now summarize at treatment unit level
@@ -603,10 +605,9 @@ perInc.X<-
   
   # rename periods
   mutate(Period=dplyr::recode(Period,
-                       Period1="1992-1994",
-                       Period2="1994-1997",
-                       Period3="1997-2009",
-                       Period4="2009-2019")) 
+                       Period1="1994-1997",
+                       Period2="1997-2009",
+                       Period3="2009-2019")) 
 
 
 
@@ -673,7 +674,7 @@ standFit.contrasts<-
   data.frame(Variable="Volume",vol.contrast) %>% 
   rbind(data.frame(Variable="Basal area",ba.contrast)) %>% 
   rbind(data.frame(Variable="Stand density",sph.contrast)) %>% 
-  filter(Year_revpairwise %in% c("2019 - 1992")) %>% 
+  filter(Year_revpairwise %in% c("2019 - 1994")) %>% 
   dplyr::select(Variable,`Year contrast`="Year_revpairwise",`Treatment contrast`="BA.Target_pairwise",everything()) %>% 
   rename(`t ratio`="t.ratio",
          `p value`="p.value") %>% 
@@ -741,16 +742,14 @@ baM.spp.contrast <- pairs(ba.spp.means,by="Year")
 sphM.spp.contrast <- pairs(sph.spp.means,by="Year")
 
 
-# Create species mean contrasts table
-
 
 
 
 ```
 
 
-### Rate of change from 1992 to 2019
-All treatment units, including the control, increased volume, basal area and stand density over the 1992-2019 period (`r figNums("standPlots",display="cite")` and `r appNums("standPlot.table",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  From 1992 to 2019, estimated marginal means of basal area increment in the low RBA unit exceeded marginal means in the high RBA and control unit by an estimated 
+### Rate of change from 1994 to 2019
+All treatment units, including the control, increased volume, basal area and stand density over the 1994-2019 period (`r figNums("standPlots",display="cite")` and `r appNums("standPlot.table",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  From 1994 to 2019, estimated marginal means of basal area increment in the low RBA unit exceeded marginal means in the high RBA and control unit by an estimated 
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]`
 and
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[2]`
@@ -845,6 +844,19 @@ gd.Dat <-
 # clean up some objects
   rm(gd.prelim,gd.BAInc,gd.Inc)
   
+# # sgr.Dat
+#   sgr.Dat<-
+#     gd.Dat %>%
+#     filter(Var=="PBAI") %>% 
+#     ungroup() %>% 
+#     group_by(Plot) %>% 
+#     mutate(Stand.Inc=sum(Inc),
+#            Stand.BA=sum(BA.Init)) %>% 
+#     mutate(Prop.growth=Inc/Stand.Inc,
+#            Prop.size=BA.Init/Stand.BA) %>% 
+#     left_join(plotDat,by="Plot")
+    
+  
   
 # Plots of GD
 
@@ -865,7 +877,10 @@ gd.Dat <-
     mutate(Cumu.BA=cumsum(BA.Init)) %>% 
     mutate(Cumu.BA2=max(Cumu.BA)) %>% 
     mutate(Cumu.Prop.BA=Cumu.BA/Cumu.BA2) %>% 
-    dplyr::select(-Cumu.BA2) 
+    dplyr::select(-Cumu.BA2) %>% 
+    
+    # Bring in plot data
+     left_join(plotDat,by="Plot")
     
     # Calculate Growth Dominance statistic
     gd.stats<-
@@ -874,30 +889,74 @@ gd.Dat <-
       ungroup() %>% 
       group_by(Plot,Year) %>% 
       summarise(GDS=1-sum(GDS)) %>% 
-      left_join(plotDat,by="Plot")
+      left_join(plotDat,by="Plot") %>% 
+      ungroup() %>% 
+      group_by(BA.Target,Year) %>% 
+      summarise(GDS.mean=round(mean(GDS),3),
+                GDS.sd=round(sd(GDS),2)) %>% 
+      mutate(GDS.label=paste0("GDS: ",GDS.mean," (",GDS.sd,") "))
     
-    gd.stats %>% 
-      filter(Year=="1994") %>% 
-      ggplot()+
-      aes(x=Pre.Harvest,y=GDS)+
-      geom_point()
+  #   gd.stats.plot<-
+  #     gd.stats %>% 
+  #   filter(Year %in% c(2009,2019)) %>% 
+  # ggplot()+
+  # aes(x=BA.Target,y=GDS,fill=Year)+
+  # geom_boxplot()
+  #   
+
+       
+      
+      
     
-    
+  # Plotting
+  # ## Growth Dominance statistic
+  gd.plot<-
+    gd.cumu.Inc %>%
+    filter(Year %in% c(2009,2019)) %>%
     ggplot()+
-    aes(x=Cumu.Prop.BA,y=Cumu.Prop.Inc)+
-    geom_point()+
-    geom_line()+
-    geom_abline(slope=1,intercept=0,linetype = "dashed")+
-    theme(aspect.ratio = 1)+
-    facet_wrap(~Year,scales="free_y")
-
-
+    aes(x=Cumu.Prop.BA,y=Cumu.Prop.Inc,group=BA.Target)+
+    geom_point(colour="grey")+
+    geom_smooth(se=F,size=1.5)+
+    geom_abline(slope=1,intercept=0,linetype = "dashed",size=1.5)+
+    theme(aspect.ratio = 1,
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+    facet_grid(Year~BA.Target,scales="free_y")+
+    xlab("Cumulative proportion of stand size (basal area)")+
+    ylab("Cumulative proportion of stand growth (basal area)")+
+    facet_grid(Year~BA.Target)+
+    geom_text(data=filter(gd.stats %>% filter(Year %in% c(2009,2019))),
+            size=4,
+            mapping = aes(x = Inf, y = 0.1, label = GDS.label),
+            hjust="right")
+    
+    
+  ## Plot measurement year GSD
+      # gd.stats %>% 
+      #   ggplot()+
+      #   aes(x=Year,y=GDS,group=Plot,color=Plot)+
+      #   geom_line()+
+      #   facet_wrap(~BA.Target)
+      # 
+      
+  ## GSize-Growth relationship statistic
+      # sgr.ind.plot<-
+      #   sgr.Dat %>% 
+      #  ggplot()+
+      #   aes(x=Prop.size,y=Prop.growth,group=Plot,color=BA.Target)+
+      #   geom_point()+
+      #   geom_smooth(aes(group=Plot),method="lm",se=F,color="black")+
+      #   facet_wrap(~Year)+
+      #       theme(aspect.ratio = 1)+
+      #     facet_grid(BA.Target~Year)
+      
 
 
 
 
 
 ```
+
+Across all plots and time periods, smaller trees contributed proportionally more to stand basal area growth than larger trees (`r figNums("gds.plot",display="cite")`).  Over the last two measurement periods, the growth dominance statistic decreased in all plots except one (not shown), indicating that individual tree growth contributions to stand growth became more proportional to tree size over the last 11 growing seasons.    
 
 
 ### Stand attributes by diameter class
