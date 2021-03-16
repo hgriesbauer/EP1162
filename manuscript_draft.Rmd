@@ -9,7 +9,9 @@ output:
     df_print: paged
 csl: cjfr.csl
 bibliography: ep1162.bib
-
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r load libraries for analyses, echo=FALSE, message=FALSE, warning=FALSE}
@@ -94,180 +96,377 @@ pm=20
 
 ### Comments from Mike's emails
 
-we can put text below each comment to describe how it was addressed, and then delete comments for any issues once they are resolved.
-
+we can put text below each comment to describe how it was addressed, and
+then delete comments for any issues once they are resolved.
 
 #### Use of terminology
 
-- The term "units" is used in several places, where it seems that you mean "treatments" (or treatment types, treatment unit).
+-   The term "units" is used in several places, where it seems that you
+    mean "treatments" (or treatment types, treatment unit).
 
-- The use of the term "plot" or "plots" is used appropriately as far as I can see.
+-   The use of the term "plot" or "plots" is used appropriately as far
+    as I can see.
 
-- The term "fir" is used to describe subalpine fir or 'balsam' in several parts of the text, including possibly figure and table captions. I know what species you are referring to, of course, but others, especially cursory readers, may misconstrue it. The colloquial use of 'fir" is spread across both Abies and Douglas-fir. "Balsam" as a term has well-documented ambiguities, and while Canadians tend to use balsam for Abies, Americans often call Abies "firs", as in the various species of true fir. I would recommend using Abies as the shorthand descriptor in the text and captions for subalpine fir.  It is a short word, and we have only 1 Abies species at this site. Also, my experience in the on-line-search literature world and with things like Google Scholar is that Abies is a much better and more diagnostic search word for this subject matter than fir or balsam. "Spruce-Abies" is very unambiguous as a descriptor for this forest type.
+-   The term "fir" is used to describe subalpine fir or 'balsam' in
+    several parts of the text, including possibly figure and table
+    captions. I know what species you are referring to, of course, but
+    others, especially cursory readers, may misconstrue it. The
+    colloquial use of 'fir" is spread across both Abies and Douglas-fir.
+    "Balsam" as a term has well-documented ambiguities, and while
+    Canadians tend to use balsam for Abies, Americans often call Abies
+    "firs", as in the various species of true fir. I would recommend
+    using Abies as the shorthand descriptor in the text and captions for
+    subalpine fir. It is a short word, and we have only 1 Abies species
+    at this site. Also, my experience in the on-line-search literature
+    world and with things like Google Scholar is that Abies is a much
+    better and more diagnostic search word for this subject matter than
+    fir or balsam. "Spruce-Abies" is very unambiguous as a descriptor
+    for this forest type.
 
-- Rate of change (increase, decrease) in vol, BA, and sph: In both in your stats tables and figure captions, and in the text narrative, ensure that what you are describing is clearly and accurately described as either:  (a) the incremental change in values between two measurement periods, or (b)  the difference in absolute value in certain parameters (e.g. standing volume) between two measurement periods, or between two treatments. Also, the annualized growth rate of something averaged over a measurement period (e.g. mean PBAI, like BA growth in m2/yr over a period) is different than the rate of change in a growth rate over time (e.g. is a growth rate increasing or decreasing).  I got confused a few times on this issue.
-
+-   Rate of change (increase, decrease) in vol, BA, and sph: In both in
+    your stats tables and figure captions, and in the text narrative,
+    ensure that what you are describing is clearly and accurately
+    described as either: (a) the incremental change in values between
+    two measurement periods, or (b) the difference in absolute value in
+    certain parameters (e.g. standing volume) between two measurement
+    periods, or between two treatments. Also, the annualized growth rate
+    of something averaged over a measurement period (e.g. mean PBAI,
+    like BA growth in m2/yr over a period) is different than the rate of
+    change in a growth rate over time (e.g. is a growth rate increasing
+    or decreasing). I got confused a few times on this issue.
 
 ### Commentary on sections and sub-sections
 
 #### Section 3.1.1 BA increment from 1992 to 2019
 
-- Great: Very clear and straightforward. i.e. - log-transformed treatment (initial BA) was a very statistically significant predictor of tree response across dbh classes for both Sx and Bl.
-- Don't know what all the random effects outputs are. I am sure they are meaningful, but I just dont know what they mean.
-- Number of observations of 510: Should ensure it is clear that only trees > 7.5 cm dbh are counted.
-- Would be good to define the dbh class limits somewhere. In Appendix 6 table, we describe the class mid-point.
-- For Appendix 6, I assume that the null hypothesis for the ratio is = 1.
+-   Great: Very clear and straightforward. i.e. - log-transformed
+    treatment (initial BA) was a very statistically significant
+    predictor of tree response across dbh classes for both Sx and Bl.
+-   Don't know what all the random effects outputs are. I am sure they
+    are meaningful, but I just dont know what they mean.
+-   Number of observations of 510: Should ensure it is clear that only
+    trees \> 7.5 cm dbh are counted.
+-   Would be good to define the dbh class limits somewhere. In Appendix
+    6 table, we describe the class mid-point.
+-   For Appendix 6, I assume that the null hypothesis for the ratio is
+    = 1.
 
 #### Section 3.1.2 Mortality
 
-- I am thinking that mortality should / could be analysed as a frequency response - i.e. - expected vs actual distribution of mortality by size class and/or species. e.g. a Chi-squared or allied type of analysis. Null hypothesis is that mortality of stems is randomly distributed across different sizes and species of trees. H1 is that it is non-random.
-- I'd suggest that we don't compare total mortality (e.g # of stems) across treatment units, but rather frequency relative to initial number of stems (i.e. - at beginning of observation period). That way we normalize mortality rates relative to initial stem densities. Otherwise, results could be mis-leading - e.g. Control treatments could have more mortality in overall sph, simply because they have more initial stems.
-- ACTION ITEM FOR ME:  I need to check my original datasets and data sorting iterations to see how I handled mortality observations for the 1992 and 1994 plot remeasurements.
-- Note for you:  All of the mortality you've analysed and identified so far is mortality that is incremental following 92/94, so it is still solid analysis data, just with that qualification. I will clarify the 92/94 mortalilty observations for the Methods section; we did observe dead trees at these times, but these mortality pre-dated our treatments and/or first measurements. Anyway, probably not a big deal, but this needs examination and clarification to explain this. If necessary, I will quantify observations of dead trees observed on these years, because they are actually > 0.
+-   I am thinking that mortality should / could be analysed as a
+    frequency response - i.e. - expected vs actual distribution of
+    mortality by size class and/or species. e.g. a Chi-squared or allied
+    type of analysis. Null hypothesis is that mortality of stems is
+    randomly distributed across different sizes and species of trees. H1
+    is that it is non-random.
+-   I'd suggest that we don't compare total mortality (e.g \# of stems)
+    across treatment units, but rather frequency relative to initial
+    number of stems (i.e. - at beginning of observation period). That
+    way we normalize mortality rates relative to initial stem densities.
+    Otherwise, results could be mis-leading - e.g. Control treatments
+    could have more mortality in overall sph, simply because they have
+    more initial stems.
+-   ACTION ITEM FOR ME: I need to check my original datasets and data
+    sorting iterations to see how I handled mortality observations for
+    the 1992 and 1994 plot remeasurements.
+-   Note for you: All of the mortality you've analysed and identified so
+    far is mortality that is incremental following 92/94, so it is still
+    solid analysis data, just with that qualification. I will clarify
+    the 92/94 mortalilty observations for the Methods section; we did
+    observe dead trees at these times, but these mortality pre-dated our
+    treatments and/or first measurements. Anyway, probably not a big
+    deal, but this needs examination and clarification to explain this.
+    If necessary, I will quantify observations of dead trees observed on
+    these years, because they are actually \> 0.
 
-Testing for density-dependence of mortality responses... some ideas or hypotheses..  Note that f (___) means "a function of"...
+Testing for density-dependence of mortality responses... some ideas or
+hypotheses.. Note that f (\_\_\_) means "a function of"...
 
-  *   MORT RATE of a size class = f (Sum of BA in that plot > than that size class).
-Would assume asymmetric competition where only bigger trees exert competition on smaller trees.
-  *   MORT RATE of a size class = f ( Sum of BA in that plot that is either > or < that size class).
-Assumes symmetric competition where both big and small trees exert competition on their neighbors.
+-   MORT RATE of a size class = f (Sum of BA in that plot \> than that
+    size class). Would assume asymmetric competition where only bigger
+    trees exert competition on smaller trees.
+-   MORT RATE of a size class = f ( Sum of BA in that plot that is
+    either \> or \< that size class). Assumes symmetric competition
+    where both big and small trees exert competition on their neighbors.
 
-Caveats:   (a) our plots and tree distributions might be too spatially variable to get a reliable test of these hypotheses, and (b) BA would be the BA at the beginning of a measurement period. And (c) a tree that died of suppression would probably show reduced growth rates prior to death; but trees that had abiotic damage and mortality - e.g. - snow or wind breakage - might not. Complicated stuff !!
+Caveats: (a) our plots and tree distributions might be too spatially
+variable to get a reliable test of these hypotheses, and (b) BA would be
+the BA at the beginning of a measurement period. And (c) a tree that
+died of suppression would probably show reduced growth rates prior to
+death; but trees that had abiotic damage and mortality - e.g. - snow or
+wind breakage - might not. Complicated stuff !!
 
+#### 3.2.1 Estimating tree height from diameter
 
-
-#### 3.2.1  Estimating tree height from diameter
-
-
-- Really solid stats and rationale for a single ht:dbh model. Great !
-- What is really interesting and useful about this is that the ht:dbh relationship is seemingly statistically independent of treatment or, that is, initial density,  A very useful simplifying assumption proven for future modellers of these stands. We should highlight this in either our results or discussion.
+-   Really solid stats and rationale for a single ht:dbh model. Great !
+-   What is really interesting and useful about this is that the ht:dbh
+    relationship is seemingly statistically independent of treatment or,
+    that is, initial density, A very useful simplifying assumption
+    proven for future modellers of these stands. We should highlight
+    this in either our results or discussion.
 
 #### 3.2.2 Plot means
 
-- See notes above about use of term "units" vs treatment (or similar).
-- Clarify effects of treatment and/or species on growth rate vs standing vol / BA at each measurement period.
-- A Figure 7b or equivalent could visually present changes in growth rate over time. (e.g. previous graphs we've developed)
-- Under Observations, # 2 - the 2nd sentence needs work to edit and clarify.
+-   See notes above about use of term "units" vs treatment (or similar).
+-   Clarify effects of treatment and/or species on growth rate vs
+    standing vol / BA at each measurement period.
+-   A Figure 7b or equivalent could visually present changes in growth
+    rate over time. (e.g. previous graphs we've developed)
+-   Under Observations, \# 2 - the 2nd sentence needs work to edit and
+    clarify.
 
 #### 3.2.3 Stand attributes by diameter class
 
-- We should define what we mean by the term inverse J or inverse J-shaped dbh distribution. Just for clarity.
-- Should we quantitatively describe these distributions? Don't have to, just asking the question.
-- Is the merch limit for min merch tree size 18.5 cm dbh, or 17.5 cm dbh? I remember the latter from various cruises and cruise compilations.
-- There are two Figure 2's, one is for vol and one is for sph.
-- Clarify in figures and text that sph is based on trees 7.5 cm dbh and greater. Increases in sph can be from ingress of trees growing from size classes below this limit.
-- A suggestion:  Have a table comparing total volume to merch volume by treatment, etc?  Would be useful for some readers, and communicate MAI and volume growth rates too.
+-   We should define what we mean by the term inverse J or inverse
+    J-shaped dbh distribution. Just for clarity.
+-   Should we quantitatively describe these distributions? Don't have
+    to, just asking the question.
+-   Is the merch limit for min merch tree size 18.5 cm dbh, or 17.5 cm
+    dbh? I remember the latter from various cruises and cruise
+    compilations.
+-   There are two Figure 2's, one is for vol and one is for sph.
+-   Clarify in figures and text that sph is based on trees 7.5 cm dbh
+    and greater. Increases in sph can be from ingress of trees growing
+    from size classes below this limit.
+-   A suggestion: Have a table comparing total volume to merch volume by
+    treatment, etc? Would be useful for some readers, and communicate
+    MAI and volume growth rates too.
 
-#### 3.2.4  Species composition
+#### 3.2.4 Species composition
 
-- First sentence:  Clarify what you mean by "organized similarly". Does this refer to frequency distribution ? What constitutes similarity?
+-   First sentence: Clarify what you mean by "organized similarly". Does
+    this refer to frequency distribution ? What constitutes similarity?
 
 #### Mortality
 
-Last winter, as well as keeping reference copies of the initial “raw” dataset following data entry and related stuff, I kept copies each stage of data cleaning and prep (about 10 iterations). 
+Last winter, as well as keeping reference copies of the initial "raw"
+dataset following data entry and related stuff, I kept copies each stage
+of data cleaning and prep (about 10 iterations).
 
-We did have “dead tree” observations in the first ~ 2 year of monitoring. The key thing to see is : if I can determine is when the trees were dead, and/or when death was initiated, and why.  
-Timing of tree death and observations of causal factors of tree death in these first two years will help inform our interpretation and data handling of these observations. 
+We did have "dead tree" observations in the first \~ 2 year of
+monitoring. The key thing to see is : if I can determine is when the
+trees were dead, and/or when death was initiated, and why.\
+Timing of tree death and observations of causal factors of tree death in
+these first two years will help inform our interpretation and data
+handling of these observations.
 
-If trees were dead or moribund at the first “initial” observation or two (as soon after the logging as possible), this is – arguably -  different than mortality that occurs over time in response to the basal area treatment and/or could be considered to be density- or treatment-dependent in some way.
+If trees were dead or moribund at the first "initial" observation or two
+(as soon after the logging as possible), this is -- arguably - different
+than mortality that occurs over time in response to the basal area
+treatment and/or could be considered to be density- or
+treatment-dependent in some way.
 
-The 1992 data was in mid-March really early after logging, and before snowmelt (in retrospect not a great idea but we had resources available before the end of the fiscal year at the time). The 1994 data was from when the plots were re-visited under snow-free conditions. We did a thinning and sanitation culling of trees in the treatment units and PSP’s in 1994 to remove logging-damaged trees and most deciduous, to bring the units and PSP’s down to their final treatment BA. 1994 remeasurements were completed after that.
+The 1992 data was in mid-March really early after logging, and before
+snowmelt (in retrospect not a great idea but we had resources available
+before the end of the fiscal year at the time). The 1994 data was from
+when the plots were re-visited under snow-free conditions. We did a
+thinning and sanitation culling of trees in the treatment units and
+PSP's in 1994 to remove logging-damaged trees and most deciduous, to
+bring the units and PSP's down to their final treatment BA. 1994
+remeasurements were completed after that.
 
-A few plots, as you know, were established in 1994 not 1992. 
+A few plots, as you know, were established in 1994 not 1992.
 
 Interpretive implications:
 
-1.	The very-early observed mortality may be a result of pre-existing stand conditions not the created, treatment-induced stand conditions. “stochastic” vs potentially treatment induced. 
-2.	It can be argued that trees dead at time of treatment or very soon  thereafter were never taking up growing space in the post-harvest stand, and therefore would not contribute to the initial “green” basal area going forward. 
-3.	We do have 1992 data in most plots, but it was 1994 when the BA in each trmt unit and embedded PSP was finalized. 1994 is the most homogeneous start point for all PSP’s.
+1.  The very-early observed mortality may be a result of pre-existing
+    stand conditions not the created, treatment-induced stand
+    conditions. "stochastic" vs potentially treatment induced.
+2.  It can be argued that trees dead at time of treatment or very soon
+    thereafter were never taking up growing space in the post-harvest
+    stand, and therefore would not contribute to the initial "green"
+    basal area going forward.
+3.  We do have 1992 data in most plots, but it was 1994 when the BA in
+    each trmt unit and embedded PSP was finalized. 1994 is the most
+    homogeneous start point for all PSP's.
 
-Regarding tree mortality in the period from 1992 to 1994 at Summit Lake EP 1162:
+Regarding tree mortality in the period from 1992 to 1994 at Summit Lake
+EP 1162:
 
-I reviewed our data regarding this, any relevant project records, and my own recollection of our monitoring of tree mortality during this period. Here is my train of thought, and what I have concluded on this topic:
+I reviewed our data regarding this, any relevant project records, and my
+own recollection of our monitoring of tree mortality during this period.
+Here is my train of thought, and what I have concluded on this topic:
 
 1992 Observations and PSP establishment limitations
 
-Trees that were dead at the time of the 1992 PSP establishment were not tagged or recorded. The rationale for this was that these trees were dead and therefore not taking up up growing space in the stands. Dead trees in 1992 would have been either snags / dead trees pre-existing the harvest, or trees fatally damaged or killed by logging activities (e.g. – trees with stems snapped and crowns broken off, no live limbs) or trees smashed to the ground by felled trees). 
+Trees that were dead at the time of the 1992 PSP establishment were not
+tagged or recorded. The rationale for this was that these trees were
+dead and therefore not taking up up growing space in the stands. Dead
+trees in 1992 would have been either snags / dead trees pre-existing the
+harvest, or trees fatally damaged or killed by logging activities (e.g.
+-- trees with stems snapped and crowns broken off, no live limbs) or
+trees smashed to the ground by felled trees).
 
 Summer 1994 sanitation treatment and Fall 1994 PSP Remeasurement
 
-EP 1162 treatment units, including the PSP area contained therein, were assessed in Spring 1994 to review stand density / basal area, and stand condition, in order to:  
-a)	identify and mark-to-cut residual trees that were considered too badly scarred or damaged to constitute good growing stock for trial purposes, 
-b)	where needed, to lower the initial BA closer to the target level, 
-c)	to either fell or girdle birch trees, especially in the PSP’s themselves, but usually also within the TU as a whole, and 
-d)	to fell any dead, dangerous, and/or moribund trees within the treatment units and PSP’s. 
-Generally most if not all of these trees felled in the sanitation felling were understory or subdominant trees, and occasionally a lower codominant tree. Tagged trees felled by the sanitation felling were documented on field sheets and our Excel datasets, so we can retrieve the species and size of these trees as needed. However, sanitation-felled trees included both live, moribund, and dead trees – generally all poorer quality or vigor though.  
+EP 1162 treatment units, including the PSP area contained therein, were
+assessed in Spring 1994 to review stand density / basal area, and stand
+condition, in order to:\
+a) identify and mark-to-cut residual trees that were considered too
+badly scarred or damaged to constitute good growing stock for trial
+purposes, b) where needed, to lower the initial BA closer to the target
+level, c) to either fell or girdle birch trees, especially in the PSP's
+themselves, but usually also within the TU as a whole, and d) to fell
+any dead, dangerous, and/or moribund trees within the treatment units
+and PSP's. Generally most if not all of these trees felled in the
+sanitation felling were understory or subdominant trees, and
+occasionally a lower codominant tree. Tagged trees felled by the
+sanitation felling were documented on field sheets and our Excel
+datasets, so we can retrieve the species and size of these trees as
+needed. However, sanitation-felled trees included both live, moribund,
+and dead trees -- generally all poorer quality or vigor though.
 
-After felling, the felled trees were bucked to a 2 to 3 m length so as to lay these felled trees to as close to the ground as possibly, maximize decay, and minimize physical obstructions within the TU’s and PSP’s.
+After felling, the felled trees were bucked to a 2 to 3 m length so as
+to lay these felled trees to as close to the ground as possibly,
+maximize decay, and minimize physical obstructions within the TU's and
+PSP's.
 
-As a result of the sanitation felling, potentially some trees which died or were damaged between 1992 and Summer 1994 were felled without recording these mortality events and precise tree vigor beforehand. Some minor mortality occurred between 1992 and 94, but was obscured by the post-harvest sanitation treatment. 
+As a result of the sanitation felling, potentially some trees which died
+or were damaged between 1992 and Summer 1994 were felled without
+recording these mortality events and precise tree vigor beforehand. Some
+minor mortality occurred between 1992 and 94, but was obscured by the
+post-harvest sanitation treatment.
 
-The 1994 Remeasurement occurred in Fall 1994, with a few plot remeasurements occurring in Winter 1994/95 (i.e. no intervening growing season). 
+The 1994 Remeasurement occurred in Fall 1994, with a few plot
+remeasurements occurring in Winter 1994/95 (i.e. no intervening growing
+season).
 
+For scientific rigour, we should not state that there was zero mortality
+between 1992 and 1994. Rather, I suggest, it is more accurate to state
+that data on tree mortalilty between 1992 and 1994 was not collected,
+and that the Summer 1994 sanitation felling treatment did not allow
+accurate documentation of tree mortality in this initial period on a
+retrospective basis.
 
-For scientific rigour, we should not state that there was zero mortality between 1992 and 1994. Rather, I suggest, it is more accurate to state that data on tree mortalilty between 1992 and 1994 was not collected, and that the Summer 1994 sanitation felling treatment did not allow accurate documentation of tree mortality in this initial period on a retrospective basis. 
+We don't, therefore, have data on mortality between 1992 and 1994,
+though my recollection is that it was minor in nature.
 
-We don’t, therefore, have data on mortality between 1992 and 1994, though my recollection is that it was minor in nature. 
+The difference in basal area between 1992 and 1994 is predominantly a
+product of the sanitation felling of some basal area, with minor natural
+mortality.
 
-The difference in basal area between 1992 and 1994 is predominantly a product of the sanitation felling of some basal area, with minor natural mortality. 
+Mortality occurring between Fall 1994 and Fall 1997 remeasurements was
+captured accurately by these two sequential remeasurements.
 
-Mortality occurring between Fall 1994 and Fall 1997 remeasurements was captured accurately by these two sequential remeasurements. 
+"The difference in basal area between 1992 and 1994 is a result of basal
+area reductions through the sanitation felling of some stems and some
+minor natural mortality, combined with basal area increases through the
+growth of remaining live stems."
 
-“The difference in basal area between 1992 and 1994 is a result of basal area reductions through the sanitation felling of some stems and some minor natural mortality, combined with basal area increases through the growth of remaining live stems.”
+A review of the various plots indicates that between 1992 and 1994, some
+PSP's decreased in BA (as sanitation removals and minor mortality
+exceeded growth of live stems), while others increased in BA as tree
+growth exceeded BA removals.
 
-A review of the various plots indicates that between 1992 and 1994, some PSP’s decreased in BA (as sanitation removals and minor mortality exceeded growth of live stems), while others increased in BA as tree growth exceeded BA removals. 
+-   Is there any change in which sizes or size classes of trees die as
+    stand volume increases? - e.g. is competition asymmetrical or
+    symmetrical? Currently the y axis is total number of trees, I
+    believe.
+-   Not sure if we have enough sample size of trees to look at species
+    dynamics (Sx vs Bl).
+-   I am wondering if the same relationship that appears between volume
+    and tree mortality, is mirrored in the relationship between BA and
+    tree mortality. A bit more on this below...
 
-  *   Is there any change in which sizes or size classes of trees die as stand volume increases? - e.g. is competition asymmetrical or symmetrical? Currently the y axis is total number of trees, I believe.
-  *   Not sure if we have enough sample size of trees to look at species dynamics (Sx vs Bl).
-  *   I am wondering if the same relationship that appears between volume and tree mortality, is mirrored in the relationship between BA and tree mortality. A bit more on this below...
+Foresters (like me) do like to use BA per ha as a density measure for
+field planning and stand assessment because it seems to be broadly
+useful and is easily assessed via stand walkthroughs or plots. Sapwood
+BA is pretty well correlated with foliar biomass of the stand - a
+biological linkage. Tree BA is often correlated well with things like
+crown width.
 
-Foresters (like me) do like to use BA per ha as a density measure for field planning and stand assessment because it seems to be broadly useful and is easily assessed via stand walkthroughs or plots. Sapwood BA is pretty well correlated with foliar biomass of the stand - a biological linkage. Tree BA is often correlated well with things like crown width.
-
-I hadn't thought alot previously about vol per ha as a density measurement, but it does have the characteristic of integrating not just BA, but also tree height, so it integrates tree growing space occupancy in both in horizontal dimensions (crown width and probably root spread) but also vertical. Vol ha theoretically provides more of a 3D measure of how the trees are occupying a given land area. The fact that volume is of commercial interest is a bonus. Key assumptions here: That trees are healthy and most importantly, crowns are health and growing relatively optimally relative to their growing space opportunities. Once crown vigor etc starts to decline with age, pests or pathogens, then the relationship could start to break down.
+I hadn't thought alot previously about vol per ha as a density
+measurement, but it does have the characteristic of integrating not just
+BA, but also tree height, so it integrates tree growing space occupancy
+in both in horizontal dimensions (crown width and probably root spread)
+but also vertical. Vol ha theoretically provides more of a 3D measure of
+how the trees are occupying a given land area. The fact that volume is
+of commercial interest is a bonus. Key assumptions here: That trees are
+healthy and most importantly, crowns are health and growing relatively
+optimally relative to their growing space opportunities. Once crown
+vigor etc starts to decline with age, pests or pathogens, then the
+relationship could start to break down.
 
 \newpage
 
 # Introduction
 
-
 # Methods
 
-This section will describe the methods we used for data analyses, not field data collection.  
+This section will describe the methods we used for data analyses, not
+field data collection.
 
 From our technical report submitted to FCI earlier:
 
-Our data analyses and summaries examined the effects of the different levels of stand-level basal area density treatments on three main attributes of stand development following treatment. These include, in order: 
- 
-1. Post-treatment stand basal area dynamics, including the rate and pattern of basal area re-growth and recovery over time following different levels of initial basal area density reductions;
-2. Stand structural outcomes, including treatment influences on the overall abundance of trees (in sph) by diameter class, within the different treatment types, and;
-3. Tree species composition outcomes, including treatment influences on the relative abundance and size class distributions of subalpine fir and hybrid white spruce within the different treatment types. 
+Our data analyses and summaries examined the effects of the different
+levels of stand-level basal area density treatments on three main
+attributes of stand development following treatment. These include, in
+order:
 
-Analyses are grouped into three main categories (below).  These are treated as separate categories in the Results section.
+1.  Post-treatment stand basal area dynamics, including the rate and
+    pattern of basal area re-growth and recovery over time following
+    different levels of initial basal area density reductions;
+2.  Stand structural outcomes, including treatment influences on the
+    overall abundance of trees (in sph) by diameter class, within the
+    different treatment types, and;
+3.  Tree species composition outcomes, including treatment influences on
+    the relative abundance and size class distributions of subalpine fir
+    and hybrid white spruce within the different treatment types.
 
-1. Tree-level responses to treatment;
-2. Stand-level responses to treatment:
+Analyses are grouped into three main categories (below). These are
+treated as separate categories in the Results section.
+
+1.  Tree-level responses to treatment;
+2.  Stand-level responses to treatment:
 
 ## Data analyses
 
-
 ### Tree-level growth responses
 
-To test the hypothesis that tree-level radial growth response over the 1994-2019 period varied with interactions between (i) tree diameter at the time of final treatment (1994); (ii) treatment; and (iii) species, we fit linear mixed effects models with log-transformed 1994-2019 diameter increment as the response variable, and treatment, species and log-transformed 1992 diameter as interacting fixed effects. To account for plot-level productivity differences, we included plot as a random intercept effect.  Models were fit using the 'lme4' package for R [@].  We also fit a similar model with the 1994-2019 diameter increment expressed as a percentage of 1994 diameter.  Plots of residuals and fit lines with orginal data were examined to evaluate model goodness of fit.  Variance explained for each model are reported using the approach described in Nakagawa et al. [-@Nakagawa2013], as implemented in the MuMIn package for R [@barton2009mumin].  Pairwise contrasts were performed using the 'emmeans' package for R [@] and Tukey HSD method of *p* value adjustment was used to control for multiplicity.  We report all significant results at p<0.05.  
+To test the hypothesis that tree-level radial growth response over the
+1994-2019 period varied with interactions between (i) tree diameter at
+the time of final treatment (1994); (ii) treatment; and (iii) species,
+we fit linear mixed effects models with log-transformed 1994-2019
+diameter increment as the response variable, and treatment, species and
+log-transformed 1992 diameter as interacting fixed effects. To account
+for plot-level productivity differences, we included plot as a random
+intercept effect. Models were fit using the 'lme4' package for R [\@].
+We also fit a similar model with the 1994-2019 diameter increment
+expressed as a percentage of 1994 diameter. Plots of residuals and fit
+lines with orginal data were examined to evaluate model goodness of fit.
+Variance explained for each model are reported using the approach
+described in Nakagawa et al. [-@Nakagawa2013], as implemented in the
+MuMIn package for R [@barton2009mumin]. Pairwise contrasts were
+performed using the 'emmeans' package for R [\@] and Tukey HSD method of
+*p* value adjustment was used to control for multiplicity. We report all
+significant results at p\<0.05.
+
+For each plot and measurement period, we computed the growth dominance statistic (GDS) to evaluate the relationship between individual tree size and its growth as a proportion of the stand's overall growth [@Forrester; @West; @Binkey] 
 
 ### Stand-level growth and structure
 
 #### Stand-level volume and basal area estimates
-Total and merchantable volumes were estimated for trees using species- and region-specific equations [@nigh2016] based on tree height and DBH.  Consistent with forest management practices in British Columbia, we estimated volumes for trees meeting a minimum diameter utilization limit of 18.5cm DBH.  For trees lacking a tree height measurement, we estimated height by fitting a single diameter-height model developed with a linear mixed effects model, with log-transformed DBH as a fixed effect, and tree nested within plot as random intercepts.  Trees with broken tops were omitted from diameter-height models. We summed tree-level estimates of volume and basal area to generate stand-level estimates for each plot. To test the hypothesis that changes in stand attributes over 27 years varied by treatment, we fit separate linear models with stand total volume, basal area, and density as response variables, and the interaction between treatment and year as the independent variable.  
 
+Total and merchantable volumes were estimated for trees using species-
+and region-specific equations [@nigh2016] based on tree height and DBH.
+Consistent with forest management practices in British Columbia, we
+estimated volumes for trees meeting a minimum diameter utilization limit
+of 18.5cm DBH. For trees lacking a tree height measurement, we estimated
+height by fitting a single diameter-height model developed with a linear
+mixed effects model, with log-transformed DBH as a fixed effect, and
+tree nested within plot as random intercepts. Trees with broken tops
+were omitted from diameter-height models. We summed tree-level estimates
+of volume and basal area to generate stand-level estimates for each
+plot. To test the hypothesis that changes in stand attributes over 27
+years varied by treatment, we fit separate linear models with stand
+total volume, basal area, and density as response variables, and the
+interaction between treatment and year as the independent variable.
 
 #### Mortality
 
-
-
-
 # Results
 
-## Tree-level 
+## Tree-level
 
 ### Basal area increment from 1994-2019
 
@@ -322,8 +521,6 @@ piDat<-
 
 ```
 
-
-
 ```{r tree level species contrasts}
 
 sppContrast<-
@@ -338,7 +535,6 @@ sppContrast<-
 
 ```
 
-
 ```{r treatment contrasts}
 
 trtContrast<-
@@ -351,10 +547,29 @@ trtContrast<-
 
 ```
 
-
-The tree-level basal area increment model indicated that interactions between log-transformed tree size, species and treatment explained `r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in log-transformed 1994-2019 tree-level BAI, and `r round(r.squaredGLMM(fitBApct)[2]*100,1)`% of the variation in basal area increment as a percentage of tree size in 1994 (p<0.0001 for both, `r tableNums("fitBA.table",display="cite")`).  Estimated marginal means from the model showed that between species and among treatments, basal area increment increased with tree size, meaning that larger trees increased basal area more than smaller trees (`r figNums("treeGrowth.plot",display="cite")`), although smaller trees increased their size proportionally more than large trees (`r figNums("treeGrowthPct.plot",display="cite")`).  Species contrasts showed that spruce trees increased  basal area significantly more than than fir in the high-removal and control treatment units, whereas basal growth between the two species was close to equal in the low-removal unit (`r appNums("sppContrast.table",display="cite")`).  Within-species contrasts showed that spruce basal area increment in the high-removal unit exceeded spruce growth in both other units (`r appNums("trtContrast.table",display="cite")`), whereas fir basal area increment in the high- and low-removal units was higher than the control unit, and there were no significant differences between the two harvested units (`r appNums("trtContrast.table",display="cite")`).  
-
-
+The tree-level basal area increment model indicated that interactions
+between log-transformed tree size, species and treatment explained
+`r round(r.squaredGLMM(fitBA)[2]*100,1)`% of the variation in
+log-transformed 1994-2019 tree-level BAI, and
+`r round(r.squaredGLMM(fitBApct)[2]*100,1)`% of the variation in basal
+area increment as a percentage of tree size in 1994 (p\<0.0001 for both,
+`r tableNums("fitBA.table",display="cite")`). Estimated marginal means
+from the model showed that between species and among treatments, basal
+area increment increased with tree size, meaning that larger trees
+increased basal area more than smaller trees
+(`r figNums("treeGrowth.plot",display="cite")`), although smaller trees
+increased their size proportionally more than large trees
+(`r figNums("treeGrowthPct.plot",display="cite")`). Species contrasts
+showed that spruce trees increased basal area significantly more than
+than fir in the high-removal and control treatment units, whereas basal
+growth between the two species was close to equal in the low-removal
+unit (`r appNums("sppContrast.table",display="cite")`). Within-species
+contrasts showed that spruce basal area increment in the high-removal
+unit exceeded spruce growth in both other units
+(`r appNums("trtContrast.table",display="cite")`), whereas fir basal
+area increment in the high- and low-removal units was higher than the
+control unit, and there were no significant differences between the two
+harvested units (`r appNums("trtContrast.table",display="cite")`).
 
 ## Stand-level analyses
 
@@ -379,12 +594,27 @@ X<-
 
 ```
 
-
 ### Tree height modeling
-Tree heights had a positive nonlinear relationship with diameter, for both species and across all time periods (`r appNums("heightDiam.plot",display="cite")`).  We originally developed separate models for each species and time period, however, a comparison of height-diameter models showed that intercepts and slopes did not vary significantly (i.e., p>0.05) between species or time periods (not shown).  Therefore, we developed a single height-diameter linear mixed-effects model using `r X %>% filter(Species %in% c("Fir","Spruce")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()` tree height-diameter observations in the dataset. This model explained `r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in log-transformed heights, with an intercept of `r round(fixef(htDiamFit)[1],3)` and slope coefficient of  `r round(fixef(htDiamFit)[2],3)` * log-transformed DBH (not shown).  Residual and predicted vs actual height plots were assessed to ensure goodness of fit (`r appNums("htModelFit.plot",display="cite")`). Using this model, we generated height estimates for trees without height measurements, and then estimated tree total volume as per Nigh [-@nigh2016].
 
-
-
+Tree heights had a positive nonlinear relationship with diameter, for
+both species and across all time periods
+(`r appNums("heightDiam.plot",display="cite")`). We originally developed
+separate models for each species and time period, however, a comparison
+of height-diameter models showed that intercepts and slopes did not vary
+significantly (i.e., p\>0.05) between species or time periods (not
+shown). Therefore, we developed a single height-diameter linear
+mixed-effects model using
+`r X %>% filter(Species %in% c("Fir","Spruce")) %>% filter(Status=="Live") %>% filter(is.na(DBT)) %>% drop_na(Height) %>% nrow()`
+tree height-diameter observations in the dataset. This model explained
+`r round(MuMIn::r.squaredGLMM(htDiamFit)[1]*100,1)`% of variation in
+log-transformed heights, with an intercept of
+`r round(fixef(htDiamFit)[1],3)` and slope coefficient of
+`r round(fixef(htDiamFit)[2],3)` \* log-transformed DBH (not shown).
+Residual and predicted vs actual height plots were assessed to ensure
+goodness of fit (`r appNums("htModelFit.plot",display="cite")`). Using
+this model, we generated height estimates for trees without height
+measurements, and then estimated tree total volume as per Nigh
+[-@nigh2016].
 
 ```{r hardcode volume coefficients per Nigh}
 
@@ -614,7 +844,6 @@ perInc.X<-
 
 ```
 
-
 ```{r fit model to plot data}
 
 # Rename columns in plotData.X
@@ -691,7 +920,6 @@ standFitM.contrasts<-
 
 ```
 
-
 ```{r plot comparisons at the species level, eval=FALSE}
 
 # Summarize plot data at the species and treatment unit level
@@ -747,23 +975,60 @@ sphM.spp.contrast <- pairs(sph.spp.means,by="Year")
 
 ```
 
-
 ### Rate of change from 1994 to 2019
-All treatment units, including the control, increased volume, basal area and stand density over the 1994-2019 period (`r figNums("standPlots",display="cite")` and `r appNums("standPlot.table",display="cite")`).  Mean annual basal area and volume increment peaked during the 1997-2009 period in the two harvested treatments, and peaked in the 1994-1997 period in the control treatment unit (`r figNums("perInc.plot",display="cite")`).  From 1994 to 2019, estimated marginal means of basal area increment in the low RBA unit exceeded marginal means in the high RBA and control unit by an estimated 
+
+All treatment units, including the control, increased volume, basal area
+and stand density over the 1994-2019 period
+(`r figNums("standPlots",display="cite")` and
+`r appNums("standPlot.table",display="cite")`). Mean annual basal area
+and volume increment peaked during the 1997-2009 period in the two
+harvested treatments, and peaked in the 1994-1997 period in the control
+treatment unit (`r figNums("perInc.plot",display="cite")`). From 1994 to
+2019, estimated marginal means of basal area increment in the low RBA
+unit exceeded marginal means in the high RBA and control unit by an
+estimated
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]`
 and
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[2]`
-m² per hectare, respectively (p<0.01 for both, `r appNums("standFit.contrasts",display="cite")`). 
+m² per hectare, respectively (p\<0.01 for both,
+`r appNums("standFit.contrasts",display="cite")`).
 
-
-The low RBA unit also significantly increased its stand density by an estimated 
+The low RBA unit also significantly increased its stand density by an
+estimated
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0)  %>%   .[2]`
-stems per hectare more than the control unit (p<0.001). The estimated rate of change in tree density did not differ significantly between the two harvested units.  The rate of change in volume in trees over 18.5cm DBH was barely significant (p=0.049) between the two harvested units, and the difference was not significant between the control and harvested units. 
-
-
+stems per hectare more than the control unit (p\<0.001). The estimated
+rate of change in tree density did not differ significantly between the
+two harvested units. The rate of change in volume in trees over 18.5cm
+DBH was barely significant (p=0.049) between the two harvested units,
+and the difference was not significant between the control and harvested
+units.
 
 ### Stand attributes by year
-By year, mean plot volume, basal area and stand density did not differ significantly between both harvested units (i.e., p>0.05, `r appNums("standFitM.contrasts",display="cite")` and `r figNums("standPlots",display="cite")`).  Contrasts between the high-removal and control treatment units showed that volume, basal area and stand density differences were highest and significant (i.e., p<0.05) in the 1992 measurement year, and these differences diminshed over each subsequent measurement year.  For example, mean plot density in the high-removal treatment unit was approximately 600 trees per hectare less than the control in 1994 (p<0.05); by 2019, that difference had decreased to 219 trees per hectare (p>0.05).  Contrasts between the low-removal and the control treatment units showed a similar trend with basal area and stand density; the control unit had significanly higher basal area and stand density means in 1992, but the difference between the units diminished over each subsequent measurement, becoming non-significant (i.e., p>0.05) in 2019.  Plot means of volume did not differ significantly between the treatment units in any measurement year. 
+
+By year, mean plot volume, basal area and stand density did not differ
+significantly between both harvested units (i.e., p\>0.05,
+`r appNums("standFitM.contrasts",display="cite")` and
+`r figNums("standPlots",display="cite")`). Contrasts between the
+high-removal and control treatment units showed that volume, basal area
+and stand density differences were highest and significant (i.e.,
+p\<0.05) in the 1994 measurement year, and these differences diminshed
+over each subsequent measurement year. For example, mean plot density in
+the high-removal treatment unit was approximately
+
+`r standFitM.contrasts %>% filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Stand density") %>%  filter(Year==1994) %>% mutate(estimate=abs(round(estimate,0))) %>%  pull(estimate)`
+
+trees per hectare less than the control in 1994 (p\<0.05); by 2019, that
+difference had decreased to
+
+`r standFitM.contrasts %>% filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Stand density") %>%  filter(Year==2019) %>% mutate(estimate=abs(round(estimate,0))) %>%  pull(estimate)`
+
+trees per hectare (p\>0.05). Contrasts between the low-removal and the
+control treatment units showed a similar trend with basal area and stand
+density; the control unit had significantly higher basal area and stand
+density means in 1994, but the difference between the units diminished
+over each subsequent measurement, becoming non-significant (i.e.,
+p\>0.05) in 2019. Plot means of volume did not differ significantly
+between the treatment units in any measurement year.
 
 ### Growth dominance statistics
 
@@ -956,15 +1221,28 @@ gd.Dat <-
 
 ```
 
-Across all plots and time periods, smaller trees contributed proportionally more to stand basal area growth than larger trees (`r figNums("gds.plot",display="cite")`).  Over the last two measurement periods, the growth dominance statistic decreased in all plots except one (not shown), indicating that individual tree growth contributions to stand growth became more proportional to tree size over the last 11 growing seasons.    
-
+Across all plots and time periods, smaller trees contributed
+proportionally more to stand basal area growth than larger trees
+(`r figNums("gds.plot",display="cite")`). Over the last two measurement
+periods, the growth dominance statistic decreased in all plots except
+one (not shown), indicating that individual tree growth contributions to
+stand growth became more proportional to tree size over the last 11
+growing seasons.
 
 ### Stand attributes by diameter class
 
-Among treatments and throughout the stand development after treatment, the stands maintained a negative exponential (also referred to as 'reverse-J') diameter class distribution (`r figNums("diamK.plot",display="cite")`).  
-Immediately after the partial harvest, the diameter class distribution of volume differed among treatments.  In the 27 years since partial harvest, volume in all three treatment units was mostly concentrated in the 22.5-27.5cm DBH class, and mostly comprised of fir (`r figNums("diamVol.plot",display="cite")`).  Over both time periods shown in the figure and all three treatments, most of the spruce volume was concentrated in DBH classes spanning 37.5 to 47.5cm.  Basal area trends were very similar to volume (not shown).  
-
-
+Among treatments and throughout the stand development after treatment,
+the stands maintained a negative exponential (also referred to as
+'reverse-J') diameter class distribution
+(`r figNums("diamK.plot",display="cite")`).\
+Immediately after the partial harvest, the diameter class distribution
+of volume differed among treatments. In the 27 years since partial
+harvest, volume in all three treatment units was mostly concentrated in
+the 22.5-27.5cm DBH class, and mostly comprised of fir
+(`r figNums("diamVol.plot",display="cite")`). Over both time periods
+shown in the figure and all three treatments, most of the spruce volume
+was concentrated in DBH classes spanning 37.5 to 47.5cm. Basal area
+trends were very similar to volume (not shown).
 
 ### Species composition
 
@@ -1024,11 +1302,22 @@ plotTotal.table<-
 
 ```
 
+A comparison of proportional species composition by diameter class,
+treatment and year showed that fir and spruce volume proportion by
+diameter class varied similarly between the high RBA and control units
+(`r figNums("sppCompDiam.plot",display="cite")`). In 1992, the largest
+diameter classes were dominated by spruce, whereas fir was the dominant
+species in the smallest diameter classes. This pattern was also found
+for basal area and tree density (not shown). By 2019, the fir-spruce
+composition by distribution class was maintained in these two units,
+with small increases in spruce composition in the smallest diameter
+class.
 
-
-A comparison of proportional species composition by diameter class, treatment and year showed that fir and spruce volume proportion by diameter class varied similarly between the high RBA and control units (`r figNums("sppCompDiam.plot",display="cite")`).  In 1992, the largest diameter classes were dominated by spruce, whereas fir was the dominant species in the smallest diameter classes.  This pattern was also found for basal area and tree density (not shown).  By 2019, the fir-spruce composition by distribution class was maintained in these two units, with small increases in spruce composition in the smallest diameter class.
-
-In the low RBA, the species composition distribution by diameter class was different.  Here, both fir and spruce maintained similar proportions across diameter classes smaller than 37.5cm DBH.  Spruce formed the leading species in diameter classes above 37.5cm DBH, with the exception of the largest class.
+In the low RBA, the species composition distribution by diameter class
+was different. Here, both fir and spruce maintained similar proportions
+across diameter classes smaller than 37.5cm DBH. Spruce formed the
+leading species in diameter classes above 37.5cm DBH, with the exception
+of the largest class.
 
 ## Mortality
 
@@ -1096,77 +1385,289 @@ dead.Summ<-
 
 ```
 
-A total of `r deadList %>% nrow()` trees (`r deadList %>% filter(Species=="Fir") %>% nrow()` fir, `r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce, and `r deadList %>% filter(Species=="Fd") %>% nrow()` Douglas-fir) died in `r length(unique(deadList$Plot))` plots from 1994 to 2019. The number of trees that died per plot from 1994 to 2019 increased significantly with plot basal area in 1994 (`r figNums("mort.plot",display="cite")`, p < 0.0001). Mortality was generally not attributable to a particular forest health factor, and in the majority ofcases, we could not ascertain a casual agent.  Similar linear models fitted separately for fir and spruce showed that fir mortality had a similar relationship to plot basal area, whereas spruce mortality did not (not shown).  The diameter distribution of fir mortality followed a negative exponential distribution, with mortality concentrated in smaller diameter classes (`r figNums("mortSppDiam.plot",display="cite")`).  Spruce mortality was concentrated in larger diameter classes.  By treatment unit, the control unit had the highest mortality, whereas the high-removal treatment unit had the lowest mortality (`r figNums("mortDiam.plot",display="cite")`).  The majority of mortality occured during the most recent measurement period of 2009-2019.
-
-
-
+A total of `r deadList %>% nrow()` trees
+(`r deadList %>% filter(Species=="Fir") %>% nrow()` fir,
+`r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce, and
+`r deadList %>% filter(Species=="Fd") %>% nrow()` Douglas-fir) died in
+`r length(unique(deadList$Plot))` plots from 1994 to 2019. The number of
+trees that died per plot from 1994 to 2019 increased significantly with
+plot basal area in 1994 (`r figNums("mort.plot",display="cite")`, p \<
+0.0001). Mortality was generally not attributable to a particular forest
+health factor, and in the majority ofcases, we could not ascertain a
+casual agent. Similar linear models fitted separately for fir and spruce
+showed that fir mortality had a similar relationship to plot basal area,
+whereas spruce mortality did not (not shown). The diameter distribution
+of fir mortality followed a negative exponential distribution, with
+mortality concentrated in smaller diameter classes
+(`r figNums("mortSppDiam.plot",display="cite")`). Spruce mortality was
+concentrated in larger diameter classes. By treatment unit, the control
+unit had the highest mortality, whereas the high-removal treatment unit
+had the lowest mortality (`r figNums("mortDiam.plot",display="cite")`).
+The majority of mortality occured during the most recent measurement
+period of 2009-2019.
 
 # Discussion
 
 ## Uneven-aged stand management
-This study describes tree- and stand-level responses to partial harvest treatments in an uneven-aged stand.  
-- THere are numerous studies documenting responses of even-aged stands to partial harvest treatments such as thinning.  In even-aged stands, a common objective of thinning treatments is to re-allocate growing space and resources to the most valulable trees in the stand that have capacity to increase production.  The objectives of partial harvesting in uneven-aged stands is more often to provide a sustained production of wood over multiple generations of trees.  In this context, partial harvesting in uneven-aged stands seeks to provide adequate growing space and resources to trees across a range of sizes and densities.  By quantifying growth responses at the tree- and stand-level, this study addresses questions regarding the manipulation of structure in an uneven-aged stand to achieve ...
+
+This study describes tree- and stand-level responses to partial harvest
+treatments in an uneven-aged stand.\
+- THere are numerous studies documenting responses of even-aged stands
+to partial harvest treatments such as thinning. In even-aged stands, a
+common objective of thinning treatments is to re-allocate growing space
+and resources to the most valulable trees in the stand that have
+capacity to increase production. The objectives of partial harvesting in
+uneven-aged stands is more often to provide a sustained production of
+wood over multiple generations of trees. In this context, partial
+harvesting in uneven-aged stands seeks to provide adequate growing space
+and resources to trees across a range of sizes and densities. By
+quantifying growth responses at the tree- and stand-level, this study
+addresses questions regarding the manipulation of structure in an
+uneven-aged stand to achieve ...
 
 ## Tree- and stand-level growth response to partial harvest
 
 ### Species
 
-At the tree-level, our results suggest that while both hybrid white spruce and subalpine fir respond to thinning with faster radial growth, heavy thinning can elicit a stronger radial growth response in spruce, compared to fir.  Spruce trees in the low-removal harvest treatment did not respond with a significant growth release.  THus, our results suggest that a relatively high removal of the stand will result in increased spruce growth, and this release will exceed that of co-occurring fir trees.  Other studies have shown that residual spruce growth responds favourably to heavy thinning.  A 10-year analysis of white spruce growth underneath an aspen canopy found that a complete or high overstory removal resulted in immediate and significant spruce radial and height growth responses, compared to control and partial cutting treatments (Smith et al. 2016).   In a 35-year old white spruce stand, diameter increment was maximized with the heaviest thinning intensity, however, the treatment thinning from below (Stiell 1970).  Frank (1973) also showed that 70-year old white spruce basal increment increased with the amount of thinning. Competition for light is a key factor that limits white spruce growth, and opening up the stand to allow for increased light penetration may be a primary mechanism that enhances white spruce growth responses [@Lieffers1999].  High basal area removal may also increase air and soil temperatures, which can preferentially favour spruce growth responses compared to fir [@Lajzerowicz2004].  The relatively low spruce growth response in the low-removal treatment may be explained in that the gaps created may have been too small to elicit as strong a growth response as observed in the high-removal thinning treatment.  Light levels may differ little between forest canopies that are closed or contain small gaps [@Bartemucci2002], and strong vertical light gradients may result in relatively little light regime changes for understorey trees.
+At the tree-level, our results suggest that while both hybrid white
+spruce and subalpine fir respond to thinning with faster radial growth,
+heavy thinning can elicit a stronger radial growth response in spruce,
+compared to fir. Spruce trees in the low-removal harvest treatment did
+not respond with a significant growth release. THus, our results suggest
+that a relatively high removal of the stand will result in increased
+spruce growth, and this release will exceed that of co-occurring fir
+trees. Other studies have shown that residual spruce growth responds
+favourably to heavy thinning. A 10-year analysis of white spruce growth
+underneath an aspen canopy found that a complete or high overstory
+removal resulted in immediate and significant spruce radial and height
+growth responses, compared to control and partial cutting treatments
+(Smith et al. 2016). In a 35-year old white spruce stand, diameter
+increment was maximized with the heaviest thinning intensity, however,
+the treatment thinning from below (Stiell 1970). Frank (1973) also
+showed that 70-year old white spruce basal increment increased with the
+amount of thinning. Competition for light is a key factor that limits
+white spruce growth, and opening up the stand to allow for increased
+light penetration may be a primary mechanism that enhances white spruce
+growth responses [@Lieffers1999]. High basal area removal may also
+increase air and soil temperatures, which can preferentially favour
+spruce growth responses compared to fir [@Lajzerowicz2004]. The
+relatively low spruce growth response in the low-removal treatment may
+be explained in that the gaps created may have been too small to elicit
+as strong a growth response as observed in the high-removal thinning
+treatment. Light levels may differ little between forest canopies that
+are closed or contain small gaps [@Bartemucci2002], and strong vertical
+light gradients may result in relatively little light regime changes for
+understorey trees.
 
+In comparison, both partial harvest treatments stimulated a growth
+response in fir, compared to the control. Although both species are
+similar in shade tolerance, firs are considered to be better adapted to
+low light conditions in the understory, allowing them to persist longer
+in undisturbed forest (Antos 2000) and potentially able to respond
+faster to even modest changes in understory light (Dumais et al 2014,
+Messier et al. 1999). Although fir growth may respond at lower levels of
+overstorey removal, the growth response potential of fir may be lower
+than spruce. Comparative studies of spruce and fir growth rates present
+differing evidence regarding species differences in release potential to
+thinning. In mature Engelmann spruce (*Picea engelmannii*) -- subalpine
+fir forests in western North America, understory spruce growth rates
+exceeded those of fir, allowing spruce to achieve canopy position
+faster, including after canopy gaps were created through disturbance
+(Antos et al. 2000, Andrus et al. 2018). In mature forest in central BC,
+spruce growth exceeded that of subalpine fir after age 80 (Eis and
+Craigdallie 1983). Because spruce tends to live longer than subalpine
+fir, higher growth rates at later ages may allow this species to become
+larger than fir. In contrast, thinning studies in spruce-fir forests in
+eastern North America report that balsam fir (*Abies balsamifera*)
+responds to release with faster height and diameter growth than
+co-occurring red spruce (*Picea rubens*) (Dumais and Prevost, 2007;
+Dumais et al. 2014, Messier et al. 1999). Other studies have found no
+difference in growth response between spruce and fir species after
+treatment (MCaughey and Smith1982). Our study also suggests that at
+lower levels of basal area removal, spruce and fir growth responses are
+similar.
 
-In comparison, both partial harvest treatments stimulated a growth response in fir, compared to the control.  Although both species are similar in shade tolerance, firs are considered to be better adapted to low light conditions in the understory, allowing them to persist longer in undisturbed forest  (Antos 2000) and potentially able to respond faster to even modest changes in understory light (Dumais et al 2014, Messier et al. 1999).  Although fir growth may respond at lower levels of overstorey removal, the growth response potential of fir may be lower than spruce.  Comparative studies of spruce and fir growth rates present differing evidence regarding species differences in release potential to thinning.  In mature Engelmann spruce (*Picea engelmannii*) – subalpine fir forests in western North America, understory spruce growth rates exceeded those of fir, allowing spruce to achieve canopy position faster, including after canopy gaps were created through disturbance (Antos et al. 2000, Andrus et al. 2018).  In mature forest in central BC, spruce growth exceeded that of subalpine fir after age 80 (Eis and Craigdallie 1983).  Because spruce tends to live longer than subalpine fir, higher growth rates at later ages may allow this species to become larger than fir.  In contrast, thinning studies in spruce-fir forests in eastern North America report that balsam fir (*Abies balsamifera*) responds to release with faster height and diameter growth than co-occurring red spruce (*Picea rubens*) (Dumais and Prevost, 2007; Dumais et al. 2014, Messier et al. 1999). Other studies have found no difference in growth response between spruce and fir species after treatment (MCaughey and Smith1982).   Our study also suggests that at lower levels of basal area removal, spruce and fir growth responses are similar.
-
-Post-treatment growth rates increased with tree size at the time of treatment, for both species.  This has been found in other studies as well (references) and may be related to size-asymmetric competition whereby larger trees preempt resources, especially light, from smaller individuals [@Bose2017].  Thinning treatments may exacerbate size-assymetric competition [@Cordonnier2015], and growth increases from treatment will be predominantly concentrated in the larger tree size classes [@Bose2018; @Schwinning1998].  Smaller trees will likely continue to experience competition and will not benefit as much from the thinning treatment.  Thinning treatments may not promote growth responses in the largest dominant trees in a stand either, as these trees may not experience significant changes in resource availability or may have achieved maximal growth rates [@Ryan1997, Bose2017]. Forest managers should account for potential size differential when planning thinning treatments.  For example, a silviculture treatment that seeks to release a suppressed understorey may have to ensure that sufficient overstorey trees are removed to reduce assymetric competition after treatment.    
-
-
+Post-treatment growth rates increased with tree size at the time of
+treatment, for both species. This has been found in other studies as
+well (references) and may be related to size-asymmetric competition
+whereby larger trees preempt resources, especially light, from smaller
+individuals [@Bose2017]. Thinning treatments may exacerbate
+size-assymetric competition [@Cordonnier2015], and growth increases from
+treatment will be predominantly concentrated in the larger tree size
+classes [@Bose2018; @Schwinning1998]. Smaller trees will likely continue
+to experience competition and will not benefit as much from the thinning
+treatment. Thinning treatments may not promote growth responses in the
+largest dominant trees in a stand either, as these trees may not
+experience significant changes in resource availability or may have
+achieved maximal growth rates [@Ryan1997, Bose2017]. Forest managers
+should account for potential size differential when planning thinning
+treatments. For example, a silviculture treatment that seeks to release
+a suppressed understorey may have to ensure that sufficient overstorey
+trees are removed to reduce assymetric competition after treatment.
 
 ## Stand-level responses to thinning treatments
 
-Stand density 
-The thinned treatments increased tree density faster than the control, and within three decades, there were no significant density differences between the two harvested treatments and control.  This likely resulted from two processes; growth and mortality.  Increasing stand density reflects the growth of smaller trees that achieved the minimum diameter class (i.e., 7.5cm DBH) in this study.  The faster increases in stand density of the thinned treatments compared to the control likely reflect that smaller trees in the thinned stands responded with faster diameter increment after treatment (as previously discussed).  We note that our study did not account for new seedlings that may have become established over the period of the study.  Based on increasing densities in the smaller diameter classes, these stands will likely maintain a negative-exponential diameter distribution, which is considered typical of older, uneven-aged stands in this region.   
+Stand density The thinned treatments increased tree density faster than
+the control, and within three decades, there were no significant density
+differences between the two harvested treatments and control. This
+likely resulted from two processes; growth and mortality. Increasing
+stand density reflects the growth of smaller trees that achieved the
+minimum diameter class (i.e., 7.5cm DBH) in this study. The faster
+increases in stand density of the thinned treatments compared to the
+control likely reflect that smaller trees in the thinned stands
+responded with faster diameter increment after treatment (as previously
+discussed). We note that our study did not account for new seedlings
+that may have become established over the period of the study. Based on
+increasing densities in the smaller diameter classes, these stands will
+likely maintain a negative-exponential diameter distribution, which is
+considered typical of older, uneven-aged stands in this region.
 
-  Stand densities between all units likely also converged because of different mortality rates.  Tree mortality increased with stand-level basal area, and the thinned stands had the lowest mortality over the time of the study.  Most of the mortality was concentrated in fir trees among the smaller size classes.  Density-dependent tree mortality is common in younger, even-aged stands, reflecting intertree competition for light and other resources, and resulting in increasing uniformity of tree distribution [@Larson2015].  In the uneven-aged stands of our study, density-dependent mortality likely reflects indicate the effects of assymetric competition and suppression of .  In the unthinned stands, smaller trees died more frequently as a result of suppression from the larger trees, whereas thinning reduced this competition.  Density-dependent mortality in uneven-aged, mixed-species forests can also vary with drought and site-level conditions such as aspect and soil moisture regime, which needs to be considered when planning stand thinning treatments [@VanGunst2016].      
+Stand densities between all units likely also converged because of
+different mortality rates. Tree mortality increased with stand-level
+basal area, and the thinned stands had the lowest mortality over the
+time of the study. Most of the mortality was concentrated in fir trees
+among the smaller size classes. Density-dependent tree mortality is
+common in younger, even-aged stands, reflecting intertree competition
+for light and other resources, and resulting in increasing uniformity of
+tree distribution [@Larson2015]. In the uneven-aged stands of our study,
+density-dependent mortality likely reflects indicate the effects of
+assymetric competition and suppression of . In the unthinned stands,
+smaller trees died more frequently as a result of suppression from the
+larger trees, whereas thinning reduced this competition.
+Density-dependent mortality in uneven-aged, mixed-species forests can
+also vary with drought and site-level conditions such as aspect and soil
+moisture regime, which needs to be considered when planning stand
+thinning treatments [@VanGunst2016].
 
-Species composition 
+Species composition
 
-The low-removal thinning treatment also maintained a species composition by diameter class similar to the unthinned stands.  In these units, subalpine fir was the leading species by frequency in the smaller diameter classes, and spruce was the leading species in the larger classes.  This is a stand structure and composition common at low- to mid-elevations in the interior of British Columbia.  In closed forests with undisturbed forest floors, subalpine fir can have higher seedling establishment success than spruce, leading to higher densities of fir in the understorey.  Compared to spruce, subalpine fir can be relatively short-lived, and can die after 250 years in the canopy.  Spruce can live for over 400 years and thus can achieve larger sizes and dominant canopy positions.  
+The low-removal thinning treatment also maintained a species composition
+by diameter class similar to the unthinned stands. In these units,
+subalpine fir was the leading species by frequency in the smaller
+diameter classes, and spruce was the leading species in the larger
+classes. This is a stand structure and composition common at low- to
+mid-elevations in the interior of British Columbia. In closed forests
+with undisturbed forest floors, subalpine fir can have higher seedling
+establishment success than spruce, leading to higher densities of fir in
+the understorey. Compared to spruce, subalpine fir can be relatively
+short-lived, and can die after 250 years in the canopy. Spruce can live
+for over 400 years and thus can achieve larger sizes and dominant canopy
+positions.
 
-The high-removal unit had a somewhat different species composition by diameter class.  Here, fir was the leading species in all diameter classes.  This means that the high-removal thinning treatment converted the stand composition to fir-leading in all tree sizes.  This result may be concern for forest managers, as spruce is often preferred as a crop species over subalpine fir [].  However, the stands in this treatment had more spruce in the smaller diameter classes than the other treatment units and over the 27-year period of this study, spruce monotonically increased its composition (by volume and basal area) compared to fir.  Over time, we expect that spruce will continue to increase its proportion relative to fir and eventually achieve a similar species composition - diameter distribution as the other units. 
+The high-removal unit had a somewhat different species composition by
+diameter class. Here, fir was the leading species in all diameter
+classes. This means that the high-removal thinning treatment converted
+the stand composition to fir-leading in all tree sizes. This result may
+be concern for forest managers, as spruce is often preferred as a crop
+species over subalpine fir []. However, the stands in this treatment had
+more spruce in the smaller diameter classes than the other treatment
+units and over the 27-year period of this study, spruce monotonically
+increased its composition (by volume and basal area) compared to fir.
+Over time, we expect that spruce will continue to increase its
+proportion relative to fir and eventually achieve a similar species
+composition - diameter distribution as the other units.
 
 ### Tree mortality
 
-, reflecting intertree competiton for light and other resources.  In older stands with more complex structures, tree mortality tends to be primarily caused by senescence and spatially autocorrelated forest agents.  Given that the forests in this study are older and have a stand structure typial of an uneven-aged stand,.  , which tends to result in spatially aggregated tree distributions but by Thinning is considered a silviculture treatment that improves growth efficiency of the stand by redistibuting growing space and capturing mortality that would otherwise reduce net stand growth.  Our findings support suggest that this occured, and that the thinning treament captured a portion of the stand that would have been lost eventually to natural mortality.  The thinning treatments may have captured some volume through trees that would have died naturally, potentially increasing the net recoverable volume from these stands.  [@Valkonen2020] found similar mortality in uneven-aged norway spruce stands.
-
-
+, reflecting intertree competiton for light and other resources. In
+older stands with more complex structures, tree mortality tends to be
+primarily caused by senescence and spatially autocorrelated forest
+agents. Given that the forests in this study are older and have a stand
+structure typial of an uneven-aged stand,. , which tends to result in
+spatially aggregated tree distributions but by Thinning is considered a
+silviculture treatment that improves growth efficiency of the stand by
+redistibuting growing space and capturing mortality that would otherwise
+reduce net stand growth. Our findings support suggest that this occured,
+and that the thinning treament captured a portion of the stand that
+would have been lost eventually to natural mortality. The thinning
+treatments may have captured some volume through trees that would have
+died naturally, potentially increasing the net recoverable volume from
+these stands. [@Valkonen2020] found similar mortality in uneven-aged
+norway spruce stands.
 
 ### Stand-level growth responses
-Over the 27-year period of this study, plots with high-removal harvest treatments accrued basal area significantly faster than the control and low-removal harvest treatment, likely due to increases in tree-level growth and stand density discussed previously.  As a result, differences in basal area between the high-removal harvest unit and the control reduced from ca. 17m2/hectare in 1992 to ca.9m2/hectare in 2019.  
 
+Over the 27-year period of this study, plots with high-removal harvest
+treatments accrued basal area significantly faster than the control and
+low-removal harvest treatment, likely due to increases in tree-level
+growth and stand density discussed previously. As a result, differences
+in basal area between the high-removal harvest unit and the control
+reduced from ca. 17m2/hectare in 1992 to ca.9m2/hectare in 2019.
 
-In contrast, basal area increment between the low-removal unit and the control did not differ significantly over the 1992-2019 period, and the difference between these two units remained relatively constant over all measurement periods at ca. 10m2/hectare.  The similar rates of basal area increment between the low-removal thinning treatment and the control are difficult to explain.  Tree-level results showed that fir grew faster in the low-removal unit than the control, but spruce did not. As well, by 2019 there were no significant differences in stand density between the two units.  Thus, it appears that while the fir trees may have increased growth as a response of low-removal, the growth increases were insufficient to cause a significant change in basal area increment.  Further monitoring in this study will help determine the future trajectory of the low-removal thinning treatment.    
+In contrast, basal area increment between the low-removal unit and the
+control did not differ significantly over the 1992-2019 period, and the
+difference between these two units remained relatively constant over all
+measurement periods at ca. 10m2/hectare. The similar rates of basal area
+increment between the low-removal thinning treatment and the control are
+difficult to explain. Tree-level results showed that fir grew faster in
+the low-removal unit than the control, but spruce did not. As well, by
+2019 there were no significant differences in stand density between the
+two units. Thus, it appears that while the fir trees may have increased
+growth as a response of low-removal, the growth increases were
+insufficient to cause a significant change in basal area increment.
+Further monitoring in this study will help determine the future
+trajectory of the low-removal thinning treatment.
 
+While our study found that high-removal partial harvest resulted in
+faster basal area growth, we did not find evidence that thinning changed
+volume increment in trees greater than 17.5cm DBH. A possible
+explanation is that tree growth responses to thinning might be primarily
+concentrated in radial growth, as opposed to height growth; this would
+be important because the volume formula used in this study is based on
+both tree diameter and height [@Nigh2016]. We note that it is often
+difficult to precisely capture height growth changes in mature trees
+using conventional field-based methods [@Vepakommaetal2011], which makes
+capturing height changes problematic in these sorts of studies. We also
+utilized a 17.5cm DBH limit for volume calculations; as such, our volume
+measures only reflect the contribution of the larger trees in the stand,
+and do not include volume increment in smaller trees.
 
-While our study found that high-removal partial harvest resulted in faster basal area growth, we did not find evidence that thinning changed volume increment in trees greater than 17.5cm DBH. A possible explanation is that tree growth responses to thinning might be primarily concentrated in radial growth, as opposed to height growth; this would be important because the volume formula used in this study is based on both tree diameter and height [@Nigh2016].  We note that it is often difficult to precisely capture height growth changes in mature trees using conventional field-based methods [@Vepakommaetal2011], which makes capturing height changes problematic in these sorts of studies.  We also utilized a 17.5cm DBH limit for volume calculations; as such, our volume measures only reflect the contribution of the larger trees in the stand, and do not include volume increment in smaller trees.  
-
-The partial harvest treatment appeared to change the timing of peak stand growth.  In the control unit, Volume and basal area increment peaked in the 1994-1997 measurement period, and declined thereafter, with the strongest decline in annual growth over the last measurement period of 2009-2019.  Age-related declines in stand productivity may be associated with decreasing water-use efficiency and reduced photosynthesis, with the age of maximal growth rate varying with factors such as species and site conditions [@Ryan1997].  In both thinned treatments, maximal growth rates peaked in the 1997-2009 period.  Thus, it appears the thinning treatment may have delayed the period of maximal growth rates by approximately 10 years.  The timing of thinning treatments can be important.  Stands that are past their period of age-related maximal growth rate may not have as much capacity to respond to treatments as a younger stand, although this is liekly a more important factor for shade-intolerant species rather than the spruce and fir trees in this study [@Bose2017].  At the time of this study, the high-removal thinning treatment had maintianed an annual basal area and volume increment that was similar to previous measurement periods; if this high level of increment continues, differences in basal area and volume will continue to diminish compared to the control, and this stand may exceed the low-removal thinning treatment. 
-
-
+The partial harvest treatment appeared to change the timing of peak
+stand growth. In the control unit, Volume and basal area increment
+peaked in the 1994-1997 measurement period, and declined thereafter,
+with the strongest decline in annual growth over the last measurement
+period of 2009-2019. Age-related declines in stand productivity may be
+associated with decreasing water-use efficiency and reduced
+photosynthesis, with the age of maximal growth rate varying with factors
+such as species and site conditions [@Ryan1997]. In both thinned
+treatments, maximal growth rates peaked in the 1997-2009 period. Thus,
+it appears the thinning treatment may have delayed the period of maximal
+growth rates by approximately 10 years. The timing of thinning
+treatments can be important. Stands that are past their period of
+age-related maximal growth rate may not have as much capacity to respond
+to treatments as a younger stand, although this is liekly a more
+important factor for shade-intolerant species rather than the spruce and
+fir trees in this study [@Bose2017]. At the time of this study, the
+high-removal thinning treatment had maintianed an annual basal area and
+volume increment that was similar to previous measurement periods; if
+this high level of increment continues, differences in basal area and
+volume will continue to diminish compared to the control, and this stand
+may exceed the low-removal thinning treatment.
 
 ## Management of uneven-aged stands
 
-
-
 ## Management considerations
-1. Both species responded with increased growth after partial harvest.  High removal of basal area in these forests stimulated stronger spruce growth.  This information can help silviculturists manipulate stand structure to preferentially ...
-2. Partial harvesting at both intensities delayed peak volume and basal area increment by approximately 10 years.  Annual increment in the control unit declined faster over the last measurement period compared to previous periods, perhaps suggesting that the stand is becoming mature and losses due to mortality may substantially offset growth increment.
-3. GIven that larger trees responded with faster growth than smaller trees, silviculturists need to consider the implications of this on residual stand structure and response after treatment.  
+
+1.  Both species responded with increased growth after partial harvest.
+    High removal of basal area in these forests stimulated stronger
+    spruce growth. This information can help silviculturists manipulate
+    stand structure to preferentially ...
+2.  Partial harvesting at both intensities delayed peak volume and basal
+    area increment by approximately 10 years. Annual increment in the
+    control unit declined faster over the last measurement period
+    compared to previous periods, perhaps suggesting that the stand is
+    becoming mature and losses due to mortality may substantially offset
+    growth increment.
+3.  GIven that larger trees responded with faster growth than smaller
+    trees, silviculturists need to consider the implications of this on
+    residual stand structure and response after treatment.
 
 \newpage
 
 # Tables
 
 `r tableNums("fitBA.table",caption="Summary of two mixed effects models of tree-level basal area increment")`
-  
+
 ```{r summarize tree level BAI model}
 
 fitBA.random<-
@@ -1228,11 +1729,12 @@ fitBA.fixed %>%
 
 ```
 
-*The dependent variable in the first model (BAI) is tree basal area increment from 1992-2019.  The dependent variable in the second model (BAI (%)) is basal area increment from 1992-2019 as a percentage of the tree's basal area in 1992.*   
-
+*The dependent variable in the first model (BAI) is tree basal area
+increment from 1992-2019. The dependent variable in the second model
+(BAI (%)) is basal area increment from 1992-2019 as a percentage of the
+tree's basal area in 1992.*
 
 \newpage
-
 
 `r tableNums("standFit.X",caption="Output from three separate linear models testing the effect of the interaction between treatment and year on plot-level volume, basal area and density." )`
 
@@ -1248,12 +1750,13 @@ standFit.X %>%
     fix_border_issues() %>% 
   autofit()
 ```
-*Trt, treatment; Sq., squares, Num., numerator; Den., denominator; DF, degrees of freedom*
+
+*Trt, treatment; Sq., squares, Num., numerator; Den., denominator; DF,
+degrees of freedom*
 
 \newpage
 
 # Figures
-
 
 ```{r tree BAI by treatment species and diameter class}
 
@@ -1280,12 +1783,9 @@ standFit.X %>%
 
 ```
 
-
 `r figNums("treeGrowth.plot",caption="Estimated marginal means of spruce and fir basal area increment (m²) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model.  BAI, basal area increment")`
 
-
 \newpage
-
 
 ```{r tree BAI as percentage by treatment species and diameter class}
 
@@ -1315,7 +1815,6 @@ standFit.X %>%
 `r figNums("treeGrowthPct.plot",caption="Estimated marginal means of spruce and fir basal area increment (expressed as a percentage increase relative to 1992 DBH) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model. BAI, basal area increment")`
 
 \newpage
-
 
 ```{r plot means plots, fig.height=10,eval=FALSE}
 
@@ -1454,11 +1953,9 @@ plotTotal.X %>%
   
 ```
 
-
 `r figNums("standPlots",caption="Mean plot live-tree attributes by treatment unit and year.  Whiskers are one standard error of the mean.  Vol., volume; BA, basal area; Tree dens., tree density")`
 
 \newpage
-
 
 ```{r plot periodic increment}
 
@@ -1495,7 +1992,6 @@ plotTotal.X %>%
 `r figNums("perInc.plot",caption="Mean plot annual increment over four measurement periods for basal area and volume, by treatment.  Whiskers are one standard error of the mean. Inc, increment.")`
 
 \newpage
-
 
 ```{r plot species composition by attribute}
 
@@ -1563,10 +2059,12 @@ diamVol.plot
 
 `r figNums("diamVol.plot",caption="Diameter-class distribution of volume (m³/hectare) by species, treatment and year.Numbers identifying each diameter classes represent the lower size limit for that class. For example, trees in the 7.5cm DBH class are greater or equal to 7.5 and less than 12.5cm DBH.")`
 
-*Note that in this figure, we show volume for all diameter classes.  This is different than the stand-level estimate of volume, where we only estimate volume for trees that would be considered merchantable under conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).  *
+*Note that in this figure, we show volume for all diameter classes. This
+is different than the stand-level estimate of volume, where we only
+estimate volume for trees that would be considered merchantable under
+conventional harvest in British Columbia (i.e., minimum 18.5cm DBH).*
 
 \newpage
-
 
 ```{r show tree density by diameter class,fig.width=8}
 diamK.plot
@@ -1575,8 +2073,6 @@ diamK.plot
 ```
 
 `r figNums("diamK.plot",caption="Diameter-class distribution of tree density (stems/hectare) by species, treatment and year.")`
-
-
 
 \newpage
 
@@ -1623,10 +2119,10 @@ sppComp.plot("BA")
 
 ```
 
-
 `r figNums("sppCompDiam.plot",caption="Spruce-fir volume proportional composition by diameter class, treatment and year.")`
 
-*Note this figure is almost identical for compairsons of basal area, volume or tree density. For brevity, we only show basal area.*
+*Note this figure is almost identical for compairsons of basal area,
+volume or tree density. For brevity, we only show basal area.*
 
 \newpage
 
@@ -1653,10 +2149,7 @@ deadPlot.X %>%
 
 `r figNums("mort.plot",caption="Total tree mortality over 1994-2019 period vs plot basal area in 1994.  Plots are symbolized to show three treatment types.")`
 
-
-
 \newpage
-
 
 ```{r plot mortality by year and DBH class}
 
@@ -1709,7 +2202,6 @@ dead %>%
 \newpage
 
 # Appendices
-
 
 ```{r show paiTable, ft.align="left",eval=FALSE}
 
@@ -1776,7 +2268,6 @@ trtContrast %>%
 
 \newpage
 
-
 ```{r height to diameter plot}
 
 
@@ -1818,7 +2309,6 @@ trtContrast %>%
   xlab("Measured height (m)")
 
 ```
-
 
 `r appNums("htModelFit.plot",caption="Scatterplot of predicted height(m) vs actual height(m) from diameter-height model.")`
 
@@ -1862,8 +2352,9 @@ standData.X %>%
 
 ```
 
-*Volume is m3/hectare, BA = basal area (m2/ha), SPH = stems per hectare, QMD = quadratic mean diameter (cm) at 1.3m height.  Values in brackets are the standard error of the mean.*
-
+*Volume is m3/hectare, BA = basal area (m2/ha), SPH = stems per hectare,
+QMD = quadratic mean diameter (cm) at 1.3m height. Values in brackets
+are the standard error of the mean.*
 
 \newpage
 
@@ -1912,10 +2403,12 @@ perInc.X %>%
 
 ```
 
-*Volume is m3/hectare, BA = basal area (m2/ha), SPH = stems per hectare.  Values in brackets in Period column are number of growing seasons in that period.  Values in brackets in Volume, BA and SPH columns are the standard error of the mean.*
+*Volume is m3/hectare, BA = basal area (m2/ha), SPH = stems per hectare.
+Values in brackets in Period column are number of growing seasons in
+that period. Values in brackets in Volume, BA and SPH columns are the
+standard error of the mean.*
 
 \newpage
-
 
 `r appNums("standFitM.contrasts",caption="Contrasts of stand attributes (volume, basal area and tree density) between treatments and by year.  Contrasts are presented for five measurement years. SE, standard error, df, degrees freedom")`
 
@@ -1956,7 +2449,4 @@ standFit.contrasts %>%
 
 \newpage
 
-
-
 # References
-
