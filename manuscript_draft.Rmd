@@ -8,7 +8,7 @@ output:
   html_document:
     df_print: paged
 csl: cjfr.csl
-bibliography: ep1162.bib
+bibliography: library.bib
 editor_options: 
   markdown: 
     wrap: 72
@@ -428,7 +428,7 @@ To test the hypothesis that tree-level radial growth response over the
 the time of final treatment (1994); (ii) treatment; and (iii) species,
 we fit linear mixed effects models with log-transformed 1994-2019
 diameter increment as the response variable, and treatment, species and
-log-transformed 1992 diameter as interacting fixed effects. To account
+log-transformed 1994 diameter as interacting fixed effects. To account
 for plot-level productivity differences, we included plot as a random
 intercept effect. Models were fit using the 'lme4' package for R [\@].
 We also fit a similar model with the 1994-2019 diameter increment
@@ -472,7 +472,7 @@ interaction between treatment and year as the independent variable.
 
 ```{r mixed effects model of tree growth}
 
-# Filter only for trees that have measurements in 1992 and 2019 
+# Filter only for trees that have measurements in 1994 and 2019 
 treeList<- # assign variable
   X %>% 
   filter(TreeID!="New") %>% # remove new trees
@@ -650,11 +650,11 @@ volCoef<-
 
 ```{r summarize stand attributes by diameter class}
 
-# We will produce diameter class stand attributes for two time periods 1992 and 2019.
+# We will produce diameter class stand attributes for two time periods 1994 and 2019.
 
 standDiam.X<-
   
-  # Determine which plots have measurements in 1992 and 2019
+  # Determine which plots have measurements in 1994 and 2019
   X %>% 
    filter(Year %in% c(1994,2019)) %>% 
    filter(Status=="Live") %>% 
@@ -1014,14 +1014,10 @@ and stand density differences were highest and significant (i.e.,
 p\<0.05) in the 1994 measurement year, and these differences diminshed
 over each subsequent measurement year. For example, mean plot density in
 the high-removal treatment unit was approximately
-
 `r standFitM.contrasts %>% filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Stand density") %>%  filter(Year==1994) %>% mutate(estimate=abs(round(estimate,0))) %>%  pull(estimate)`
-
 trees per hectare less than the control in 1994 (p\<0.05); by 2019, that
-difference had decreased to
-
+difference had decreased to 
 `r standFitM.contrasts %>% filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Stand density") %>%  filter(Year==2019) %>% mutate(estimate=abs(round(estimate,0))) %>%  pull(estimate)`
-
 trees per hectare (p\>0.05). Contrasts between the low-removal and the
 control treatment units showed a similar trend with basal area and stand
 density; the control unit had significantly higher basal area and stand
@@ -1030,11 +1026,11 @@ over each subsequent measurement, becoming non-significant (i.e.,
 p\>0.05) in 2019. Plot means of volume did not differ significantly
 between the treatment units in any measurement year.
 
-### Growth dominance statistics
+### Growth dominance coefficients
 
 ```{r calculate growth dominance}
 
-# Filter only for trees that have measurements in 1992 and 2019 
+# Filter only for trees that have measurements in 1994 and 2019 
 gd.treeList<- # assign variable
   X %>% 
   filter(TreeID!="New") %>% # remove new trees
@@ -1221,10 +1217,10 @@ gd.Dat <-
 
 ```
 
-Across all plots and time periods, smaller trees contributed
+The growth dominance coefficient was negative for all plots and time periods, indicating that smaller trees contributed
 proportionally more to stand basal area growth than larger trees
 (`r figNums("gds.plot",display="cite")`). Over the last two measurement
-periods, the growth dominance statistic decreased in all plots except
+periods, the growth dominance coefficient increased in all plots except
 one (not shown), indicating that individual tree growth contributions to
 stand growth became more proportional to tree size over the last 11
 growing seasons.
@@ -1305,7 +1301,7 @@ plotTotal.table<-
 A comparison of proportional species composition by diameter class,
 treatment and year showed that fir and spruce volume proportion by
 diameter class varied similarly between the high RBA and control units
-(`r figNums("sppCompDiam.plot",display="cite")`). In 1992, the largest
+(`r figNums("sppCompDiam.plot",display="cite")`). In 1994, the largest
 diameter classes were dominated by spruce, whereas fir was the dominant
 species in the smallest diameter classes. This pattern was also found
 for basal area and tree density (not shown). By 2019, the fir-spruce
@@ -1386,15 +1382,13 @@ dead.Summ<-
 ```
 
 A total of `r deadList %>% nrow()` trees
-(`r deadList %>% filter(Species=="Fir") %>% nrow()` fir,
-`r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce, and
-`r deadList %>% filter(Species=="Fd") %>% nrow()` Douglas-fir) died in
+(`r deadList %>% filter(Species=="Fir") %>% nrow()` fir and
+`r deadList %>% filter(Species=="Spruce") %>% nrow()` spruce) died in
 `r length(unique(deadList$Plot))` plots from 1994 to 2019. The number of
 trees that died per plot from 1994 to 2019 increased significantly with
 plot basal area in 1994 (`r figNums("mort.plot",display="cite")`, p \<
-0.0001). Mortality was generally not attributable to a particular forest
-health factor, and in the majority ofcases, we could not ascertain a
-casual agent. Similar linear models fitted separately for fir and spruce
+0.0001). In the majority of cases, we could not identify a casual agent, and overall, mortality was generally not attributable to a particular forest
+health factor. Linear models fitted separately for fir and spruce
 showed that fir mortality had a similar relationship to plot basal area,
 whereas spruce mortality did not (not shown). The diameter distribution
 of fir mortality followed a negative exponential distribution, with
@@ -1433,7 +1427,7 @@ At the tree-level, our results suggest that while both hybrid white
 spruce and subalpine fir respond to thinning with faster radial growth,
 heavy thinning can elicit a stronger radial growth response in spruce,
 compared to fir. Spruce trees in the low-removal harvest treatment did
-not respond with a significant growth release. THus, our results suggest
+not respond with a significant growth release. Thus, our results suggest
 that a relatively high removal of the stand will result in increased
 spruce growth, and this release will exceed that of co-occurring fir
 trees. Other studies have shown that residual spruce growth responds
@@ -1444,7 +1438,7 @@ growth responses, compared to control and partial cutting treatments
 (Smith et al. 2016). In a 35-year old white spruce stand, diameter
 increment was maximized with the heaviest thinning intensity, however,
 the treatment thinning from below (Stiell 1970). Frank (1973) also
-showed that 70-year old white spruce basal increment increased with the
+showed that basal area increment in a 70-year old white spruce stand increased with the
 amount of thinning. Competition for light is a key factor that limits
 white spruce growth, and opening up the stand to allow for increased
 light penetration may be a primary mechanism that enhances white spruce
@@ -1460,20 +1454,19 @@ light gradients may result in relatively little light regime changes for
 understorey trees.
 
 In comparison, both partial harvest treatments stimulated a growth
-response in fir, compared to the control. Although both species are
-similar in shade tolerance, firs are considered to be better adapted to
+response in fir, compared to the control. Firs are considered to be better adapted than spruce to
 low light conditions in the understory, allowing them to persist longer
 in undisturbed forest (Antos 2000) and potentially able to respond
 faster to even modest changes in understory light (Dumais et al 2014,
 Messier et al. 1999). Although fir growth may respond at lower levels of
 overstorey removal, the growth response potential of fir may be lower
 than spruce. Comparative studies of spruce and fir growth rates present
-differing evidence regarding species differences in release potential to
-thinning. In mature Engelmann spruce (*Picea engelmannii*) -- subalpine
+differing evidence regarding genus-level differences in release potential to
+thinning. In mature Engelmann spruce (*Picea engelmannii*) - subalpine
 fir forests in western North America, understory spruce growth rates
 exceeded those of fir, allowing spruce to achieve canopy position
 faster, including after canopy gaps were created through disturbance
-(Antos et al. 2000, Andrus et al. 2018). In mature forest in central BC,
+(Antos et al. 2000, Andrus et al. 2018). In a mature forest in central BC,
 spruce growth exceeded that of subalpine fir after age 80 (Eis and
 Craigdallie 1983). Because spruce tends to live longer than subalpine
 fir, higher growth rates at later ages may allow this species to become
@@ -1499,15 +1492,18 @@ to experience competition and will not benefit as much from the thinning
 treatment. Thinning treatments may not promote growth responses in the
 largest dominant trees in a stand either, as these trees may not
 experience significant changes in resource availability or may have
-achieved maximal growth rates [@Ryan1997, Bose2017]. Forest managers
-should account for potential size differential when planning thinning
+achieved maximal growth rates [@Ryan1997, Bose2017]. 
+
+Although growth responses were concentrated in the larger trees, our analysis of growth dominance indicated that smaller trees contributed proportionally more to stand growth than larger trees.  Binkley et al. (2006) propose that GDC in developing forests increases from 0 to positive during early development, reflecting the growth dominance of larger robust trees as canopy closure is achieved.  As the forests age, the GDC may switch to negative, reflecting several co-occuring processes.  Older trees may start to senesce, with growth reductions and increased mortality.  Younger trees may increase their resource use efficiency, and/or increase their allocation to leaf biomass (Baret et al. 2017) partially in response to increasing resource availiabilty as older trees senesce.  Data from old Englemann spruce – subalpine fir forests in Colorado (Binkley et al. 2006) as well as old-growth boreal mixedwood stands (Baret et al. 2017) support this proposed model of growth dominance development.  While we found a similar negative growth dominance in the stands of this study, a comparison between the two recent measurement periods showed that growth dominance actually increased over time (i.e., tree growth became increasingly proportional to tree size).  This finding is unique from other studies, and suggests that either larger trees are increasing their growth rates relative to smaller trees, or smaller trees are beginning to experience increased competition and may be experiencing lower growth rates.  Further data from these stands will help evaluate the long-term trend in GDC.
+
+Our results suggest that thinning did not substantially alter the growth dominance of the stand within close to 30 years after treatment.  Similar results were reported after thinning in uneven- and even-aged hardwood stands in eastern Canada [@Lemire2020].  While thinning treatments stimulated a growth response in all trees, the increase in growth was more or less proportional to tree size.  A significant decrease in GDS could be potentially achieved in older stands where the treatment seeks to release suppressed larger trees [@Lemire2020].  Conversely, thinning even-aged red pine (*Pinus resinosa*)  stands reduced growth dominance compared to unthinned stands, regardless of thinning type, presumably by allocating more growing space to previously suppressed trees [@Bradford2010].  The use of GDC to evaluate the effects of partial cutting may be insufficient on its own, and should be used in conjunction with tree-level analyses [@Lemire2020].  Forest managers should account for potential size differential when planning thinning
 treatments. For example, a silviculture treatment that seeks to release
 a suppressed understorey may have to ensure that sufficient overstorey
-trees are removed to reduce assymetric competition after treatment.
+trees are removed to reduce assymetric competition and growth dominance after treatment.
 
 ## Stand-level responses to thinning treatments
 
-Stand density The thinned treatments increased tree density faster than
+The thinned treatments increased tree density faster than
 the control, and within three decades, there were no significant density
 differences between the two harvested treatments and control. This
 likely resulted from two processes; growth and mortality. Increasing
@@ -1592,10 +1588,10 @@ treatments accrued basal area significantly faster than the control and
 low-removal harvest treatment, likely due to increases in tree-level
 growth and stand density discussed previously. As a result, differences
 in basal area between the high-removal harvest unit and the control
-reduced from ca. 17m2/hectare in 1992 to ca.9m2/hectare in 2019.
+reduced from ca. 17m2/hectare in 1994 to ca.9m2/hectare in 2019.
 
 In contrast, basal area increment between the low-removal unit and the
-control did not differ significantly over the 1992-2019 period, and the
+control did not differ significantly over the 1994-2019 period, and the
 difference between these two units remained relatively constant over all
 measurement periods at ca. 10m2/hectare. The similar rates of basal area
 increment between the low-removal thinning treatment and the control are
@@ -1730,9 +1726,9 @@ fitBA.fixed %>%
 ```
 
 *The dependent variable in the first model (BAI) is tree basal area
-increment from 1992-2019. The dependent variable in the second model
-(BAI (%)) is basal area increment from 1992-2019 as a percentage of the
-tree's basal area in 1992.*
+increment from 1994-2019. The dependent variable in the second model
+(BAI (%)) is basal area increment from 1994-2019 as a percentage of the
+tree's basal area in 1994.*
 
 \newpage
 
@@ -1775,8 +1771,8 @@ degrees of freedom*
   geom_line()+
   geom_errorbar(aes(ymin=response-SE, ymax=response+SE), width=.2,
                  position=position_dodge(0.05))+
-  xlab("1992 DBH (cm)")+
-  ylab("Tree BAI from 1992-2019 (m²)")+
+  xlab("1994 DBH (cm)")+
+  ylab("Tree BAI from 1994-2019 (m²)")+
   facet_wrap(~BA.Target)+
   theme(legend.position="bottom")
 
@@ -1804,15 +1800,15 @@ degrees of freedom*
   geom_line()+
   geom_errorbar(aes(ymin=response-SE, ymax=response+SE), width=.2,
                  position=position_dodge(0.05))+
-  xlab("1992 DBH (cm)")+
-  ylab("Tree BAI from 1992-2019 (% increase)")+
+  xlab("1994 DBH (cm)")+
+  ylab("Tree BAI from 1994-2019 (% increase)")+
   facet_wrap(~BA.Target)+
   theme(legend.position="bottom")
 
 
 ```
 
-`r figNums("treeGrowthPct.plot",caption="Estimated marginal means of spruce and fir basal area increment (expressed as a percentage increase relative to 1992 DBH) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model. BAI, basal area increment")`
+`r figNums("treeGrowthPct.plot",caption="Estimated marginal means of spruce and fir basal area increment (expressed as a percentage increase relative to 1994 DBH) across five inital DBH classes and three treatments.  Whiskers are standard error of the mean.  Responses are back-transformed from the model. BAI, basal area increment")`
 
 \newpage
 
@@ -1847,8 +1843,8 @@ standData.X %>%
   geom_line()+
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se, width=.2))+
                    # position=position_dodge(.9))+
-   scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
-                     minor_breaks = c(1992,1994,1997,2009,2019),
+   scale_x_continuous(limits=c(1994,2019),breaks=c(1994,1997,2009,2019),
+                     minor_breaks = c(1994,1997,2009,2019),
                      name="Measurement year")+ # stretch out x-axis
   facet_wrap(~Var,scales="free_y")+
   xlab("Plot mean")+
@@ -1938,8 +1934,8 @@ plotTotal.X %>%
   geom_line()+
   geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE, width=.2),
                    position=position_dodge(0))+
- scale_x_continuous(limits=c(1992,2019),breaks=c(1992,1994,1997,2009,2019),
-                     minor_breaks = c(1992,1994,1997,2009,2019),
+ scale_x_continuous(limits=c(1994,2019),breaks=c(1994,1997,2009,2019),
+                     minor_breaks = c(1994,1997,2009,2019),
                      name="Measurement year")+ # stretch out x-axis
   ylab("")+
   xlab("Measurement year")+
@@ -2241,7 +2237,7 @@ appNums("paiTable",caption="Number of growing seasons between measurement period
 
 \newpage
 
-`r appNums("trtContrast.table",caption="Contrasts of predicted 1992-2019 tree growth among treatments within each species.  Ratio of predicted growth between treatments is in 'ratio' column.")`
+`r appNums("trtContrast.table",caption="Contrasts of predicted 1994-2019 tree growth among treatments within each species.  Ratio of predicted growth between treatments is in 'ratio' column.")`
 
 ```{r tree level treatment contrasts}
 
@@ -2388,7 +2384,7 @@ perInc.X %>%
   arrange(Period,BA.Target) %>% 
   
     # Insert number of growing seasons column
-  add_column(Num.Seasons=c(rep(3,6),rep(11,6)),.after="Period") %>% 
+  add_column(Num.Seasons=c(rep(3,3),rep(11,6)),.after="Period") %>% 
   mutate(Period=paste0(Period," (",Num.Seasons,")")) %>% 
   dplyr::select(-Num.Seasons) %>% 
   
@@ -2397,7 +2393,7 @@ perInc.X %>%
   align(align="left",part="all") %>% 
   merge_v("Period") %>% 
   valign(valign="top",part="body") %>% 
-  hline(i=seq(from=3,to=12,by=3),border=fp_border(color="black")) %>% 
+  hline(i=seq(from=3,to=9,by=3),border=fp_border(color="black")) %>% 
   fix_border_issues() %>% 
    autofit()
 
