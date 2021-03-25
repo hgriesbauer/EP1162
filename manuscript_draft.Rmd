@@ -440,7 +440,7 @@ performed using the 'emmeans' package for R [@Lenth2019] and Tukey Honestly Sign
 *p* value adjustment was used to control for multiplicity. We report all
 significant results at p<0.05.
 
-Growth dominance in a stand considers the contribution of individual trees to total stand growth as a function of their size [@Binkley2006].  The growth dominance statistic [GDS; @Binkley2006; @West2014] represents growth dominance as a single metric, whereby a GDS value of 0 indicates a stand where the growth of individual trees, expressed as a proportion of stand total growth, is equal to their size, expressed as a proportion of stand total size (e.g., basal area).  A negative (positive) GDS indicates a stand where smaller (larger) trees contribute more to stand growth relative to their proportional size.  For formulae used to compute GDS, we refer the reader to West [-@West2014].
+Growth dominance in a stand considers the contribution of individual trees to total stand growth as a function of their size [@Binkley2006; @Forrester2019; @West2014].  The growth dominance statistic (GDS) expresses growth dominance as a single metric, where a GDS value of 0 indicates a stand where the growth of individual trees, expressed as a proportion of stand total growth, is equal to their size, expressed as a proportion of stand total size (e.g., basal area).  A negative (positive) GDS indicates a stand where smaller (larger) trees contribute more to stand growth relative to their proportional size.  For more information on the formula used to compute GDS, we refer the reader to West [-@West2014].
 
 ### Stand-level growth and structure
 
@@ -461,7 +461,7 @@ years varied by treatment, we fit separate linear models with stand
 total volume, basal area, and density as response variables, and the
 interaction between treatment and year as the independent variable.
 
-#### Mortality
+
 
 # Results
 
@@ -976,54 +976,31 @@ sphM.spp.contrast <- pairs(sph.spp.means,by="Year")
 
 ### Rate of change from 1994 to 2019
 
-All treatment units, including the control, increased volume, basal area
-and stand density over the 1994-2019 period
-(`r figNums("standPlots",display="cite")` and
-`r appNums("standPlot.table",display="cite")`). Mean annual basal area
-and volume increment peaked during the 1997-2009 period in the two
-harvested treatments, and peaked in the 1994-1997 period in the control
-treatment unit (`r figNums("perInc.plot",display="cite")`). From 1994 to
-2019, estimated marginal means of basal area increment in the low RBA
-unit exceeded marginal means in the high RBA and control unit by an
-estimated
-`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]`
+All treatment units, including the control, increased volume, basal area and stand density over the 1994-2019 period (`r figNums("standPlots",display="cite")`).  Over this period, the low RBA treatment unit accrued basal area and density significantly faster (p<0.05) than the high RBA unit and control, and the high RBA unit accrued stand density faster than the control (p<0.05).  The rate of volume increment did not differ significantly between treatments and control.  Contrasts of estimated marginal means showed that basal area increment in the low RBA unit exceeded the high RBA and control unit by an estimated `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[1]` 
 and
 `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Basal area") %>%   pull(estimate) %>% round(.,1) %>% .[2]`
 m² per hectare, respectively (p\<0.01 for both,
 `r appNums("standFit.contrasts",display="cite")`).
 
-The low RBA unit also significantly increased its stand density by an
-estimated
-`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0)  %>%   .[2]`
-stems per hectare more than the control unit (p\<0.001). The estimated
-rate of change in tree density did not differ significantly between the
-two harvested units. The rate of change in volume in trees over 18.5cm
-DBH was barely significant (p=0.049) between the two harvested units,
-and the difference was not significant between the control and harvested
-units.
+In 1994, the low RBA unit had 
+`r standFitM.contrasts %>%   filter(Contrast=="TU:10 - TU:20") %>%  filter(Variable=="Basal area") %>%  filter(Year==1994) %>%  pull(estimate) %>%   abs() %>%   round(.,1)`
+and
+ `r standFitM.contrasts %>%   filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Basal area") %>%   filter(Year==1994) %>%   pull(estimate) %>%   abs() %>%   round(.,1)`
+ less basal area per hectare than the high RBA unit and control, respectively, and by 2019, those differences had decreased to 
+`r standFitM.contrasts %>%   filter(Contrast=="TU:10 - TU:20") %>%  filter(Variable=="Basal area") %>%  filter(Year==2019) %>%  pull(estimate) %>%   abs() %>%   round(.,1)`
+and
+`r standFitM.contrasts %>%   filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Basal area") %>%   filter(Year==2019) %>%   pull(estimate) %>%   abs() %>%   round(.,1)`, respectively.  In terms of stand density, the low RBA unit accrued `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0) %>% .[1]` 
+and
+`r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0) %>% .[2]` more trees per hectare from 1994-2019, than the high RBA and control, respectively (p<0.05for both), and the high RBA accrued  `r standFit.contrasts %>% as.data.frame() %>% filter(Variable=="Stand density") %>%   pull(estimate) %>% round(.,0) %>% .[3]` more trees than the control (p<0.05) over the same time period.  By 2019, there were no significant stand density differences between the treatments and control.  
 
-### Stand attributes by year
+The rate of change varied by measurement period.  In the low RBA unit, basal area and volume increment peaked at 
+`r perInc.X %>% filter(BA.Target=="TU:10") %>% filter(Period=="1997-2009") %>% pull("BA") %>%   round(.,2)` m2/ha and
+ `r perInc.X %>% filter(BA.Target=="TU:10") %>% filter(Period=="1997-2009") %>% pull("Vol") %>%   round(.,1)` m3/ha, respectively, in the 1997-2009 period; increments declined to `r perInc.X %>% filter(BA.Target=="TU:10") %>% filter(Period=="2009-2019") %>% pull("BA") %>%   round(.,2)` m2/ha and
+ `r perInc.X %>% filter(BA.Target=="TU:10") %>% filter(Period=="2009-2019") %>% pull("Vol") %>%   round(.,1)` m3/ha respectively in the subsequent measurement period of 2009-2019.  In the high RBA unit, periodic annual basal area and volume increment increased with each measurement period and peaked in the 2009-2019 measurement period at `r perInc.X %>% filter(BA.Target=="TU:20") %>% filter(Period=="2009-2019") %>% pull("BA") %>%   round(.,2)` m2/ha and
+ `r perInc.X %>% filter(BA.Target=="TU:20") %>% filter(Period=="2009-2019") %>% pull("Vol") %>%   round(.,1)` m3/ha respectively.  Conversely, basal area and volume increment in the control unit was highest in the 1994-1997 period, and declined with each subsequent measurement period to `r perInc.X %>% filter(BA.Target=="TU:Control") %>% filter(Period=="2009-2019") %>% pull("BA") %>%   round(.,2)` m2/ha and
+ `r perInc.X %>% filter(BA.Target=="TU:Control") %>% filter(Period=="2009-2019") %>% pull("Vol") %>%   round(.,1)` m3/ha respectively..    
 
-By year, mean plot volume, basal area and stand density did not differ
-significantly between both harvested units (i.e., p\>0.05,
-`r appNums("standFitM.contrasts",display="cite")` and
-`r figNums("standPlots",display="cite")`). Contrasts between the
-high-removal and control treatment units showed that volume, basal area
-and stand density differences were highest and significant (i.e.,
-p\<0.05) in the 1994 measurement year, and these differences diminshed
-over each subsequent measurement year. For example, mean plot density in
-the high-removal treatment unit was approximately
-`r standFitM.contrasts %>% filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Stand density") %>%  filter(Year==1994) %>% mutate(estimate=abs(round(estimate,0))) %>%  pull(estimate)`
-trees per hectare less than the control in 1994 (p\<0.05); by 2019, that
-difference had decreased to 
-`r standFitM.contrasts %>% filter(Contrast=="TU:10 - TU:Control") %>% filter(Variable=="Stand density") %>%  filter(Year==2019) %>% mutate(estimate=abs(round(estimate,0))) %>%  pull(estimate)`
-trees per hectare (p\>0.05). Contrasts between the low-removal and the
-control treatment units showed a similar trend with basal area and stand
-density; the control unit had significantly higher basal area and stand
-density means in 1994, but the difference between the units diminished
-over each subsequent measurement, becoming non-significant (i.e.,
-p\>0.05) in 2019. Plot means of volume did not differ significantly
-between the treatment units in any measurement year.
+
 
 ### Growth dominance coefficients
 
@@ -1361,8 +1338,8 @@ deadPlot.X<-
   rename("BA.dead"=BA.x,"Num.dead"=k,"BA"=BA.y) %>% 
   mutate(BA.dead=replace_na(BA.dead,0),
          Num.dead=replace_na(Num.dead,0)) %>% 
-  mutate(prop.K=Num.dead/SPH,
-         prop.BA=BA.dead/BA)
+  mutate(prop.K=Num.dead/SPH*100,
+         prop.BA=BA.dead/BA*100)
 
 # linear model to analyze mortality by plot volume
 deadPlot.ANOVA<-
@@ -1386,7 +1363,7 @@ A total of `r deadList %>% nrow()` trees
 `r length(unique(deadList$Plot))` plots from 1994 to 2019. The number of
 trees that died per plot from 1994 to 2019 increased significantly with
 plot basal area in 1994 (`r figNums("mort.plot",display="cite")`, p \<
-0.0001). In the majority of cases, we could not identify a casual agent, and overall, mortality was generally not attributable to a particular forest
+0.0001). In the majority of cases, we could not identify a causal agent, and overall, mortality was generally not attributable to a particular forest
 health factor. Linear models fitted separately for fir and spruce
 showed that fir mortality had a similar relationship to plot basal area,
 whereas spruce mortality did not (not shown). The diameter distribution
@@ -1402,8 +1379,7 @@ period of 2009-2019.
 # Discussion
 
 ## Uneven-aged stand management
-The successful application of partial harvesting in uneven-aged, multi-species stands can be complicated [@smith1997practice], especially where the objectives include the sustained production of wood over multiple generations of trees.  In this context, partial harvesting in uneven-aged stands seeks to re-allocate growing space and resources to trees across a range of sizes and densities.  Selection thinning is a typical thinning treatment in uneven-aged stands, whereby individual or groups of dominant trees are removed to recover their economic value as well as create growing space for understory trees.  While this treatment 
-
+The successful application of partial harvesting in uneven-aged, multi-species stands can be complicated [@smith1997practice], especially where the objectives include the sustained production of wood over multiple generations of trees.  In this context, partial harvesting seeks to re-allocate growing space and resources to trees across a range of species and size classes to ensure their survival and productivity.  Knowledge gleaned from thinning treatments in even-aged stands can help inform silviculture practices in more complex stands, however, complexities associated with competition between size classes and species requires additional consideration.  
 
 ## Tree- and stand-level growth response to partial harvest
 
@@ -1435,9 +1411,9 @@ relatively low spruce growth response in the low-removal treatment may
 be explained in that the gaps created may have been too small to elicit
 as strong a growth response as observed in the high-removal thinning
 treatment. Light levels may differ little between forest canopies that
-are closed or contain small gaps [@Bartemucci2002], and strong vertical
+are closed or contain small gaps, and strong vertical
 light gradients may result in relatively little light regime changes for
-understorey trees.
+understorey trees [@Bartemucci2002].
 
 In comparison, both partial harvest treatments stimulated a growth
 response in fir, compared to the control. Firs are considered to be better adapted than spruce to
@@ -1459,8 +1435,7 @@ eastern North America report that balsam fir (*Abies balsamifera*)
 responds to release with faster height and diameter growth than
 co-occurring red spruce (*Picea rubens*) [@Dumais2008; @Dumais2008a; @Dumais2014; @Messier1999]. Other studies have found no
 difference in growth response between spruce and fir species after
-treatment [@mccaughey1982understory]. Our study also suggests that at
-lower levels of basal area removal, spruce and fir growth responses are
+treatment [@mccaughey1982understory]. Our study also suggests that spruce and fir growth responses to lower levels of basal area removal are
 similar.
 
 Post-treatment growth rates increased with tree size at the time of
@@ -1472,14 +1447,14 @@ size-assymetric competition [@cordonnier2015gini], and growth increases from
 treatment will be predominantly concentrated in the larger tree size
 classes [@Bose; @schwinning1998mechanisms]. Smaller trees will likely continue
 to experience competition and will not benefit as much from the thinning
-treatment. Thinning treatments may not promote growth responses in the
+treatment. However, thinning treatments may not promote growth responses in the
 largest dominant trees in a stand either, as these trees may not
 experience significant changes in resource availability or may have
-achieved maximal growth rates [@ryan1997age, @Bose]. 
+already achieved maximal growth rates [@ryan1997age, @Bose]. 
 
-Although growth responses were concentrated in the larger trees, our analysis of growth dominance indicated that smaller trees contributed proportionally more to stand growth than larger trees.  Binkley et al. [-@Binkley2006] propose that GDC in developing forests increases from 0 to positive during early development, reflecting the growth dominance of larger robust trees as canopy closure is achieved.  As the forests age, the GDC may switch to negative, reflecting several co-occuring processes.  Older trees may start to senesce, with growth reductions and increased mortality.  Younger trees may increase their resource use efficiency, and/or increase their allocation to leaf biomass [@baret2017long] partially in response to increasing resource availiabilty as older trees senesce.  Data from old Englemann spruce – subalpine fir forests in Colorado [@Binkley2006] as well as old-growth boreal mixedwood stands [@baret2017long] support this proposed model of growth dominance development.  While we found a similar negative growth dominance in the stands of this study, a comparison between the two recent measurement periods showed that growth dominance actually increased over time (i.e., tree growth became increasingly proportional to tree size).  This finding is unique from other studies, and suggests that either larger trees are increasing their growth rates relative to smaller trees, or smaller trees are beginning to experience increased competition and may be experiencing lower growth rates.  Further data from these stands will help evaluate the long-term trend in GDC.
+Although growth responses were concentrated in the larger trees, our analysis of growth dominance indicated that smaller trees contributed proportionally more to stand growth than larger trees.  Binkley et al. [-@Binkley2006] propose that GDC in developing forests increases from 0 to positive during early development, reflecting the growth dominance of larger robust trees as canopy closure is achieved.  As the forests age, the GDC may switch to negative, reflecting several co-occuring processes.  Older trees may start to senesce, with growth reductions and increased mortality.  Concurrently, younger trees may increase their resource use efficiency, and/or increase their allocation to leaf biomass [@baret2017long], partially in response to increasing resource availability resulting from the senescence of older trees.  Data from old-growth Engelmann spruce – subalpine fir forests in Colorado [@Binkley2006] as well as old-growth boreal mixedwood stands [@baret2017long] support this proposed model of growth dominance development.  While we found a similar negative growth dominance in the stands of this study, a comparison between the two recent measurement periods showed that growth dominance actually increased over time (i.e., tree growth became increasingly proportional to tree size).  This finding is unique from other studies, and suggests that either larger trees are increasing their growth rates relative to smaller trees, or smaller trees are beginning to experience increased competition and may be experiencing lower growth rates.  Further data from these stands will help evaluate the long-term trend in GDC.
 
-Our results suggest that thinning did not substantially alter the growth dominance of the stand within close to 30 years after treatment.  Similar results were reported after thinning in uneven- and even-aged hardwood stands in eastern Canada [@Lemire2020].  While thinning treatments stimulated a growth response in all trees, the increase in growth was more or less proportional to tree size.  A significant decrease in GDS could be potentially achieved in older stands where the treatment seeks to release suppressed larger trees [@Lemire2020].  Conversely, thinning even-aged red pine (*Pinus resinosa*)  stands reduced growth dominance compared to unthinned stands, regardless of thinning type, presumably by allocating more growing space to previously suppressed trees [@Bradford2010].  The use of GDC to evaluate the effects of partial cutting may be insufficient on its own, and should be used in conjunction with tree-level analyses [@Lemire2020].  Forest managers should account for potential size differential when planning thinning
+Our results suggest that thinning did not substantially alter the growth dominance of the stand at any point 27 years after treatment.  Similar results were reported after thinning in uneven- and even-aged hardwood stands in eastern Canada [@Lemire2020].  While thinning treatments stimulated a growth response in all trees, the increase in growth was more or less proportional to tree size.  A significant decrease in GDS could be potentially achieved in older stands where the treatment seeks to release suppressed larger trees [@Lemire2020].  Conversely, thinning even-aged red pine (*Pinus resinosa*)  stands reduced growth dominance compared to unthinned stands, regardless of thinning type, presumably by allocating more growing space to previously suppressed trees [@Bradford2010].  The use of GDC to evaluate the effects of partial cutting may be insufficient on its own, and should be used in conjunction with tree-level analyses [@Lemire2020].  Forest managers should account for potential size differential when planning thinning
 treatments. For example, a silviculture treatment that seeks to release
 a suppressed understorey may have to ensure that sufficient overstorey
 trees are removed to reduce assymetric competition and growth dominance after treatment.
@@ -1538,7 +1513,7 @@ diameter class. Here, fir was the leading species in all diameter
 classes. This means that the high-removal thinning treatment converted
 the stand composition to fir-leading in all tree sizes. This result may
 be concern for forest managers, as spruce is often preferred as a crop
-species over subalpine fir []. However, the stands in this treatment had
+species in British Columbia and elsewhere [@Deal]. However, the stands in this treatment had
 more spruce in the smaller diameter classes than the other treatment
 units and over the 27-year period of this study, spruce monotonically
 increased its composition (by volume and basal area) compared to fir.
@@ -1547,22 +1522,7 @@ proportion relative to fir and eventually achieve a similar species
 composition - diameter distribution as the other units.
 
 ### Tree mortality
-
-, reflecting intertree competiton for light and other resources. In
-older stands with more complex structures, tree mortality tends to be
-primarily caused by senescence and spatially autocorrelated forest
-agents. Given that the forests in this study are older and have a stand
-structure typial of an uneven-aged stand,. , which tends to result in
-spatially aggregated tree distributions but by Thinning is considered a
-silviculture treatment that improves growth efficiency of the stand by
-redistibuting growing space and capturing mortality that would otherwise
-reduce net stand growth. Our findings support suggest that this occured,
-and that the thinning treament captured a portion of the stand that
-would have been lost eventually to natural mortality. The thinning
-treatments may have captured some volume through trees that would have
-died naturally, potentially increasing the net recoverable volume from
-these stands. [@Valkonen2020] found similar mortality in uneven-aged
-norway spruce stands.
+Our results suggest that mortality increased with stand density.  The majority of trees that died were fir, and these were predominantly concentrated in the smaller size classes.  These findings concur with other studies that found that risk or tree mortality increases with stand density, competition and tree-level factors such as live crown and growth [@Valkonen2020; @VanGunst2016].  Competition from overstory trees is likely a contributing cause to most of the mortality recorded in our study.    Because we did not record trees below 7.5cm DBH, we cannot quantify total tree mortality in the stand.  Given the relatively low mortality in the thinning treatments, it does appear that partial harvesting may effectively capture some volume that would otherwise be lost to mortality, potentially affecting the total net volume recovered from a stand.  Density-dependent mortality may vary with other factors such as drought [@VanGunst2016], and climate change may alter competitive interactions between species and size classes.  We also note that as of 2019, there was a large spruce bark beetle (*Dendroctonus rufipennis*) outbreak in the study region; presumably, the larger spruce trees in this study may be removed by this forest health agent in the short-term.  This may provide an opportunity for further study into stand responses after mortality of larger stems.
 
 ### Stand-level growth responses
 
@@ -1602,7 +1562,7 @@ measures only reflect the contribution of the larger trees in the stand,
 and do not include volume increment in smaller trees.
 
 The partial harvest treatment appeared to change the timing of peak
-stand growth. In the control unit, Volume and basal area increment
+stand growth. In the control unit, volume and basal area increment
 peaked in the 1994-1997 measurement period, and declined thereafter,
 with the strongest decline in annual growth over the last measurement
 period of 2009-2019. Age-related declines in stand productivity may be
@@ -1614,10 +1574,10 @@ it appears the thinning treatment may have delayed the period of maximal
 growth rates by approximately 10 years. The timing of thinning
 treatments can be important. Stands that are past their period of
 age-related maximal growth rate may not have as much capacity to respond
-to treatments as a younger stand, although this is liekly a more
+to treatments as a younger stand, although this is likely a more
 important factor for shade-intolerant species rather than the spruce and
 fir trees in this study [@Bose]. At the time of this study, the
-high-removal thinning treatment had maintianed an annual basal area and
+high-removal thinning treatment had maintained an annual basal area and
 volume increment that was similar to previous measurement periods; if
 this high level of increment continues, differences in basal area and
 volume will continue to diminish compared to the control, and this stand
@@ -2410,7 +2370,7 @@ standFitM.contrasts %>%
 
 \newpage
 
-`r appNums("standFit.contrasts",caption="Contrasts of 1992-2019 stand structure development over 1992-2019 between treatments.  Contrasts are shown for three variables: volume, basal area and stand density.")`
+`r appNums("standFit.contrasts",caption="Contrasts of 1992-2019 stand structure development between treatments.  Contrasts are shown for three variables: volume, basal area and stand density.")`
 
 ```{r show contrasts between plot means}
 
