@@ -93,6 +93,8 @@ pm=20
 
 # To-do list
 
+1. COmplete Q factor coding
+
 ### Comments from Mike's emails
 
 we can put text below each comment to describe how it was addressed, and
@@ -461,7 +463,11 @@ years varied by treatment, we fit separate linear models with stand
 total volume, basal area, and density as response variables, and the
 interaction between treatment and year as the independent variable.
 
+#### Growth dominance coefficients
+*Need to describe GDC methods here*
 
+#### Diameter distributions
+We quantified the stand structure in each plot and time period by computing Q factor, which is the ratio between adjacent diameter classes.  Diameter classes were 5cm wide.   
 
 # Results
 
@@ -1206,7 +1212,7 @@ growing seasons.
 Among treatments and throughout the stand development after treatment,
 the stands maintained a negative exponential (also referred to as
 'reverse-J') diameter class distribution
-(`r figNums("diamK.plot",display="cite")`).\
+(`r figNums("diamK.plot",display="cite")`).
 Immediately after the partial harvest, the diameter class distribution
 of volume differed among treatments. In the 27 years since partial
 harvest, volume in all three treatment units was mostly concentrated in
@@ -1215,6 +1221,50 @@ the 22.5-27.5cm DBH class, and mostly comprised of fir
 shown in the figure and all three treatments, most of the spruce volume
 was concentrated in DBH classes spanning 37.5 to 47.5cm. Basal area
 trends were very similar to volume (not shown).
+
+Q factor
+```{r compute Q factor}
+
+# Fit negative exponential distribution to plots/time combinations, and then combine
+source(here::here("manuscript","negExp.R"))
+
+# compute for each plot and time period
+x.qFact<-
+  X %>% 
+  mutate(DBH.class=as.numeric(as.character(DBH.class))) %>% 
+  group_by(BA.Target,Plot,Year,DBH.class) %>% 
+  summarise(k=n()) %>% 
+  complete(BA.Target,Plot,Year,DBH.class,fill=list(k=0)) %>% 
+  group_by(BA.Target,Year,DBH.class) %>% 
+  summarise(k=mean(k)) %>% 
+  mutate(k=k*20) %>% 
+  filter(k>0) 
+
+# function to apply negExp to each year
+nexExp.year<-function(year){
+  
+  x<-
+    x.qFact %>% 
+    filter(BA.Target=="TU:10") %>% 
+    filter(Year==year) 
+  
+  
+    negExp(x$DBH.class,y=x$DBH.class)
+    
+    
+    
+    
+    
+    
+  }
+  
+  
+  
+}
+
+
+```
+
 
 ### Species composition
 
